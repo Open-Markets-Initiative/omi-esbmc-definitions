@@ -1,0 +1,2405 @@
+// nasdaq/nordicequities/orderentry/NordicEquities_OrderEntry_v5_01_14_Server.c
+/*
+ * National Association of Securities Dealers Automated Quotations (Nasdaq) Nordic Ouch 5 Order Entry
+ *
+ * Generated from the binary model. Every record is a run of fields, and esbmc checks two
+ * claims of each, for every value its bytes can take rather than for chosen ones: that any
+ * record written to the wire and read back is that record, and that any bytes read off the
+ * wire and written back are those bytes. Each takes exactly the record's width, and no
+ * write or read leaves the buffer it is made on.
+ *
+ * A field is the bytes it occupies. Nothing is read as an integer, so nothing is read in a
+ * byte order, and no rule stated here depends on a value.
+ *
+ * Check the whole file:   esbmc <file>
+ * Check one record:       esbmc <file> --function check_<record>
+ *
+ * Built with -DCONCRETE it is an ordinary program any C compiler runs: the bytes the
+ * checker would choose are drawn from four patterns instead, so the definition can be
+ * tried without the checker. That run is a test, and the checker's is the claim.
+ *
+ * What this definition does not state, and the model does:
+ *   - a run filling what frames it
+ *   - a length prefix framing what follows
+ *   - a field read in bits
+ *   - a run counted by a field
+ *
+ * License: MIT No Attribution
+ */
+
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+/* ---- Any byte ---------------------------------------------------------------- */
+
+#ifdef CONCRETE
+
+/* which pattern the bytes are drawn from, and how many have been drawn */
+static unsigned pattern;
+static size_t drawn;
+
+/* a byte of the pattern: zero, a space, every bit set, or one more than the last */
+static uint8_t arbitrary(void) {
+  drawn++;
+
+  switch (pattern) {
+    case 0: return 0;
+    case 1: return 32;
+    case 2: return 255;
+    default: return (uint8_t)(drawn % 256);
+  }
+}
+
+#else
+
+/* declared and never defined: a value the checker chooses */
+unsigned char __VERIFIER_nondet_uchar(void);
+
+/* a byte nobody chose, so what holds of it holds of all of them */
+static uint8_t arbitrary(void) {
+  return __VERIFIER_nondet_uchar();
+}
+
+#endif
+
+/* ---- Server Packet Header: 3 bytes ------------------------------------------- */
+
+/* Packet header of a packet sent by the server */
+typedef struct {
+  uint8_t packet_length[2];    /* bytes 0 to 1 */
+  uint8_t server_packet_type;  /* byte 2 */
+} ServerPacketHeader;
+
+/* any Server Packet Header at all: every byte one the checker chooses */
+static void any_server_packet_header(ServerPacketHeader *record) {
+  for (size_t i = 0; i < 2; i++) { record->packet_length[i] = arbitrary(); }
+  record->server_packet_type = arbitrary();
+}
+
+/* Server Packet Header to the wire: 3 bytes from at, returning where the next byte goes */
+static size_t encode_server_packet_header(const ServerPacketHeader *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->packet_length[i]; }
+  wire[at++] = record->server_packet_type;
+
+  return at;
+}
+
+/* Server Packet Header off the wire: 3 bytes from at, returning where the next byte lies */
+static size_t decode_server_packet_header(ServerPacketHeader *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 2; i++) { record->packet_length[i] = wire[at++]; }
+  record->server_packet_type = wire[at++];
+
+  return at;
+}
+
+/* what was read of Server Packet Header is what was written, byte for byte */
+static void equal_server_packet_header(const ServerPacketHeader *read, const ServerPacketHeader *written) {
+  for (size_t i = 0; i < 2; i++) { assert(read->packet_length[i] == written->packet_length[i]); }
+  assert(read->server_packet_type == written->server_packet_type);
+}
+
+/* Server Packet Header: written and read back, then read and written back */
+static void check_server_packet_header(void) {
+  ServerPacketHeader sent;
+  ServerPacketHeader got;
+  uint8_t wire[3];
+  uint8_t again[3];
+
+  any_server_packet_header(&sent);
+  assert(encode_server_packet_header(&sent, wire, 0) == 3);
+  assert(decode_server_packet_header(&got, wire, 0) == 3);
+  equal_server_packet_header(&got, &sent);
+
+  for (size_t i = 0; i < 3; i++) { wire[i] = arbitrary(); }
+  assert(decode_server_packet_header(&got, wire, 0) == 3);
+  assert(encode_server_packet_header(&got, again, 0) == 3);
+  for (size_t i = 0; i < 3; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Login Accepted Packet: 30 bytes ----------------------------------------- */
+
+/* The SoupBinTCP server sends a Login Accepted Packet in response to receiving a valid Login Request from the client */
+typedef struct {
+  uint8_t accepted_session[10];          /* bytes 0 to 9 */
+  uint8_t accepted_sequence_number[20];  /* bytes 10 to 29 */
+} LoginAcceptedPacket;
+
+/* any Login Accepted Packet at all: every byte one the checker chooses */
+static void any_login_accepted_packet(LoginAcceptedPacket *record) {
+  for (size_t i = 0; i < 10; i++) { record->accepted_session[i] = arbitrary(); }
+  for (size_t i = 0; i < 20; i++) { record->accepted_sequence_number[i] = arbitrary(); }
+}
+
+/* Login Accepted Packet to the wire: 30 bytes from at, returning where the next byte goes */
+static size_t encode_login_accepted_packet(const LoginAcceptedPacket *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 10; i++) { wire[at++] = record->accepted_session[i]; }
+  for (size_t i = 0; i < 20; i++) { wire[at++] = record->accepted_sequence_number[i]; }
+
+  return at;
+}
+
+/* Login Accepted Packet off the wire: 30 bytes from at, returning where the next byte lies */
+static size_t decode_login_accepted_packet(LoginAcceptedPacket *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 10; i++) { record->accepted_session[i] = wire[at++]; }
+  for (size_t i = 0; i < 20; i++) { record->accepted_sequence_number[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Login Accepted Packet is what was written, byte for byte */
+static void equal_login_accepted_packet(const LoginAcceptedPacket *read, const LoginAcceptedPacket *written) {
+  for (size_t i = 0; i < 10; i++) { assert(read->accepted_session[i] == written->accepted_session[i]); }
+  for (size_t i = 0; i < 20; i++) { assert(read->accepted_sequence_number[i] == written->accepted_sequence_number[i]); }
+}
+
+/* Login Accepted Packet: written and read back, then read and written back */
+static void check_login_accepted_packet(void) {
+  LoginAcceptedPacket sent;
+  LoginAcceptedPacket got;
+  uint8_t wire[30];
+  uint8_t again[30];
+
+  any_login_accepted_packet(&sent);
+  assert(encode_login_accepted_packet(&sent, wire, 0) == 30);
+  assert(decode_login_accepted_packet(&got, wire, 0) == 30);
+  equal_login_accepted_packet(&got, &sent);
+
+  for (size_t i = 0; i < 30; i++) { wire[i] = arbitrary(); }
+  assert(decode_login_accepted_packet(&got, wire, 0) == 30);
+  assert(encode_login_accepted_packet(&got, again, 0) == 30);
+  for (size_t i = 0; i < 30; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Login Rejected Packet: 1 byte ------------------------------------------- */
+
+/* The SoupBinTCP server sends this packet in response to an invalid Login Request Packet from the client */
+typedef struct {
+  uint8_t reject_reason_code;  /* byte 0 */
+} LoginRejectedPacket;
+
+/* any Login Rejected Packet at all: every byte one the checker chooses */
+static void any_login_rejected_packet(LoginRejectedPacket *record) {
+  record->reject_reason_code = arbitrary();
+}
+
+/* Login Rejected Packet to the wire: 1 byte from at, returning where the next byte goes */
+static size_t encode_login_rejected_packet(const LoginRejectedPacket *record, uint8_t *wire, size_t at) {
+  wire[at++] = record->reject_reason_code;
+
+  return at;
+}
+
+/* Login Rejected Packet off the wire: 1 byte from at, returning where the next byte lies */
+static size_t decode_login_rejected_packet(LoginRejectedPacket *record, const uint8_t *wire, size_t at) {
+  record->reject_reason_code = wire[at++];
+
+  return at;
+}
+
+/* what was read of Login Rejected Packet is what was written, byte for byte */
+static void equal_login_rejected_packet(const LoginRejectedPacket *read, const LoginRejectedPacket *written) {
+  assert(read->reject_reason_code == written->reject_reason_code);
+}
+
+/* Login Rejected Packet: written and read back, then read and written back */
+static void check_login_rejected_packet(void) {
+  LoginRejectedPacket sent;
+  LoginRejectedPacket got;
+  uint8_t wire[1];
+  uint8_t again[1];
+
+  any_login_rejected_packet(&sent);
+  assert(encode_login_rejected_packet(&sent, wire, 0) == 1);
+  assert(decode_login_rejected_packet(&got, wire, 0) == 1);
+  equal_login_rejected_packet(&got, &sent);
+
+  for (size_t i = 0; i < 1; i++) { wire[i] = arbitrary(); }
+  assert(decode_login_rejected_packet(&got, wire, 0) == 1);
+  assert(encode_login_rejected_packet(&got, again, 0) == 1);
+  for (size_t i = 0; i < 1; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- System Event Message: 9 bytes ------------------------------------------- */
+
+/* Signals an event affecting the entire Nasdaq Nordic system */
+typedef struct {
+  uint8_t timestamp[8];  /* bytes 0 to 7 */
+  uint8_t event_code;    /* byte 8 */
+} SystemEventMessage;
+
+/* any System Event Message at all: every byte one the checker chooses */
+static void any_system_event_message(SystemEventMessage *record) {
+  for (size_t i = 0; i < 8; i++) { record->timestamp[i] = arbitrary(); }
+  record->event_code = arbitrary();
+}
+
+/* System Event Message to the wire: 9 bytes from at, returning where the next byte goes */
+static size_t encode_system_event_message(const SystemEventMessage *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->timestamp[i]; }
+  wire[at++] = record->event_code;
+
+  return at;
+}
+
+/* System Event Message off the wire: 9 bytes from at, returning where the next byte lies */
+static size_t decode_system_event_message(SystemEventMessage *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 8; i++) { record->timestamp[i] = wire[at++]; }
+  record->event_code = wire[at++];
+
+  return at;
+}
+
+/* what was read of System Event Message is what was written, byte for byte */
+static void equal_system_event_message(const SystemEventMessage *read, const SystemEventMessage *written) {
+  for (size_t i = 0; i < 8; i++) { assert(read->timestamp[i] == written->timestamp[i]); }
+  assert(read->event_code == written->event_code);
+}
+
+/* System Event Message: written and read back, then read and written back */
+static void check_system_event_message(void) {
+  SystemEventMessage sent;
+  SystemEventMessage got;
+  uint8_t wire[9];
+  uint8_t again[9];
+
+  any_system_event_message(&sent);
+  assert(encode_system_event_message(&sent, wire, 0) == 9);
+  assert(decode_system_event_message(&got, wire, 0) == 9);
+  equal_system_event_message(&got, &sent);
+
+  for (size_t i = 0; i < 9; i++) { wire[i] = arbitrary(); }
+  assert(decode_system_event_message(&got, wire, 0) == 9);
+  assert(encode_system_event_message(&got, again, 0) == 9);
+  for (size_t i = 0; i < 9; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Clearing Account: 12 bytes ---------------------------------------------- */
+
+/* Clearing Account */
+typedef struct {
+  uint8_t clearing_account_value[12];  /* bytes 0 to 11 */
+} ClearingAccount;
+
+/* any Clearing Account at all: every byte one the checker chooses */
+static void any_clearing_account(ClearingAccount *record) {
+  for (size_t i = 0; i < 12; i++) { record->clearing_account_value[i] = arbitrary(); }
+}
+
+/* Clearing Account to the wire: 12 bytes from at, returning where the next byte goes */
+static size_t encode_clearing_account(const ClearingAccount *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 12; i++) { wire[at++] = record->clearing_account_value[i]; }
+
+  return at;
+}
+
+/* Clearing Account off the wire: 12 bytes from at, returning where the next byte lies */
+static size_t decode_clearing_account(ClearingAccount *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 12; i++) { record->clearing_account_value[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Clearing Account is what was written, byte for byte */
+static void equal_clearing_account(const ClearingAccount *read, const ClearingAccount *written) {
+  for (size_t i = 0; i < 12; i++) { assert(read->clearing_account_value[i] == written->clearing_account_value[i]); }
+}
+
+/* Clearing Account: written and read back, then read and written back */
+static void check_clearing_account(void) {
+  ClearingAccount sent;
+  ClearingAccount got;
+  uint8_t wire[12];
+  uint8_t again[12];
+
+  any_clearing_account(&sent);
+  assert(encode_clearing_account(&sent, wire, 0) == 12);
+  assert(decode_clearing_account(&got, wire, 0) == 12);
+  equal_clearing_account(&got, &sent);
+
+  for (size_t i = 0; i < 12; i++) { wire[i] = arbitrary(); }
+  assert(decode_clearing_account(&got, wire, 0) == 12);
+  assert(encode_clearing_account(&got, again, 0) == 12);
+  for (size_t i = 0; i < 12; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Clearing Account Type: 1 byte ------------------------------------------- */
+
+/* Clearing Account Type */
+typedef struct {
+  uint8_t clearing_account_type_value;  /* byte 0 */
+} ClearingAccountType;
+
+/* any Clearing Account Type at all: every byte one the checker chooses */
+static void any_clearing_account_type(ClearingAccountType *record) {
+  record->clearing_account_type_value = arbitrary();
+}
+
+/* Clearing Account Type to the wire: 1 byte from at, returning where the next byte goes */
+static size_t encode_clearing_account_type(const ClearingAccountType *record, uint8_t *wire, size_t at) {
+  wire[at++] = record->clearing_account_type_value;
+
+  return at;
+}
+
+/* Clearing Account Type off the wire: 1 byte from at, returning where the next byte lies */
+static size_t decode_clearing_account_type(ClearingAccountType *record, const uint8_t *wire, size_t at) {
+  record->clearing_account_type_value = wire[at++];
+
+  return at;
+}
+
+/* what was read of Clearing Account Type is what was written, byte for byte */
+static void equal_clearing_account_type(const ClearingAccountType *read, const ClearingAccountType *written) {
+  assert(read->clearing_account_type_value == written->clearing_account_type_value);
+}
+
+/* Clearing Account Type: written and read back, then read and written back */
+static void check_clearing_account_type(void) {
+  ClearingAccountType sent;
+  ClearingAccountType got;
+  uint8_t wire[1];
+  uint8_t again[1];
+
+  any_clearing_account_type(&sent);
+  assert(encode_clearing_account_type(&sent, wire, 0) == 1);
+  assert(decode_clearing_account_type(&got, wire, 0) == 1);
+  equal_clearing_account_type(&got, &sent);
+
+  for (size_t i = 0; i < 1; i++) { wire[i] = arbitrary(); }
+  assert(decode_clearing_account_type(&got, wire, 0) == 1);
+  assert(encode_clearing_account_type(&got, again, 0) == 1);
+  for (size_t i = 0; i < 1; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Clearing Firm: 4 bytes -------------------------------------------------- */
+
+/* Clearing Firm */
+typedef struct {
+  uint8_t clearing_firm_value[4];  /* bytes 0 to 3 */
+} ClearingFirm;
+
+/* any Clearing Firm at all: every byte one the checker chooses */
+static void any_clearing_firm(ClearingFirm *record) {
+  for (size_t i = 0; i < 4; i++) { record->clearing_firm_value[i] = arbitrary(); }
+}
+
+/* Clearing Firm to the wire: 4 bytes from at, returning where the next byte goes */
+static size_t encode_clearing_firm(const ClearingFirm *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->clearing_firm_value[i]; }
+
+  return at;
+}
+
+/* Clearing Firm off the wire: 4 bytes from at, returning where the next byte lies */
+static size_t decode_clearing_firm(ClearingFirm *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { record->clearing_firm_value[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Clearing Firm is what was written, byte for byte */
+static void equal_clearing_firm(const ClearingFirm *read, const ClearingFirm *written) {
+  for (size_t i = 0; i < 4; i++) { assert(read->clearing_firm_value[i] == written->clearing_firm_value[i]); }
+}
+
+/* Clearing Firm: written and read back, then read and written back */
+static void check_clearing_firm(void) {
+  ClearingFirm sent;
+  ClearingFirm got;
+  uint8_t wire[4];
+  uint8_t again[4];
+
+  any_clearing_firm(&sent);
+  assert(encode_clearing_firm(&sent, wire, 0) == 4);
+  assert(decode_clearing_firm(&got, wire, 0) == 4);
+  equal_clearing_firm(&got, &sent);
+
+  for (size_t i = 0; i < 4; i++) { wire[i] = arbitrary(); }
+  assert(decode_clearing_firm(&got, wire, 0) == 4);
+  assert(encode_clearing_firm(&got, again, 0) == 4);
+  for (size_t i = 0; i < 4; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Client Reference: 15 bytes ---------------------------------------------- */
+
+/* Client Reference */
+typedef struct {
+  uint8_t client_reference_value[15];  /* bytes 0 to 14 */
+} ClientReference;
+
+/* any Client Reference at all: every byte one the checker chooses */
+static void any_client_reference(ClientReference *record) {
+  for (size_t i = 0; i < 15; i++) { record->client_reference_value[i] = arbitrary(); }
+}
+
+/* Client Reference to the wire: 15 bytes from at, returning where the next byte goes */
+static size_t encode_client_reference(const ClientReference *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 15; i++) { wire[at++] = record->client_reference_value[i]; }
+
+  return at;
+}
+
+/* Client Reference off the wire: 15 bytes from at, returning where the next byte lies */
+static size_t decode_client_reference(ClientReference *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 15; i++) { record->client_reference_value[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Client Reference is what was written, byte for byte */
+static void equal_client_reference(const ClientReference *read, const ClientReference *written) {
+  for (size_t i = 0; i < 15; i++) { assert(read->client_reference_value[i] == written->client_reference_value[i]); }
+}
+
+/* Client Reference: written and read back, then read and written back */
+static void check_client_reference(void) {
+  ClientReference sent;
+  ClientReference got;
+  uint8_t wire[15];
+  uint8_t again[15];
+
+  any_client_reference(&sent);
+  assert(encode_client_reference(&sent, wire, 0) == 15);
+  assert(decode_client_reference(&got, wire, 0) == 15);
+  equal_client_reference(&got, &sent);
+
+  for (size_t i = 0; i < 15; i++) { wire[i] = arbitrary(); }
+  assert(decode_client_reference(&got, wire, 0) == 15);
+  assert(encode_client_reference(&got, again, 0) == 15);
+  for (size_t i = 0; i < 15; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Cross Type: 1 byte ------------------------------------------------------ */
+
+/* Cross Type */
+typedef struct {
+  uint8_t cross_type_value;  /* byte 0 */
+} CrossType;
+
+/* any Cross Type at all: every byte one the checker chooses */
+static void any_cross_type(CrossType *record) {
+  record->cross_type_value = arbitrary();
+}
+
+/* Cross Type to the wire: 1 byte from at, returning where the next byte goes */
+static size_t encode_cross_type(const CrossType *record, uint8_t *wire, size_t at) {
+  wire[at++] = record->cross_type_value;
+
+  return at;
+}
+
+/* Cross Type off the wire: 1 byte from at, returning where the next byte lies */
+static size_t decode_cross_type(CrossType *record, const uint8_t *wire, size_t at) {
+  record->cross_type_value = wire[at++];
+
+  return at;
+}
+
+/* what was read of Cross Type is what was written, byte for byte */
+static void equal_cross_type(const CrossType *read, const CrossType *written) {
+  assert(read->cross_type_value == written->cross_type_value);
+}
+
+/* Cross Type: written and read back, then read and written back */
+static void check_cross_type(void) {
+  CrossType sent;
+  CrossType got;
+  uint8_t wire[1];
+  uint8_t again[1];
+
+  any_cross_type(&sent);
+  assert(encode_cross_type(&sent, wire, 0) == 1);
+  assert(decode_cross_type(&got, wire, 0) == 1);
+  equal_cross_type(&got, &sent);
+
+  for (size_t i = 0; i < 1; i++) { wire[i] = arbitrary(); }
+  assert(decode_cross_type(&got, wire, 0) == 1);
+  assert(encode_cross_type(&got, again, 0) == 1);
+  for (size_t i = 0; i < 1; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Dea Indicator: 1 byte --------------------------------------------------- */
+
+/* DEA Indicator */
+typedef struct {
+  uint8_t dea_indicator_value;  /* byte 0 */
+} DeaIndicator;
+
+/* any Dea Indicator at all: every byte one the checker chooses */
+static void any_dea_indicator(DeaIndicator *record) {
+  record->dea_indicator_value = arbitrary();
+}
+
+/* Dea Indicator to the wire: 1 byte from at, returning where the next byte goes */
+static size_t encode_dea_indicator(const DeaIndicator *record, uint8_t *wire, size_t at) {
+  wire[at++] = record->dea_indicator_value;
+
+  return at;
+}
+
+/* Dea Indicator off the wire: 1 byte from at, returning where the next byte lies */
+static size_t decode_dea_indicator(DeaIndicator *record, const uint8_t *wire, size_t at) {
+  record->dea_indicator_value = wire[at++];
+
+  return at;
+}
+
+/* what was read of Dea Indicator is what was written, byte for byte */
+static void equal_dea_indicator(const DeaIndicator *read, const DeaIndicator *written) {
+  assert(read->dea_indicator_value == written->dea_indicator_value);
+}
+
+/* Dea Indicator: written and read back, then read and written back */
+static void check_dea_indicator(void) {
+  DeaIndicator sent;
+  DeaIndicator got;
+  uint8_t wire[1];
+  uint8_t again[1];
+
+  any_dea_indicator(&sent);
+  assert(encode_dea_indicator(&sent, wire, 0) == 1);
+  assert(decode_dea_indicator(&got, wire, 0) == 1);
+  equal_dea_indicator(&got, &sent);
+
+  for (size_t i = 0; i < 1; i++) { wire[i] = arbitrary(); }
+  assert(decode_dea_indicator(&got, wire, 0) == 1);
+  assert(encode_dea_indicator(&got, again, 0) == 1);
+  for (size_t i = 0; i < 1; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Display: 1 byte --------------------------------------------------------- */
+
+/* Display */
+typedef struct {
+  uint8_t display_value;  /* byte 0 */
+} Display;
+
+/* any Display at all: every byte one the checker chooses */
+static void any_display(Display *record) {
+  record->display_value = arbitrary();
+}
+
+/* Display to the wire: 1 byte from at, returning where the next byte goes */
+static size_t encode_display(const Display *record, uint8_t *wire, size_t at) {
+  wire[at++] = record->display_value;
+
+  return at;
+}
+
+/* Display off the wire: 1 byte from at, returning where the next byte lies */
+static size_t decode_display(Display *record, const uint8_t *wire, size_t at) {
+  record->display_value = wire[at++];
+
+  return at;
+}
+
+/* what was read of Display is what was written, byte for byte */
+static void equal_display(const Display *read, const Display *written) {
+  assert(read->display_value == written->display_value);
+}
+
+/* Display: written and read back, then read and written back */
+static void check_display(void) {
+  Display sent;
+  Display got;
+  uint8_t wire[1];
+  uint8_t again[1];
+
+  any_display(&sent);
+  assert(encode_display(&sent, wire, 0) == 1);
+  assert(decode_display(&got, wire, 0) == 1);
+  equal_display(&got, &sent);
+
+  for (size_t i = 0; i < 1; i++) { wire[i] = arbitrary(); }
+  assert(decode_display(&got, wire, 0) == 1);
+  assert(encode_display(&got, again, 0) == 1);
+  for (size_t i = 0; i < 1; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Display Price: 4 bytes -------------------------------------------------- */
+
+/* Display Price */
+typedef struct {
+  uint8_t display_price_value[4];  /* bytes 0 to 3 */
+} DisplayPrice;
+
+/* any Display Price at all: every byte one the checker chooses */
+static void any_display_price(DisplayPrice *record) {
+  for (size_t i = 0; i < 4; i++) { record->display_price_value[i] = arbitrary(); }
+}
+
+/* Display Price to the wire: 4 bytes from at, returning where the next byte goes */
+static size_t encode_display_price(const DisplayPrice *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->display_price_value[i]; }
+
+  return at;
+}
+
+/* Display Price off the wire: 4 bytes from at, returning where the next byte lies */
+static size_t decode_display_price(DisplayPrice *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { record->display_price_value[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Display Price is what was written, byte for byte */
+static void equal_display_price(const DisplayPrice *read, const DisplayPrice *written) {
+  for (size_t i = 0; i < 4; i++) { assert(read->display_price_value[i] == written->display_price_value[i]); }
+}
+
+/* Display Price: written and read back, then read and written back */
+static void check_display_price(void) {
+  DisplayPrice sent;
+  DisplayPrice got;
+  uint8_t wire[4];
+  uint8_t again[4];
+
+  any_display_price(&sent);
+  assert(encode_display_price(&sent, wire, 0) == 4);
+  assert(decode_display_price(&got, wire, 0) == 4);
+  equal_display_price(&got, &sent);
+
+  for (size_t i = 0; i < 4; i++) { wire[i] = arbitrary(); }
+  assert(decode_display_price(&got, wire, 0) == 4);
+  assert(encode_display_price(&got, again, 0) == 4);
+  for (size_t i = 0; i < 4; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Display Quantity: 4 bytes ----------------------------------------------- */
+
+/* Display Quantity */
+typedef struct {
+  uint8_t display_quantity_value[4];  /* bytes 0 to 3 */
+} DisplayQuantity;
+
+/* any Display Quantity at all: every byte one the checker chooses */
+static void any_display_quantity(DisplayQuantity *record) {
+  for (size_t i = 0; i < 4; i++) { record->display_quantity_value[i] = arbitrary(); }
+}
+
+/* Display Quantity to the wire: 4 bytes from at, returning where the next byte goes */
+static size_t encode_display_quantity(const DisplayQuantity *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->display_quantity_value[i]; }
+
+  return at;
+}
+
+/* Display Quantity off the wire: 4 bytes from at, returning where the next byte lies */
+static size_t decode_display_quantity(DisplayQuantity *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { record->display_quantity_value[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Display Quantity is what was written, byte for byte */
+static void equal_display_quantity(const DisplayQuantity *read, const DisplayQuantity *written) {
+  for (size_t i = 0; i < 4; i++) { assert(read->display_quantity_value[i] == written->display_quantity_value[i]); }
+}
+
+/* Display Quantity: written and read back, then read and written back */
+static void check_display_quantity(void) {
+  DisplayQuantity sent;
+  DisplayQuantity got;
+  uint8_t wire[4];
+  uint8_t again[4];
+
+  any_display_quantity(&sent);
+  assert(encode_display_quantity(&sent, wire, 0) == 4);
+  assert(decode_display_quantity(&got, wire, 0) == 4);
+  equal_display_quantity(&got, &sent);
+
+  for (size_t i = 0; i < 4; i++) { wire[i] = arbitrary(); }
+  assert(decode_display_quantity(&got, wire, 0) == 4);
+  assert(encode_display_quantity(&got, again, 0) == 4);
+  for (size_t i = 0; i < 4; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Expire Time: 2 bytes ---------------------------------------------------- */
+
+/* Expire Time */
+typedef struct {
+  uint8_t expire_time_value[2];  /* bytes 0 to 1 */
+} ExpireTime;
+
+/* any Expire Time at all: every byte one the checker chooses */
+static void any_expire_time(ExpireTime *record) {
+  for (size_t i = 0; i < 2; i++) { record->expire_time_value[i] = arbitrary(); }
+}
+
+/* Expire Time to the wire: 2 bytes from at, returning where the next byte goes */
+static size_t encode_expire_time(const ExpireTime *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->expire_time_value[i]; }
+
+  return at;
+}
+
+/* Expire Time off the wire: 2 bytes from at, returning where the next byte lies */
+static size_t decode_expire_time(ExpireTime *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 2; i++) { record->expire_time_value[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Expire Time is what was written, byte for byte */
+static void equal_expire_time(const ExpireTime *read, const ExpireTime *written) {
+  for (size_t i = 0; i < 2; i++) { assert(read->expire_time_value[i] == written->expire_time_value[i]); }
+}
+
+/* Expire Time: written and read back, then read and written back */
+static void check_expire_time(void) {
+  ExpireTime sent;
+  ExpireTime got;
+  uint8_t wire[2];
+  uint8_t again[2];
+
+  any_expire_time(&sent);
+  assert(encode_expire_time(&sent, wire, 0) == 2);
+  assert(decode_expire_time(&got, wire, 0) == 2);
+  equal_expire_time(&got, &sent);
+
+  for (size_t i = 0; i < 2; i++) { wire[i] = arbitrary(); }
+  assert(decode_expire_time(&got, wire, 0) == 2);
+  assert(encode_expire_time(&got, again, 0) == 2);
+  for (size_t i = 0; i < 2; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Firm: 4 bytes ----------------------------------------------------------- */
+
+/* Firm */
+typedef struct {
+  uint8_t firm_value[4];  /* bytes 0 to 3 */
+} Firm;
+
+/* any Firm at all: every byte one the checker chooses */
+static void any_firm(Firm *record) {
+  for (size_t i = 0; i < 4; i++) { record->firm_value[i] = arbitrary(); }
+}
+
+/* Firm to the wire: 4 bytes from at, returning where the next byte goes */
+static size_t encode_firm(const Firm *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->firm_value[i]; }
+
+  return at;
+}
+
+/* Firm off the wire: 4 bytes from at, returning where the next byte lies */
+static size_t decode_firm(Firm *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { record->firm_value[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Firm is what was written, byte for byte */
+static void equal_firm(const Firm *read, const Firm *written) {
+  for (size_t i = 0; i < 4; i++) { assert(read->firm_value[i] == written->firm_value[i]); }
+}
+
+/* Firm: written and read back, then read and written back */
+static void check_firm(void) {
+  Firm sent;
+  Firm got;
+  uint8_t wire[4];
+  uint8_t again[4];
+
+  any_firm(&sent);
+  assert(encode_firm(&sent, wire, 0) == 4);
+  assert(decode_firm(&got, wire, 0) == 4);
+  equal_firm(&got, &sent);
+
+  for (size_t i = 0; i < 4; i++) { wire[i] = arbitrary(); }
+  assert(decode_firm(&got, wire, 0) == 4);
+  assert(encode_firm(&got, again, 0) == 4);
+  for (size_t i = 0; i < 4; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Liquidity Provision Indicator: 1 byte ----------------------------------- */
+
+/* Liquidity Provision Indicator */
+typedef struct {
+  uint8_t liquidity_provision_indicator_value;  /* byte 0 */
+} LiquidityProvisionIndicator;
+
+/* any Liquidity Provision Indicator at all: every byte one the checker chooses */
+static void any_liquidity_provision_indicator(LiquidityProvisionIndicator *record) {
+  record->liquidity_provision_indicator_value = arbitrary();
+}
+
+/* Liquidity Provision Indicator to the wire: 1 byte from at, returning where the next byte goes */
+static size_t encode_liquidity_provision_indicator(const LiquidityProvisionIndicator *record, uint8_t *wire, size_t at) {
+  wire[at++] = record->liquidity_provision_indicator_value;
+
+  return at;
+}
+
+/* Liquidity Provision Indicator off the wire: 1 byte from at, returning where the next byte lies */
+static size_t decode_liquidity_provision_indicator(LiquidityProvisionIndicator *record, const uint8_t *wire, size_t at) {
+  record->liquidity_provision_indicator_value = wire[at++];
+
+  return at;
+}
+
+/* what was read of Liquidity Provision Indicator is what was written, byte for byte */
+static void equal_liquidity_provision_indicator(const LiquidityProvisionIndicator *read, const LiquidityProvisionIndicator *written) {
+  assert(read->liquidity_provision_indicator_value == written->liquidity_provision_indicator_value);
+}
+
+/* Liquidity Provision Indicator: written and read back, then read and written back */
+static void check_liquidity_provision_indicator(void) {
+  LiquidityProvisionIndicator sent;
+  LiquidityProvisionIndicator got;
+  uint8_t wire[1];
+  uint8_t again[1];
+
+  any_liquidity_provision_indicator(&sent);
+  assert(encode_liquidity_provision_indicator(&sent, wire, 0) == 1);
+  assert(decode_liquidity_provision_indicator(&got, wire, 0) == 1);
+  equal_liquidity_provision_indicator(&got, &sent);
+
+  for (size_t i = 0; i < 1; i++) { wire[i] = arbitrary(); }
+  assert(decode_liquidity_provision_indicator(&got, wire, 0) == 1);
+  assert(encode_liquidity_provision_indicator(&got, again, 0) == 1);
+  for (size_t i = 0; i < 1; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Max Floor: 4 bytes ------------------------------------------------------ */
+
+/* Max Floor */
+typedef struct {
+  uint8_t max_floor_value[4];  /* bytes 0 to 3 */
+} MaxFloor;
+
+/* any Max Floor at all: every byte one the checker chooses */
+static void any_max_floor(MaxFloor *record) {
+  for (size_t i = 0; i < 4; i++) { record->max_floor_value[i] = arbitrary(); }
+}
+
+/* Max Floor to the wire: 4 bytes from at, returning where the next byte goes */
+static size_t encode_max_floor(const MaxFloor *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->max_floor_value[i]; }
+
+  return at;
+}
+
+/* Max Floor off the wire: 4 bytes from at, returning where the next byte lies */
+static size_t decode_max_floor(MaxFloor *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { record->max_floor_value[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Max Floor is what was written, byte for byte */
+static void equal_max_floor(const MaxFloor *read, const MaxFloor *written) {
+  for (size_t i = 0; i < 4; i++) { assert(read->max_floor_value[i] == written->max_floor_value[i]); }
+}
+
+/* Max Floor: written and read back, then read and written back */
+static void check_max_floor(void) {
+  MaxFloor sent;
+  MaxFloor got;
+  uint8_t wire[4];
+  uint8_t again[4];
+
+  any_max_floor(&sent);
+  assert(encode_max_floor(&sent, wire, 0) == 4);
+  assert(decode_max_floor(&got, wire, 0) == 4);
+  equal_max_floor(&got, &sent);
+
+  for (size_t i = 0; i < 4; i++) { wire[i] = arbitrary(); }
+  assert(decode_max_floor(&got, wire, 0) == 4);
+  assert(encode_max_floor(&got, again, 0) == 4);
+  for (size_t i = 0; i < 4; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Minimum Quantity: 4 bytes ----------------------------------------------- */
+
+/* Minimum Quantity */
+typedef struct {
+  uint8_t minimum_quantity_value[4];  /* bytes 0 to 3 */
+} MinimumQuantity;
+
+/* any Minimum Quantity at all: every byte one the checker chooses */
+static void any_minimum_quantity(MinimumQuantity *record) {
+  for (size_t i = 0; i < 4; i++) { record->minimum_quantity_value[i] = arbitrary(); }
+}
+
+/* Minimum Quantity to the wire: 4 bytes from at, returning where the next byte goes */
+static size_t encode_minimum_quantity(const MinimumQuantity *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->minimum_quantity_value[i]; }
+
+  return at;
+}
+
+/* Minimum Quantity off the wire: 4 bytes from at, returning where the next byte lies */
+static size_t decode_minimum_quantity(MinimumQuantity *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { record->minimum_quantity_value[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Minimum Quantity is what was written, byte for byte */
+static void equal_minimum_quantity(const MinimumQuantity *read, const MinimumQuantity *written) {
+  for (size_t i = 0; i < 4; i++) { assert(read->minimum_quantity_value[i] == written->minimum_quantity_value[i]); }
+}
+
+/* Minimum Quantity: written and read back, then read and written back */
+static void check_minimum_quantity(void) {
+  MinimumQuantity sent;
+  MinimumQuantity got;
+  uint8_t wire[4];
+  uint8_t again[4];
+
+  any_minimum_quantity(&sent);
+  assert(encode_minimum_quantity(&sent, wire, 0) == 4);
+  assert(decode_minimum_quantity(&got, wire, 0) == 4);
+  equal_minimum_quantity(&got, &sent);
+
+  for (size_t i = 0; i < 4; i++) { wire[i] = arbitrary(); }
+  assert(decode_minimum_quantity(&got, wire, 0) == 4);
+  assert(encode_minimum_quantity(&got, again, 0) == 4);
+  for (size_t i = 0; i < 4; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Order Reference: 10 bytes ----------------------------------------------- */
+
+/* Order Reference */
+typedef struct {
+  uint8_t order_reference_value[10];  /* bytes 0 to 9 */
+} OrderReference;
+
+/* any Order Reference at all: every byte one the checker chooses */
+static void any_order_reference(OrderReference *record) {
+  for (size_t i = 0; i < 10; i++) { record->order_reference_value[i] = arbitrary(); }
+}
+
+/* Order Reference to the wire: 10 bytes from at, returning where the next byte goes */
+static size_t encode_order_reference(const OrderReference *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 10; i++) { wire[at++] = record->order_reference_value[i]; }
+
+  return at;
+}
+
+/* Order Reference off the wire: 10 bytes from at, returning where the next byte lies */
+static size_t decode_order_reference(OrderReference *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 10; i++) { record->order_reference_value[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Order Reference is what was written, byte for byte */
+static void equal_order_reference(const OrderReference *read, const OrderReference *written) {
+  for (size_t i = 0; i < 10; i++) { assert(read->order_reference_value[i] == written->order_reference_value[i]); }
+}
+
+/* Order Reference: written and read back, then read and written back */
+static void check_order_reference(void) {
+  OrderReference sent;
+  OrderReference got;
+  uint8_t wire[10];
+  uint8_t again[10];
+
+  any_order_reference(&sent);
+  assert(encode_order_reference(&sent, wire, 0) == 10);
+  assert(decode_order_reference(&got, wire, 0) == 10);
+  equal_order_reference(&got, &sent);
+
+  for (size_t i = 0; i < 10; i++) { wire[i] = arbitrary(); }
+  assert(decode_order_reference(&got, wire, 0) == 10);
+  assert(encode_order_reference(&got, again, 0) == 10);
+  for (size_t i = 0; i < 10; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Original Order Entry Date: 4 bytes -------------------------------------- */
+
+/* Original Order Entry Date */
+typedef struct {
+  uint8_t original_order_entry_date_value[4];  /* bytes 0 to 3 */
+} OriginalOrderEntryDate;
+
+/* any Original Order Entry Date at all: every byte one the checker chooses */
+static void any_original_order_entry_date(OriginalOrderEntryDate *record) {
+  for (size_t i = 0; i < 4; i++) { record->original_order_entry_date_value[i] = arbitrary(); }
+}
+
+/* Original Order Entry Date to the wire: 4 bytes from at, returning where the next byte goes */
+static size_t encode_original_order_entry_date(const OriginalOrderEntryDate *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->original_order_entry_date_value[i]; }
+
+  return at;
+}
+
+/* Original Order Entry Date off the wire: 4 bytes from at, returning where the next byte lies */
+static size_t decode_original_order_entry_date(OriginalOrderEntryDate *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { record->original_order_entry_date_value[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Original Order Entry Date is what was written, byte for byte */
+static void equal_original_order_entry_date(const OriginalOrderEntryDate *read, const OriginalOrderEntryDate *written) {
+  for (size_t i = 0; i < 4; i++) { assert(read->original_order_entry_date_value[i] == written->original_order_entry_date_value[i]); }
+}
+
+/* Original Order Entry Date: written and read back, then read and written back */
+static void check_original_order_entry_date(void) {
+  OriginalOrderEntryDate sent;
+  OriginalOrderEntryDate got;
+  uint8_t wire[4];
+  uint8_t again[4];
+
+  any_original_order_entry_date(&sent);
+  assert(encode_original_order_entry_date(&sent, wire, 0) == 4);
+  assert(decode_original_order_entry_date(&got, wire, 0) == 4);
+  equal_original_order_entry_date(&got, &sent);
+
+  for (size_t i = 0; i < 4; i++) { wire[i] = arbitrary(); }
+  assert(decode_original_order_entry_date(&got, wire, 0) == 4);
+  assert(encode_original_order_entry_date(&got, again, 0) == 4);
+  for (size_t i = 0; i < 4; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Original Order Reference Number: 8 bytes -------------------------------- */
+
+/* Original Order Reference Number */
+typedef struct {
+  uint8_t original_order_reference_number_value[8];  /* bytes 0 to 7 */
+} OriginalOrderReferenceNumber;
+
+/* any Original Order Reference Number at all: every byte one the checker chooses */
+static void any_original_order_reference_number(OriginalOrderReferenceNumber *record) {
+  for (size_t i = 0; i < 8; i++) { record->original_order_reference_number_value[i] = arbitrary(); }
+}
+
+/* Original Order Reference Number to the wire: 8 bytes from at, returning where the next byte goes */
+static size_t encode_original_order_reference_number(const OriginalOrderReferenceNumber *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->original_order_reference_number_value[i]; }
+
+  return at;
+}
+
+/* Original Order Reference Number off the wire: 8 bytes from at, returning where the next byte lies */
+static size_t decode_original_order_reference_number(OriginalOrderReferenceNumber *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 8; i++) { record->original_order_reference_number_value[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Original Order Reference Number is what was written, byte for byte */
+static void equal_original_order_reference_number(const OriginalOrderReferenceNumber *read, const OriginalOrderReferenceNumber *written) {
+  for (size_t i = 0; i < 8; i++) { assert(read->original_order_reference_number_value[i] == written->original_order_reference_number_value[i]); }
+}
+
+/* Original Order Reference Number: written and read back, then read and written back */
+static void check_original_order_reference_number(void) {
+  OriginalOrderReferenceNumber sent;
+  OriginalOrderReferenceNumber got;
+  uint8_t wire[8];
+  uint8_t again[8];
+
+  any_original_order_reference_number(&sent);
+  assert(encode_original_order_reference_number(&sent, wire, 0) == 8);
+  assert(decode_original_order_reference_number(&got, wire, 0) == 8);
+  equal_original_order_reference_number(&got, &sent);
+
+  for (size_t i = 0; i < 8; i++) { wire[i] = arbitrary(); }
+  assert(decode_original_order_reference_number(&got, wire, 0) == 8);
+  assert(encode_original_order_reference_number(&got, again, 0) == 8);
+  for (size_t i = 0; i < 8; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Peg Difference: 4 bytes ------------------------------------------------- */
+
+/* Peg Difference */
+typedef struct {
+  uint8_t peg_difference_value[4];  /* bytes 0 to 3 */
+} PegDifference;
+
+/* any Peg Difference at all: every byte one the checker chooses */
+static void any_peg_difference(PegDifference *record) {
+  for (size_t i = 0; i < 4; i++) { record->peg_difference_value[i] = arbitrary(); }
+}
+
+/* Peg Difference to the wire: 4 bytes from at, returning where the next byte goes */
+static size_t encode_peg_difference(const PegDifference *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->peg_difference_value[i]; }
+
+  return at;
+}
+
+/* Peg Difference off the wire: 4 bytes from at, returning where the next byte lies */
+static size_t decode_peg_difference(PegDifference *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { record->peg_difference_value[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Peg Difference is what was written, byte for byte */
+static void equal_peg_difference(const PegDifference *read, const PegDifference *written) {
+  for (size_t i = 0; i < 4; i++) { assert(read->peg_difference_value[i] == written->peg_difference_value[i]); }
+}
+
+/* Peg Difference: written and read back, then read and written back */
+static void check_peg_difference(void) {
+  PegDifference sent;
+  PegDifference got;
+  uint8_t wire[4];
+  uint8_t again[4];
+
+  any_peg_difference(&sent);
+  assert(encode_peg_difference(&sent, wire, 0) == 4);
+  assert(decode_peg_difference(&got, wire, 0) == 4);
+  equal_peg_difference(&got, &sent);
+
+  for (size_t i = 0; i < 4; i++) { wire[i] = arbitrary(); }
+  assert(decode_peg_difference(&got, wire, 0) == 4);
+  assert(encode_peg_difference(&got, again, 0) == 4);
+  for (size_t i = 0; i < 4; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Peg Type: 1 byte -------------------------------------------------------- */
+
+/* Peg Type */
+typedef struct {
+  uint8_t peg_type_value;  /* byte 0 */
+} PegType;
+
+/* any Peg Type at all: every byte one the checker chooses */
+static void any_peg_type(PegType *record) {
+  record->peg_type_value = arbitrary();
+}
+
+/* Peg Type to the wire: 1 byte from at, returning where the next byte goes */
+static size_t encode_peg_type(const PegType *record, uint8_t *wire, size_t at) {
+  wire[at++] = record->peg_type_value;
+
+  return at;
+}
+
+/* Peg Type off the wire: 1 byte from at, returning where the next byte lies */
+static size_t decode_peg_type(PegType *record, const uint8_t *wire, size_t at) {
+  record->peg_type_value = wire[at++];
+
+  return at;
+}
+
+/* what was read of Peg Type is what was written, byte for byte */
+static void equal_peg_type(const PegType *read, const PegType *written) {
+  assert(read->peg_type_value == written->peg_type_value);
+}
+
+/* Peg Type: written and read back, then read and written back */
+static void check_peg_type(void) {
+  PegType sent;
+  PegType got;
+  uint8_t wire[1];
+  uint8_t again[1];
+
+  any_peg_type(&sent);
+  assert(encode_peg_type(&sent, wire, 0) == 1);
+  assert(decode_peg_type(&got, wire, 0) == 1);
+  equal_peg_type(&got, &sent);
+
+  for (size_t i = 0; i < 1; i++) { wire[i] = arbitrary(); }
+  assert(decode_peg_type(&got, wire, 0) == 1);
+  assert(encode_peg_type(&got, again, 0) == 1);
+  for (size_t i = 0; i < 1; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Random Reserve: 4 bytes ------------------------------------------------- */
+
+/* Random Reserve */
+typedef struct {
+  uint8_t random_reserve_value[4];  /* bytes 0 to 3 */
+} RandomReserve;
+
+/* any Random Reserve at all: every byte one the checker chooses */
+static void any_random_reserve(RandomReserve *record) {
+  for (size_t i = 0; i < 4; i++) { record->random_reserve_value[i] = arbitrary(); }
+}
+
+/* Random Reserve to the wire: 4 bytes from at, returning where the next byte goes */
+static size_t encode_random_reserve(const RandomReserve *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->random_reserve_value[i]; }
+
+  return at;
+}
+
+/* Random Reserve off the wire: 4 bytes from at, returning where the next byte lies */
+static size_t decode_random_reserve(RandomReserve *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { record->random_reserve_value[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Random Reserve is what was written, byte for byte */
+static void equal_random_reserve(const RandomReserve *read, const RandomReserve *written) {
+  for (size_t i = 0; i < 4; i++) { assert(read->random_reserve_value[i] == written->random_reserve_value[i]); }
+}
+
+/* Random Reserve: written and read back, then read and written back */
+static void check_random_reserve(void) {
+  RandomReserve sent;
+  RandomReserve got;
+  uint8_t wire[4];
+  uint8_t again[4];
+
+  any_random_reserve(&sent);
+  assert(encode_random_reserve(&sent, wire, 0) == 4);
+  assert(decode_random_reserve(&got, wire, 0) == 4);
+  equal_random_reserve(&got, &sent);
+
+  for (size_t i = 0; i < 4; i++) { wire[i] = arbitrary(); }
+  assert(decode_random_reserve(&got, wire, 0) == 4);
+  assert(encode_random_reserve(&got, again, 0) == 4);
+  for (size_t i = 0; i < 4; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Secondary Order Reference Number: 8 bytes ------------------------------- */
+
+/* Secondary Order Reference Number */
+typedef struct {
+  uint8_t secondary_order_reference_number_value[8];  /* bytes 0 to 7 */
+} SecondaryOrderReferenceNumber;
+
+/* any Secondary Order Reference Number at all: every byte one the checker chooses */
+static void any_secondary_order_reference_number(SecondaryOrderReferenceNumber *record) {
+  for (size_t i = 0; i < 8; i++) { record->secondary_order_reference_number_value[i] = arbitrary(); }
+}
+
+/* Secondary Order Reference Number to the wire: 8 bytes from at, returning where the next byte goes */
+static size_t encode_secondary_order_reference_number(const SecondaryOrderReferenceNumber *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->secondary_order_reference_number_value[i]; }
+
+  return at;
+}
+
+/* Secondary Order Reference Number off the wire: 8 bytes from at, returning where the next byte lies */
+static size_t decode_secondary_order_reference_number(SecondaryOrderReferenceNumber *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 8; i++) { record->secondary_order_reference_number_value[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Secondary Order Reference Number is what was written, byte for byte */
+static void equal_secondary_order_reference_number(const SecondaryOrderReferenceNumber *read, const SecondaryOrderReferenceNumber *written) {
+  for (size_t i = 0; i < 8; i++) { assert(read->secondary_order_reference_number_value[i] == written->secondary_order_reference_number_value[i]); }
+}
+
+/* Secondary Order Reference Number: written and read back, then read and written back */
+static void check_secondary_order_reference_number(void) {
+  SecondaryOrderReferenceNumber sent;
+  SecondaryOrderReferenceNumber got;
+  uint8_t wire[8];
+  uint8_t again[8];
+
+  any_secondary_order_reference_number(&sent);
+  assert(encode_secondary_order_reference_number(&sent, wire, 0) == 8);
+  assert(decode_secondary_order_reference_number(&got, wire, 0) == 8);
+  equal_secondary_order_reference_number(&got, &sent);
+
+  for (size_t i = 0; i < 8; i++) { wire[i] = arbitrary(); }
+  assert(decode_secondary_order_reference_number(&got, wire, 0) == 8);
+  assert(encode_secondary_order_reference_number(&got, again, 0) == 8);
+  for (size_t i = 0; i < 8; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Stp Action: 1 byte ------------------------------------------------------ */
+
+/* STP Action */
+typedef struct {
+  uint8_t stp_action_value;  /* byte 0 */
+} StpAction;
+
+/* any Stp Action at all: every byte one the checker chooses */
+static void any_stp_action(StpAction *record) {
+  record->stp_action_value = arbitrary();
+}
+
+/* Stp Action to the wire: 1 byte from at, returning where the next byte goes */
+static size_t encode_stp_action(const StpAction *record, uint8_t *wire, size_t at) {
+  wire[at++] = record->stp_action_value;
+
+  return at;
+}
+
+/* Stp Action off the wire: 1 byte from at, returning where the next byte lies */
+static size_t decode_stp_action(StpAction *record, const uint8_t *wire, size_t at) {
+  record->stp_action_value = wire[at++];
+
+  return at;
+}
+
+/* what was read of Stp Action is what was written, byte for byte */
+static void equal_stp_action(const StpAction *read, const StpAction *written) {
+  assert(read->stp_action_value == written->stp_action_value);
+}
+
+/* Stp Action: written and read back, then read and written back */
+static void check_stp_action(void) {
+  StpAction sent;
+  StpAction got;
+  uint8_t wire[1];
+  uint8_t again[1];
+
+  any_stp_action(&sent);
+  assert(encode_stp_action(&sent, wire, 0) == 1);
+  assert(decode_stp_action(&got, wire, 0) == 1);
+  equal_stp_action(&got, &sent);
+
+  for (size_t i = 0; i < 1; i++) { wire[i] = arbitrary(); }
+  assert(decode_stp_action(&got, wire, 0) == 1);
+  assert(encode_stp_action(&got, again, 0) == 1);
+  for (size_t i = 0; i < 1; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Stp Level: 1 byte ------------------------------------------------------- */
+
+/* STP Level */
+typedef struct {
+  uint8_t stp_level_value;  /* byte 0 */
+} StpLevel;
+
+/* any Stp Level at all: every byte one the checker chooses */
+static void any_stp_level(StpLevel *record) {
+  record->stp_level_value = arbitrary();
+}
+
+/* Stp Level to the wire: 1 byte from at, returning where the next byte goes */
+static size_t encode_stp_level(const StpLevel *record, uint8_t *wire, size_t at) {
+  wire[at++] = record->stp_level_value;
+
+  return at;
+}
+
+/* Stp Level off the wire: 1 byte from at, returning where the next byte lies */
+static size_t decode_stp_level(StpLevel *record, const uint8_t *wire, size_t at) {
+  record->stp_level_value = wire[at++];
+
+  return at;
+}
+
+/* what was read of Stp Level is what was written, byte for byte */
+static void equal_stp_level(const StpLevel *read, const StpLevel *written) {
+  assert(read->stp_level_value == written->stp_level_value);
+}
+
+/* Stp Level: written and read back, then read and written back */
+static void check_stp_level(void) {
+  StpLevel sent;
+  StpLevel got;
+  uint8_t wire[1];
+  uint8_t again[1];
+
+  any_stp_level(&sent);
+  assert(encode_stp_level(&sent, wire, 0) == 1);
+  assert(decode_stp_level(&got, wire, 0) == 1);
+  equal_stp_level(&got, &sent);
+
+  for (size_t i = 0; i < 1; i++) { wire[i] = arbitrary(); }
+  assert(decode_stp_level(&got, wire, 0) == 1);
+  assert(encode_stp_level(&got, again, 0) == 1);
+  for (size_t i = 0; i < 1; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Stp Trader Group: 2 bytes ----------------------------------------------- */
+
+/* STP Trader Group */
+typedef struct {
+  uint8_t stp_trader_group_value[2];  /* bytes 0 to 1 */
+} StpTraderGroup;
+
+/* any Stp Trader Group at all: every byte one the checker chooses */
+static void any_stp_trader_group(StpTraderGroup *record) {
+  for (size_t i = 0; i < 2; i++) { record->stp_trader_group_value[i] = arbitrary(); }
+}
+
+/* Stp Trader Group to the wire: 2 bytes from at, returning where the next byte goes */
+static size_t encode_stp_trader_group(const StpTraderGroup *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->stp_trader_group_value[i]; }
+
+  return at;
+}
+
+/* Stp Trader Group off the wire: 2 bytes from at, returning where the next byte lies */
+static size_t decode_stp_trader_group(StpTraderGroup *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 2; i++) { record->stp_trader_group_value[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Stp Trader Group is what was written, byte for byte */
+static void equal_stp_trader_group(const StpTraderGroup *read, const StpTraderGroup *written) {
+  for (size_t i = 0; i < 2; i++) { assert(read->stp_trader_group_value[i] == written->stp_trader_group_value[i]); }
+}
+
+/* Stp Trader Group: written and read back, then read and written back */
+static void check_stp_trader_group(void) {
+  StpTraderGroup sent;
+  StpTraderGroup got;
+  uint8_t wire[2];
+  uint8_t again[2];
+
+  any_stp_trader_group(&sent);
+  assert(encode_stp_trader_group(&sent, wire, 0) == 2);
+  assert(decode_stp_trader_group(&got, wire, 0) == 2);
+  equal_stp_trader_group(&got, &sent);
+
+  for (size_t i = 0; i < 2; i++) { wire[i] = arbitrary(); }
+  assert(decode_stp_trader_group(&got, wire, 0) == 2);
+  assert(encode_stp_trader_group(&got, again, 0) == 2);
+  for (size_t i = 0; i < 2; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Time In Force: 1 byte --------------------------------------------------- */
+
+/* Time in Force */
+typedef struct {
+  uint8_t time_in_force_value;  /* byte 0 */
+} TimeInForce;
+
+/* any Time In Force at all: every byte one the checker chooses */
+static void any_time_in_force(TimeInForce *record) {
+  record->time_in_force_value = arbitrary();
+}
+
+/* Time In Force to the wire: 1 byte from at, returning where the next byte goes */
+static size_t encode_time_in_force(const TimeInForce *record, uint8_t *wire, size_t at) {
+  wire[at++] = record->time_in_force_value;
+
+  return at;
+}
+
+/* Time In Force off the wire: 1 byte from at, returning where the next byte lies */
+static size_t decode_time_in_force(TimeInForce *record, const uint8_t *wire, size_t at) {
+  record->time_in_force_value = wire[at++];
+
+  return at;
+}
+
+/* what was read of Time In Force is what was written, byte for byte */
+static void equal_time_in_force(const TimeInForce *read, const TimeInForce *written) {
+  assert(read->time_in_force_value == written->time_in_force_value);
+}
+
+/* Time In Force: written and read back, then read and written back */
+static void check_time_in_force(void) {
+  TimeInForce sent;
+  TimeInForce got;
+  uint8_t wire[1];
+  uint8_t again[1];
+
+  any_time_in_force(&sent);
+  assert(encode_time_in_force(&sent, wire, 0) == 1);
+  assert(decode_time_in_force(&got, wire, 0) == 1);
+  equal_time_in_force(&got, &sent);
+
+  for (size_t i = 0; i < 1; i++) { wire[i] = arbitrary(); }
+  assert(decode_time_in_force(&got, wire, 0) == 1);
+  assert(encode_time_in_force(&got, again, 0) == 1);
+  for (size_t i = 0; i < 1; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Trading At Closing Price: 1 byte ---------------------------------------- */
+
+/* Trading at Closing price */
+typedef struct {
+  uint8_t trading_at_closing_price_value;  /* byte 0 */
+} TradingAtClosingPrice;
+
+/* any Trading At Closing Price at all: every byte one the checker chooses */
+static void any_trading_at_closing_price(TradingAtClosingPrice *record) {
+  record->trading_at_closing_price_value = arbitrary();
+}
+
+/* Trading At Closing Price to the wire: 1 byte from at, returning where the next byte goes */
+static size_t encode_trading_at_closing_price(const TradingAtClosingPrice *record, uint8_t *wire, size_t at) {
+  wire[at++] = record->trading_at_closing_price_value;
+
+  return at;
+}
+
+/* Trading At Closing Price off the wire: 1 byte from at, returning where the next byte lies */
+static size_t decode_trading_at_closing_price(TradingAtClosingPrice *record, const uint8_t *wire, size_t at) {
+  record->trading_at_closing_price_value = wire[at++];
+
+  return at;
+}
+
+/* what was read of Trading At Closing Price is what was written, byte for byte */
+static void equal_trading_at_closing_price(const TradingAtClosingPrice *read, const TradingAtClosingPrice *written) {
+  assert(read->trading_at_closing_price_value == written->trading_at_closing_price_value);
+}
+
+/* Trading At Closing Price: written and read back, then read and written back */
+static void check_trading_at_closing_price(void) {
+  TradingAtClosingPrice sent;
+  TradingAtClosingPrice got;
+  uint8_t wire[1];
+  uint8_t again[1];
+
+  any_trading_at_closing_price(&sent);
+  assert(encode_trading_at_closing_price(&sent, wire, 0) == 1);
+  assert(decode_trading_at_closing_price(&got, wire, 0) == 1);
+  equal_trading_at_closing_price(&got, &sent);
+
+  for (size_t i = 0; i < 1; i++) { wire[i] = arbitrary(); }
+  assert(decode_trading_at_closing_price(&got, wire, 0) == 1);
+  assert(encode_trading_at_closing_price(&got, again, 0) == 1);
+  for (size_t i = 0; i < 1; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Order Condition: 1 byte ------------------------------------------------- */
+
+/* Order Condition */
+typedef struct {
+  uint8_t order_condition_value;  /* byte 0 */
+} OrderCondition;
+
+/* any Order Condition at all: every byte one the checker chooses */
+static void any_order_condition(OrderCondition *record) {
+  record->order_condition_value = arbitrary();
+}
+
+/* Order Condition to the wire: 1 byte from at, returning where the next byte goes */
+static size_t encode_order_condition(const OrderCondition *record, uint8_t *wire, size_t at) {
+  wire[at++] = record->order_condition_value;
+
+  return at;
+}
+
+/* Order Condition off the wire: 1 byte from at, returning where the next byte lies */
+static size_t decode_order_condition(OrderCondition *record, const uint8_t *wire, size_t at) {
+  record->order_condition_value = wire[at++];
+
+  return at;
+}
+
+/* what was read of Order Condition is what was written, byte for byte */
+static void equal_order_condition(const OrderCondition *read, const OrderCondition *written) {
+  assert(read->order_condition_value == written->order_condition_value);
+}
+
+/* Order Condition: written and read back, then read and written back */
+static void check_order_condition(void) {
+  OrderCondition sent;
+  OrderCondition got;
+  uint8_t wire[1];
+  uint8_t again[1];
+
+  any_order_condition(&sent);
+  assert(encode_order_condition(&sent, wire, 0) == 1);
+  assert(decode_order_condition(&got, wire, 0) == 1);
+  equal_order_condition(&got, &sent);
+
+  for (size_t i = 0; i < 1; i++) { wire[i] = arbitrary(); }
+  assert(decode_order_condition(&got, wire, 0) == 1);
+  assert(encode_order_condition(&got, again, 0) == 1);
+  for (size_t i = 0; i < 1; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Cumulative Quantity: 4 bytes -------------------------------------------- */
+
+/* Cumulative Quantity */
+typedef struct {
+  uint8_t cumulative_quantity_value[4];  /* bytes 0 to 3 */
+} CumulativeQuantity;
+
+/* any Cumulative Quantity at all: every byte one the checker chooses */
+static void any_cumulative_quantity(CumulativeQuantity *record) {
+  for (size_t i = 0; i < 4; i++) { record->cumulative_quantity_value[i] = arbitrary(); }
+}
+
+/* Cumulative Quantity to the wire: 4 bytes from at, returning where the next byte goes */
+static size_t encode_cumulative_quantity(const CumulativeQuantity *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->cumulative_quantity_value[i]; }
+
+  return at;
+}
+
+/* Cumulative Quantity off the wire: 4 bytes from at, returning where the next byte lies */
+static size_t decode_cumulative_quantity(CumulativeQuantity *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { record->cumulative_quantity_value[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Cumulative Quantity is what was written, byte for byte */
+static void equal_cumulative_quantity(const CumulativeQuantity *read, const CumulativeQuantity *written) {
+  for (size_t i = 0; i < 4; i++) { assert(read->cumulative_quantity_value[i] == written->cumulative_quantity_value[i]); }
+}
+
+/* Cumulative Quantity: written and read back, then read and written back */
+static void check_cumulative_quantity(void) {
+  CumulativeQuantity sent;
+  CumulativeQuantity got;
+  uint8_t wire[4];
+  uint8_t again[4];
+
+  any_cumulative_quantity(&sent);
+  assert(encode_cumulative_quantity(&sent, wire, 0) == 4);
+  assert(decode_cumulative_quantity(&got, wire, 0) == 4);
+  equal_cumulative_quantity(&got, &sent);
+
+  for (size_t i = 0; i < 4; i++) { wire[i] = arbitrary(); }
+  assert(decode_cumulative_quantity(&got, wire, 0) == 4);
+  assert(encode_cumulative_quantity(&got, again, 0) == 4);
+  for (size_t i = 0; i < 4; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Customer Order Capacity: 1 byte ----------------------------------------- */
+
+/* Customer Order Capacity */
+typedef struct {
+  uint8_t customer_order_capacity_value;  /* byte 0 */
+} CustomerOrderCapacity;
+
+/* any Customer Order Capacity at all: every byte one the checker chooses */
+static void any_customer_order_capacity(CustomerOrderCapacity *record) {
+  record->customer_order_capacity_value = arbitrary();
+}
+
+/* Customer Order Capacity to the wire: 1 byte from at, returning where the next byte goes */
+static size_t encode_customer_order_capacity(const CustomerOrderCapacity *record, uint8_t *wire, size_t at) {
+  wire[at++] = record->customer_order_capacity_value;
+
+  return at;
+}
+
+/* Customer Order Capacity off the wire: 1 byte from at, returning where the next byte lies */
+static size_t decode_customer_order_capacity(CustomerOrderCapacity *record, const uint8_t *wire, size_t at) {
+  record->customer_order_capacity_value = wire[at++];
+
+  return at;
+}
+
+/* what was read of Customer Order Capacity is what was written, byte for byte */
+static void equal_customer_order_capacity(const CustomerOrderCapacity *read, const CustomerOrderCapacity *written) {
+  assert(read->customer_order_capacity_value == written->customer_order_capacity_value);
+}
+
+/* Customer Order Capacity: written and read back, then read and written back */
+static void check_customer_order_capacity(void) {
+  CustomerOrderCapacity sent;
+  CustomerOrderCapacity got;
+  uint8_t wire[1];
+  uint8_t again[1];
+
+  any_customer_order_capacity(&sent);
+  assert(encode_customer_order_capacity(&sent, wire, 0) == 1);
+  assert(decode_customer_order_capacity(&got, wire, 0) == 1);
+  equal_customer_order_capacity(&got, &sent);
+
+  for (size_t i = 0; i < 1; i++) { wire[i] = arbitrary(); }
+  assert(decode_customer_order_capacity(&got, wire, 0) == 1);
+  assert(encode_customer_order_capacity(&got, again, 0) == 1);
+  for (size_t i = 0; i < 1; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Cancelled Order Message: 17 bytes --------------------------------------- */
+
+/* An order has been reduced or cancelled */
+typedef struct {
+  uint8_t timestamp[8];           /* bytes 0 to 7 */
+  uint8_t user_ref_num[4];        /* bytes 8 to 11 */
+  uint8_t decrement_quantity[4];  /* bytes 12 to 15 */
+  uint8_t cancel_reason;          /* byte 16 */
+} CancelledOrderMessage;
+
+/* any Cancelled Order Message at all: every byte one the checker chooses */
+static void any_cancelled_order_message(CancelledOrderMessage *record) {
+  for (size_t i = 0; i < 8; i++) { record->timestamp[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->user_ref_num[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->decrement_quantity[i] = arbitrary(); }
+  record->cancel_reason = arbitrary();
+}
+
+/* Cancelled Order Message to the wire: 17 bytes from at, returning where the next byte goes */
+static size_t encode_cancelled_order_message(const CancelledOrderMessage *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->timestamp[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->user_ref_num[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->decrement_quantity[i]; }
+  wire[at++] = record->cancel_reason;
+
+  return at;
+}
+
+/* Cancelled Order Message off the wire: 17 bytes from at, returning where the next byte lies */
+static size_t decode_cancelled_order_message(CancelledOrderMessage *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 8; i++) { record->timestamp[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->user_ref_num[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->decrement_quantity[i] = wire[at++]; }
+  record->cancel_reason = wire[at++];
+
+  return at;
+}
+
+/* what was read of Cancelled Order Message is what was written, byte for byte */
+static void equal_cancelled_order_message(const CancelledOrderMessage *read, const CancelledOrderMessage *written) {
+  for (size_t i = 0; i < 8; i++) { assert(read->timestamp[i] == written->timestamp[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->user_ref_num[i] == written->user_ref_num[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->decrement_quantity[i] == written->decrement_quantity[i]); }
+  assert(read->cancel_reason == written->cancel_reason);
+}
+
+/* Cancelled Order Message: written and read back, then read and written back */
+static void check_cancelled_order_message(void) {
+  CancelledOrderMessage sent;
+  CancelledOrderMessage got;
+  uint8_t wire[17];
+  uint8_t again[17];
+
+  any_cancelled_order_message(&sent);
+  assert(encode_cancelled_order_message(&sent, wire, 0) == 17);
+  assert(decode_cancelled_order_message(&got, wire, 0) == 17);
+  equal_cancelled_order_message(&got, &sent);
+
+  for (size_t i = 0; i < 17; i++) { wire[i] = arbitrary(); }
+  assert(decode_cancelled_order_message(&got, wire, 0) == 17);
+  assert(encode_cancelled_order_message(&got, again, 0) == 17);
+  for (size_t i = 0; i < 17; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Cancel Pending Message: 13 bytes ---------------------------------------- */
+
+/* A cancel request cannot be applied immediately */
+typedef struct {
+  uint8_t timestamp[8];           /* bytes 0 to 7 */
+  uint8_t user_ref_num[4];        /* bytes 8 to 11 */
+  uint8_t cancel_pending_reason;  /* byte 12 */
+} CancelPendingMessage;
+
+/* any Cancel Pending Message at all: every byte one the checker chooses */
+static void any_cancel_pending_message(CancelPendingMessage *record) {
+  for (size_t i = 0; i < 8; i++) { record->timestamp[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->user_ref_num[i] = arbitrary(); }
+  record->cancel_pending_reason = arbitrary();
+}
+
+/* Cancel Pending Message to the wire: 13 bytes from at, returning where the next byte goes */
+static size_t encode_cancel_pending_message(const CancelPendingMessage *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->timestamp[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->user_ref_num[i]; }
+  wire[at++] = record->cancel_pending_reason;
+
+  return at;
+}
+
+/* Cancel Pending Message off the wire: 13 bytes from at, returning where the next byte lies */
+static size_t decode_cancel_pending_message(CancelPendingMessage *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 8; i++) { record->timestamp[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->user_ref_num[i] = wire[at++]; }
+  record->cancel_pending_reason = wire[at++];
+
+  return at;
+}
+
+/* what was read of Cancel Pending Message is what was written, byte for byte */
+static void equal_cancel_pending_message(const CancelPendingMessage *read, const CancelPendingMessage *written) {
+  for (size_t i = 0; i < 8; i++) { assert(read->timestamp[i] == written->timestamp[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->user_ref_num[i] == written->user_ref_num[i]); }
+  assert(read->cancel_pending_reason == written->cancel_pending_reason);
+}
+
+/* Cancel Pending Message: written and read back, then read and written back */
+static void check_cancel_pending_message(void) {
+  CancelPendingMessage sent;
+  CancelPendingMessage got;
+  uint8_t wire[13];
+  uint8_t again[13];
+
+  any_cancel_pending_message(&sent);
+  assert(encode_cancel_pending_message(&sent, wire, 0) == 13);
+  assert(decode_cancel_pending_message(&got, wire, 0) == 13);
+  equal_cancel_pending_message(&got, &sent);
+
+  for (size_t i = 0; i < 13; i++) { wire[i] = arbitrary(); }
+  assert(decode_cancel_pending_message(&got, wire, 0) == 13);
+  assert(encode_cancel_pending_message(&got, again, 0) == 13);
+  for (size_t i = 0; i < 13; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Replace Pending Message: 17 bytes --------------------------------------- */
+
+/* A replace request cannot be applied immediately */
+typedef struct {
+  uint8_t timestamp[8];            /* bytes 0 to 7 */
+  uint8_t orig_user_ref_num[4];    /* bytes 8 to 11 */
+  uint8_t user_ref_num[4];         /* bytes 12 to 15 */
+  uint8_t replace_pending_reason;  /* byte 16 */
+} ReplacePendingMessage;
+
+/* any Replace Pending Message at all: every byte one the checker chooses */
+static void any_replace_pending_message(ReplacePendingMessage *record) {
+  for (size_t i = 0; i < 8; i++) { record->timestamp[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->orig_user_ref_num[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->user_ref_num[i] = arbitrary(); }
+  record->replace_pending_reason = arbitrary();
+}
+
+/* Replace Pending Message to the wire: 17 bytes from at, returning where the next byte goes */
+static size_t encode_replace_pending_message(const ReplacePendingMessage *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->timestamp[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->orig_user_ref_num[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->user_ref_num[i]; }
+  wire[at++] = record->replace_pending_reason;
+
+  return at;
+}
+
+/* Replace Pending Message off the wire: 17 bytes from at, returning where the next byte lies */
+static size_t decode_replace_pending_message(ReplacePendingMessage *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 8; i++) { record->timestamp[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->orig_user_ref_num[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->user_ref_num[i] = wire[at++]; }
+  record->replace_pending_reason = wire[at++];
+
+  return at;
+}
+
+/* what was read of Replace Pending Message is what was written, byte for byte */
+static void equal_replace_pending_message(const ReplacePendingMessage *read, const ReplacePendingMessage *written) {
+  for (size_t i = 0; i < 8; i++) { assert(read->timestamp[i] == written->timestamp[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->orig_user_ref_num[i] == written->orig_user_ref_num[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->user_ref_num[i] == written->user_ref_num[i]); }
+  assert(read->replace_pending_reason == written->replace_pending_reason);
+}
+
+/* Replace Pending Message: written and read back, then read and written back */
+static void check_replace_pending_message(void) {
+  ReplacePendingMessage sent;
+  ReplacePendingMessage got;
+  uint8_t wire[17];
+  uint8_t again[17];
+
+  any_replace_pending_message(&sent);
+  assert(encode_replace_pending_message(&sent, wire, 0) == 17);
+  assert(decode_replace_pending_message(&got, wire, 0) == 17);
+  equal_replace_pending_message(&got, &sent);
+
+  for (size_t i = 0; i < 17; i++) { wire[i] = arbitrary(); }
+  assert(decode_replace_pending_message(&got, wire, 0) == 17);
+  assert(encode_replace_pending_message(&got, again, 0) == 17);
+  for (size_t i = 0; i < 17; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Broken Trade Message: 20 bytes ------------------------------------------ */
+
+/* An execution has been broken and cannot be reinstated */
+typedef struct {
+  uint8_t timestamp[8];                     /* bytes 0 to 7 */
+  uint8_t user_ref_num[4];                  /* bytes 8 to 11 */
+  uint8_t match_number[4];                  /* bytes 12 to 15 */
+  uint8_t broken_trade_reason;              /* byte 16 */
+  uint8_t trading_mode;                     /* byte 17 */
+  uint8_t transaction_category;             /* byte 18 */
+  uint8_t transaction_type_algo_indicator;  /* byte 19 */
+} BrokenTradeMessage;
+
+/* any Broken Trade Message at all: every byte one the checker chooses */
+static void any_broken_trade_message(BrokenTradeMessage *record) {
+  for (size_t i = 0; i < 8; i++) { record->timestamp[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->user_ref_num[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->match_number[i] = arbitrary(); }
+  record->broken_trade_reason = arbitrary();
+  record->trading_mode = arbitrary();
+  record->transaction_category = arbitrary();
+  record->transaction_type_algo_indicator = arbitrary();
+}
+
+/* Broken Trade Message to the wire: 20 bytes from at, returning where the next byte goes */
+static size_t encode_broken_trade_message(const BrokenTradeMessage *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->timestamp[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->user_ref_num[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->match_number[i]; }
+  wire[at++] = record->broken_trade_reason;
+  wire[at++] = record->trading_mode;
+  wire[at++] = record->transaction_category;
+  wire[at++] = record->transaction_type_algo_indicator;
+
+  return at;
+}
+
+/* Broken Trade Message off the wire: 20 bytes from at, returning where the next byte lies */
+static size_t decode_broken_trade_message(BrokenTradeMessage *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 8; i++) { record->timestamp[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->user_ref_num[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->match_number[i] = wire[at++]; }
+  record->broken_trade_reason = wire[at++];
+  record->trading_mode = wire[at++];
+  record->transaction_category = wire[at++];
+  record->transaction_type_algo_indicator = wire[at++];
+
+  return at;
+}
+
+/* what was read of Broken Trade Message is what was written, byte for byte */
+static void equal_broken_trade_message(const BrokenTradeMessage *read, const BrokenTradeMessage *written) {
+  for (size_t i = 0; i < 8; i++) { assert(read->timestamp[i] == written->timestamp[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->user_ref_num[i] == written->user_ref_num[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->match_number[i] == written->match_number[i]); }
+  assert(read->broken_trade_reason == written->broken_trade_reason);
+  assert(read->trading_mode == written->trading_mode);
+  assert(read->transaction_category == written->transaction_category);
+  assert(read->transaction_type_algo_indicator == written->transaction_type_algo_indicator);
+}
+
+/* Broken Trade Message: written and read back, then read and written back */
+static void check_broken_trade_message(void) {
+  BrokenTradeMessage sent;
+  BrokenTradeMessage got;
+  uint8_t wire[20];
+  uint8_t again[20];
+
+  any_broken_trade_message(&sent);
+  assert(encode_broken_trade_message(&sent, wire, 0) == 20);
+  assert(decode_broken_trade_message(&got, wire, 0) == 20);
+  equal_broken_trade_message(&got, &sent);
+
+  for (size_t i = 0; i < 20; i++) { wire[i] = arbitrary(); }
+  assert(decode_broken_trade_message(&got, wire, 0) == 20);
+  assert(encode_broken_trade_message(&got, again, 0) == 20);
+  for (size_t i = 0; i < 20; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Rejected Order Message: 14 bytes ---------------------------------------- */
+
+/* An order has been rejected */
+typedef struct {
+  uint8_t timestamp[8];              /* bytes 0 to 7 */
+  uint8_t user_ref_num[4];           /* bytes 8 to 11 */
+  uint8_t rejected_order_reason[2];  /* bytes 12 to 13 */
+} RejectedOrderMessage;
+
+/* any Rejected Order Message at all: every byte one the checker chooses */
+static void any_rejected_order_message(RejectedOrderMessage *record) {
+  for (size_t i = 0; i < 8; i++) { record->timestamp[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->user_ref_num[i] = arbitrary(); }
+  for (size_t i = 0; i < 2; i++) { record->rejected_order_reason[i] = arbitrary(); }
+}
+
+/* Rejected Order Message to the wire: 14 bytes from at, returning where the next byte goes */
+static size_t encode_rejected_order_message(const RejectedOrderMessage *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->timestamp[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->user_ref_num[i]; }
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->rejected_order_reason[i]; }
+
+  return at;
+}
+
+/* Rejected Order Message off the wire: 14 bytes from at, returning where the next byte lies */
+static size_t decode_rejected_order_message(RejectedOrderMessage *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 8; i++) { record->timestamp[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->user_ref_num[i] = wire[at++]; }
+  for (size_t i = 0; i < 2; i++) { record->rejected_order_reason[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Rejected Order Message is what was written, byte for byte */
+static void equal_rejected_order_message(const RejectedOrderMessage *read, const RejectedOrderMessage *written) {
+  for (size_t i = 0; i < 8; i++) { assert(read->timestamp[i] == written->timestamp[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->user_ref_num[i] == written->user_ref_num[i]); }
+  for (size_t i = 0; i < 2; i++) { assert(read->rejected_order_reason[i] == written->rejected_order_reason[i]); }
+}
+
+/* Rejected Order Message: written and read back, then read and written back */
+static void check_rejected_order_message(void) {
+  RejectedOrderMessage sent;
+  RejectedOrderMessage got;
+  uint8_t wire[14];
+  uint8_t again[14];
+
+  any_rejected_order_message(&sent);
+  assert(encode_rejected_order_message(&sent, wire, 0) == 14);
+  assert(decode_rejected_order_message(&got, wire, 0) == 14);
+  equal_rejected_order_message(&got, &sent);
+
+  for (size_t i = 0; i < 14; i++) { wire[i] = arbitrary(); }
+  assert(decode_rejected_order_message(&got, wire, 0) == 14);
+  assert(encode_rejected_order_message(&got, again, 0) == 14);
+  for (size_t i = 0; i < 14; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Cancel Rejected Message: 14 bytes --------------------------------------- */
+
+/* A cancel request has been rejected */
+typedef struct {
+  uint8_t timestamp[8];               /* bytes 0 to 7 */
+  uint8_t user_ref_num[4];            /* bytes 8 to 11 */
+  uint8_t cancel_rejected_reason[2];  /* bytes 12 to 13 */
+} CancelRejectedMessage;
+
+/* any Cancel Rejected Message at all: every byte one the checker chooses */
+static void any_cancel_rejected_message(CancelRejectedMessage *record) {
+  for (size_t i = 0; i < 8; i++) { record->timestamp[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->user_ref_num[i] = arbitrary(); }
+  for (size_t i = 0; i < 2; i++) { record->cancel_rejected_reason[i] = arbitrary(); }
+}
+
+/* Cancel Rejected Message to the wire: 14 bytes from at, returning where the next byte goes */
+static size_t encode_cancel_rejected_message(const CancelRejectedMessage *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->timestamp[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->user_ref_num[i]; }
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->cancel_rejected_reason[i]; }
+
+  return at;
+}
+
+/* Cancel Rejected Message off the wire: 14 bytes from at, returning where the next byte lies */
+static size_t decode_cancel_rejected_message(CancelRejectedMessage *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 8; i++) { record->timestamp[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->user_ref_num[i] = wire[at++]; }
+  for (size_t i = 0; i < 2; i++) { record->cancel_rejected_reason[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Cancel Rejected Message is what was written, byte for byte */
+static void equal_cancel_rejected_message(const CancelRejectedMessage *read, const CancelRejectedMessage *written) {
+  for (size_t i = 0; i < 8; i++) { assert(read->timestamp[i] == written->timestamp[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->user_ref_num[i] == written->user_ref_num[i]); }
+  for (size_t i = 0; i < 2; i++) { assert(read->cancel_rejected_reason[i] == written->cancel_rejected_reason[i]); }
+}
+
+/* Cancel Rejected Message: written and read back, then read and written back */
+static void check_cancel_rejected_message(void) {
+  CancelRejectedMessage sent;
+  CancelRejectedMessage got;
+  uint8_t wire[14];
+  uint8_t again[14];
+
+  any_cancel_rejected_message(&sent);
+  assert(encode_cancel_rejected_message(&sent, wire, 0) == 14);
+  assert(decode_cancel_rejected_message(&got, wire, 0) == 14);
+  equal_cancel_rejected_message(&got, &sent);
+
+  for (size_t i = 0; i < 14; i++) { wire[i] = arbitrary(); }
+  assert(decode_cancel_rejected_message(&got, wire, 0) == 14);
+  assert(encode_cancel_rejected_message(&got, again, 0) == 14);
+  for (size_t i = 0; i < 14; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Mmo Refresh Request Message: 17 bytes ----------------------------------- */
+
+/* Requests a market maker order refresh */
+typedef struct {
+  uint8_t timestamp[8];        /* bytes 0 to 7 */
+  Firm firm;                   /* bytes 8 to 11 */
+  uint8_t order_book[4];       /* bytes 12 to 15 */
+  uint8_t mmo_refresh_reason;  /* byte 16 */
+} MmoRefreshRequestMessage;
+
+/* any Mmo Refresh Request Message at all: every byte one the checker chooses */
+static void any_mmo_refresh_request_message(MmoRefreshRequestMessage *record) {
+  for (size_t i = 0; i < 8; i++) { record->timestamp[i] = arbitrary(); }
+  any_firm(&record->firm);
+  for (size_t i = 0; i < 4; i++) { record->order_book[i] = arbitrary(); }
+  record->mmo_refresh_reason = arbitrary();
+}
+
+/* Mmo Refresh Request Message to the wire: 17 bytes from at, returning where the next byte goes */
+static size_t encode_mmo_refresh_request_message(const MmoRefreshRequestMessage *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->timestamp[i]; }
+  at = encode_firm(&record->firm, wire, at);
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->order_book[i]; }
+  wire[at++] = record->mmo_refresh_reason;
+
+  return at;
+}
+
+/* Mmo Refresh Request Message off the wire: 17 bytes from at, returning where the next byte lies */
+static size_t decode_mmo_refresh_request_message(MmoRefreshRequestMessage *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 8; i++) { record->timestamp[i] = wire[at++]; }
+  at = decode_firm(&record->firm, wire, at);
+  for (size_t i = 0; i < 4; i++) { record->order_book[i] = wire[at++]; }
+  record->mmo_refresh_reason = wire[at++];
+
+  return at;
+}
+
+/* what was read of Mmo Refresh Request Message is what was written, byte for byte */
+static void equal_mmo_refresh_request_message(const MmoRefreshRequestMessage *read, const MmoRefreshRequestMessage *written) {
+  for (size_t i = 0; i < 8; i++) { assert(read->timestamp[i] == written->timestamp[i]); }
+  equal_firm(&read->firm, &written->firm);
+  for (size_t i = 0; i < 4; i++) { assert(read->order_book[i] == written->order_book[i]); }
+  assert(read->mmo_refresh_reason == written->mmo_refresh_reason);
+}
+
+/* Mmo Refresh Request Message: written and read back, then read and written back */
+static void check_mmo_refresh_request_message(void) {
+  MmoRefreshRequestMessage sent;
+  MmoRefreshRequestMessage got;
+  uint8_t wire[17];
+  uint8_t again[17];
+
+  any_mmo_refresh_request_message(&sent);
+  assert(encode_mmo_refresh_request_message(&sent, wire, 0) == 17);
+  assert(decode_mmo_refresh_request_message(&got, wire, 0) == 17);
+  equal_mmo_refresh_request_message(&got, &sent);
+
+  for (size_t i = 0; i < 17; i++) { wire[i] = arbitrary(); }
+  assert(decode_mmo_refresh_request_message(&got, wire, 0) == 17);
+  assert(encode_mmo_refresh_request_message(&got, again, 0) == 17);
+  for (size_t i = 0; i < 17; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Account Query Response Message: 12 bytes -------------------------------- */
+
+/* Indicates the next available UserRefNum */
+typedef struct {
+  uint8_t timestamp[8];          /* bytes 0 to 7 */
+  uint8_t next_user_ref_num[4];  /* bytes 8 to 11 */
+} AccountQueryResponseMessage;
+
+/* any Account Query Response Message at all: every byte one the checker chooses */
+static void any_account_query_response_message(AccountQueryResponseMessage *record) {
+  for (size_t i = 0; i < 8; i++) { record->timestamp[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->next_user_ref_num[i] = arbitrary(); }
+}
+
+/* Account Query Response Message to the wire: 12 bytes from at, returning where the next byte goes */
+static size_t encode_account_query_response_message(const AccountQueryResponseMessage *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->timestamp[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->next_user_ref_num[i]; }
+
+  return at;
+}
+
+/* Account Query Response Message off the wire: 12 bytes from at, returning where the next byte lies */
+static size_t decode_account_query_response_message(AccountQueryResponseMessage *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 8; i++) { record->timestamp[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->next_user_ref_num[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Account Query Response Message is what was written, byte for byte */
+static void equal_account_query_response_message(const AccountQueryResponseMessage *read, const AccountQueryResponseMessage *written) {
+  for (size_t i = 0; i < 8; i++) { assert(read->timestamp[i] == written->timestamp[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->next_user_ref_num[i] == written->next_user_ref_num[i]); }
+}
+
+/* Account Query Response Message: written and read back, then read and written back */
+static void check_account_query_response_message(void) {
+  AccountQueryResponseMessage sent;
+  AccountQueryResponseMessage got;
+  uint8_t wire[12];
+  uint8_t again[12];
+
+  any_account_query_response_message(&sent);
+  assert(encode_account_query_response_message(&sent, wire, 0) == 12);
+  assert(decode_account_query_response_message(&got, wire, 0) == 12);
+  equal_account_query_response_message(&got, &sent);
+
+  for (size_t i = 0; i < 12; i++) { wire[i] = arbitrary(); }
+  assert(decode_account_query_response_message(&got, wire, 0) == 12);
+  assert(encode_account_query_response_message(&got, again, 0) == 12);
+  for (size_t i = 0; i < 12; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Gtc Cancelled Message: 22 bytes ----------------------------------------- */
+
+/* A Gtc order could not be restated in the morning */
+typedef struct {
+  uint8_t timestamp[8];                                          /* bytes 0 to 7 */
+  OriginalOrderEntryDate original_order_entry_date;              /* bytes 8 to 11 */
+  OriginalOrderReferenceNumber original_order_reference_number;  /* bytes 12 to 19 */
+  uint8_t reason[2];                                             /* bytes 20 to 21 */
+} GtcCancelledMessage;
+
+/* any Gtc Cancelled Message at all: every byte one the checker chooses */
+static void any_gtc_cancelled_message(GtcCancelledMessage *record) {
+  for (size_t i = 0; i < 8; i++) { record->timestamp[i] = arbitrary(); }
+  any_original_order_entry_date(&record->original_order_entry_date);
+  any_original_order_reference_number(&record->original_order_reference_number);
+  for (size_t i = 0; i < 2; i++) { record->reason[i] = arbitrary(); }
+}
+
+/* Gtc Cancelled Message to the wire: 22 bytes from at, returning where the next byte goes */
+static size_t encode_gtc_cancelled_message(const GtcCancelledMessage *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->timestamp[i]; }
+  at = encode_original_order_entry_date(&record->original_order_entry_date, wire, at);
+  at = encode_original_order_reference_number(&record->original_order_reference_number, wire, at);
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->reason[i]; }
+
+  return at;
+}
+
+/* Gtc Cancelled Message off the wire: 22 bytes from at, returning where the next byte lies */
+static size_t decode_gtc_cancelled_message(GtcCancelledMessage *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 8; i++) { record->timestamp[i] = wire[at++]; }
+  at = decode_original_order_entry_date(&record->original_order_entry_date, wire, at);
+  at = decode_original_order_reference_number(&record->original_order_reference_number, wire, at);
+  for (size_t i = 0; i < 2; i++) { record->reason[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Gtc Cancelled Message is what was written, byte for byte */
+static void equal_gtc_cancelled_message(const GtcCancelledMessage *read, const GtcCancelledMessage *written) {
+  for (size_t i = 0; i < 8; i++) { assert(read->timestamp[i] == written->timestamp[i]); }
+  equal_original_order_entry_date(&read->original_order_entry_date, &written->original_order_entry_date);
+  equal_original_order_reference_number(&read->original_order_reference_number, &written->original_order_reference_number);
+  for (size_t i = 0; i < 2; i++) { assert(read->reason[i] == written->reason[i]); }
+}
+
+/* Gtc Cancelled Message: written and read back, then read and written back */
+static void check_gtc_cancelled_message(void) {
+  GtcCancelledMessage sent;
+  GtcCancelledMessage got;
+  uint8_t wire[22];
+  uint8_t again[22];
+
+  any_gtc_cancelled_message(&sent);
+  assert(encode_gtc_cancelled_message(&sent, wire, 0) == 22);
+  assert(decode_gtc_cancelled_message(&got, wire, 0) == 22);
+  equal_gtc_cancelled_message(&got, &sent);
+
+  for (size_t i = 0; i < 22; i++) { wire[i] = arbitrary(); }
+  assert(decode_gtc_cancelled_message(&got, wire, 0) == 22);
+  assert(encode_gtc_cancelled_message(&got, again, 0) == 22);
+  for (size_t i = 0; i < 22; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Response To Mmi Notification Message: 29 bytes -------------------------- */
+
+/* Response to a market making instruction notification */
+typedef struct {
+  uint8_t timestamp[8];        /* bytes 0 to 7 */
+  uint8_t user_ref_num[4];     /* bytes 8 to 11 */
+  uint8_t order_book[4];       /* bytes 12 to 15 */
+  uint8_t instruction;         /* byte 16 */
+  uint8_t add_or_remove;       /* byte 17 */
+  Firm firm;                   /* bytes 18 to 21 */
+  uint8_t user[6];             /* bytes 22 to 27 */
+  uint8_t instruction_status;  /* byte 28 */
+} ResponseToMmiNotificationMessage;
+
+/* any Response To Mmi Notification Message at all: every byte one the checker chooses */
+static void any_response_to_mmi_notification_message(ResponseToMmiNotificationMessage *record) {
+  for (size_t i = 0; i < 8; i++) { record->timestamp[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->user_ref_num[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->order_book[i] = arbitrary(); }
+  record->instruction = arbitrary();
+  record->add_or_remove = arbitrary();
+  any_firm(&record->firm);
+  for (size_t i = 0; i < 6; i++) { record->user[i] = arbitrary(); }
+  record->instruction_status = arbitrary();
+}
+
+/* Response To Mmi Notification Message to the wire: 29 bytes from at, returning where the next byte goes */
+static size_t encode_response_to_mmi_notification_message(const ResponseToMmiNotificationMessage *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->timestamp[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->user_ref_num[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->order_book[i]; }
+  wire[at++] = record->instruction;
+  wire[at++] = record->add_or_remove;
+  at = encode_firm(&record->firm, wire, at);
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->user[i]; }
+  wire[at++] = record->instruction_status;
+
+  return at;
+}
+
+/* Response To Mmi Notification Message off the wire: 29 bytes from at, returning where the next byte lies */
+static size_t decode_response_to_mmi_notification_message(ResponseToMmiNotificationMessage *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 8; i++) { record->timestamp[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->user_ref_num[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->order_book[i] = wire[at++]; }
+  record->instruction = wire[at++];
+  record->add_or_remove = wire[at++];
+  at = decode_firm(&record->firm, wire, at);
+  for (size_t i = 0; i < 6; i++) { record->user[i] = wire[at++]; }
+  record->instruction_status = wire[at++];
+
+  return at;
+}
+
+/* what was read of Response To Mmi Notification Message is what was written, byte for byte */
+static void equal_response_to_mmi_notification_message(const ResponseToMmiNotificationMessage *read, const ResponseToMmiNotificationMessage *written) {
+  for (size_t i = 0; i < 8; i++) { assert(read->timestamp[i] == written->timestamp[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->user_ref_num[i] == written->user_ref_num[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->order_book[i] == written->order_book[i]); }
+  assert(read->instruction == written->instruction);
+  assert(read->add_or_remove == written->add_or_remove);
+  equal_firm(&read->firm, &written->firm);
+  for (size_t i = 0; i < 6; i++) { assert(read->user[i] == written->user[i]); }
+  assert(read->instruction_status == written->instruction_status);
+}
+
+/* Response To Mmi Notification Message: written and read back, then read and written back */
+static void check_response_to_mmi_notification_message(void) {
+  ResponseToMmiNotificationMessage sent;
+  ResponseToMmiNotificationMessage got;
+  uint8_t wire[29];
+  uint8_t again[29];
+
+  any_response_to_mmi_notification_message(&sent);
+  assert(encode_response_to_mmi_notification_message(&sent, wire, 0) == 29);
+  assert(decode_response_to_mmi_notification_message(&got, wire, 0) == 29);
+  equal_response_to_mmi_notification_message(&got, &sent);
+
+  for (size_t i = 0; i < 29; i++) { wire[i] = arbitrary(); }
+  assert(decode_response_to_mmi_notification_message(&got, wire, 0) == 29);
+  assert(encode_response_to_mmi_notification_message(&got, again, 0) == 29);
+  for (size_t i = 0; i < 29; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- What esbmc checks ------------------------------------------------------- */
+
+/* every record of the protocol, each on its own buffers */
+static void checks(void) {
+  check_server_packet_header();
+  check_login_accepted_packet();
+  check_login_rejected_packet();
+  check_system_event_message();
+  check_clearing_account();
+  check_clearing_account_type();
+  check_clearing_firm();
+  check_client_reference();
+  check_cross_type();
+  check_dea_indicator();
+  check_display();
+  check_display_price();
+  check_display_quantity();
+  check_expire_time();
+  check_firm();
+  check_liquidity_provision_indicator();
+  check_max_floor();
+  check_minimum_quantity();
+  check_order_reference();
+  check_original_order_entry_date();
+  check_original_order_reference_number();
+  check_peg_difference();
+  check_peg_type();
+  check_random_reserve();
+  check_secondary_order_reference_number();
+  check_stp_action();
+  check_stp_level();
+  check_stp_trader_group();
+  check_time_in_force();
+  check_trading_at_closing_price();
+  check_order_condition();
+  check_cumulative_quantity();
+  check_customer_order_capacity();
+  check_cancelled_order_message();
+  check_cancel_pending_message();
+  check_replace_pending_message();
+  check_broken_trade_message();
+  check_rejected_order_message();
+  check_cancel_rejected_message();
+  check_mmo_refresh_request_message();
+  check_account_query_response_message();
+  check_gtc_cancelled_message();
+  check_response_to_mmi_notification_message();
+}
+
+int main(void) {
+#ifdef CONCRETE
+  for (pattern = 0; pattern < 4; pattern++) { checks(); }
+#else
+  checks();
+#endif
+
+  return 0;
+}

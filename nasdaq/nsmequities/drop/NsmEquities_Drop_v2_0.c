@@ -1,0 +1,962 @@
+// nasdaq/nsmequities/drop/NsmEquities_Drop_v2_0.c
+/*
+ * National Association of Securities Dealers Automated Quotations (Nasdaq) Drop
+ *
+ * Generated from the binary model. Every record is a run of fields, and esbmc checks two
+ * claims of each, for every value its bytes can take rather than for chosen ones: that any
+ * record written to the wire and read back is that record, and that any bytes read off the
+ * wire and written back are those bytes. Each takes exactly the record's width, and no
+ * write or read leaves the buffer it is made on.
+ *
+ * A field is the bytes it occupies. Nothing is read as an integer, so nothing is read in a
+ * byte order, and no rule stated here depends on a value.
+ *
+ * Check the whole file:   esbmc <file>
+ * Check one record:       esbmc <file> --function check_<record>
+ *
+ * Built with -DCONCRETE it is an ordinary program any C compiler runs: the bytes the
+ * checker would choose are drawn from four patterns instead, so the definition can be
+ * tried without the checker. That run is a test, and the checker's is the claim.
+ *
+ * What this definition does not state, and the model does:
+ *   - a run filling what frames it
+ *
+ * License: MIT No Attribution
+ */
+
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+/* ---- Any byte ---------------------------------------------------------------- */
+
+#ifdef CONCRETE
+
+/* which pattern the bytes are drawn from, and how many have been drawn */
+static unsigned pattern;
+static size_t drawn;
+
+/* a byte of the pattern: zero, a space, every bit set, or one more than the last */
+static uint8_t arbitrary(void) {
+  drawn++;
+
+  switch (pattern) {
+    case 0: return 0;
+    case 1: return 32;
+    case 2: return 255;
+    default: return (uint8_t)(drawn % 256);
+  }
+}
+
+#else
+
+/* declared and never defined: a value the checker chooses */
+unsigned char __VERIFIER_nondet_uchar(void);
+
+/* a byte nobody chose, so what holds of it holds of all of them */
+static uint8_t arbitrary(void) {
+  return __VERIFIER_nondet_uchar();
+}
+
+#endif
+
+/* ---- Message Header: 11 bytes ------------------------------------------------ */
+
+/* Time Stamp and Type opening every Drop message line */
+typedef struct {
+  uint8_t time_stamp[9];  /* bytes 0 to 8 */
+  uint8_t comma;          /* byte 9 */
+  uint8_t message_type;   /* byte 10 */
+} MessageHeader;
+
+/* any Message Header at all: every byte one the checker chooses */
+static void any_message_header(MessageHeader *record) {
+  for (size_t i = 0; i < 9; i++) { record->time_stamp[i] = arbitrary(); }
+  record->comma = arbitrary();
+  record->message_type = arbitrary();
+}
+
+/* Message Header to the wire: 11 bytes from at, returning where the next byte goes */
+static size_t encode_message_header(const MessageHeader *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 9; i++) { wire[at++] = record->time_stamp[i]; }
+  wire[at++] = record->comma;
+  wire[at++] = record->message_type;
+
+  return at;
+}
+
+/* Message Header off the wire: 11 bytes from at, returning where the next byte lies */
+static size_t decode_message_header(MessageHeader *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 9; i++) { record->time_stamp[i] = wire[at++]; }
+  record->comma = wire[at++];
+  record->message_type = wire[at++];
+
+  return at;
+}
+
+/* what was read of Message Header is what was written, byte for byte */
+static void equal_message_header(const MessageHeader *read, const MessageHeader *written) {
+  for (size_t i = 0; i < 9; i++) { assert(read->time_stamp[i] == written->time_stamp[i]); }
+  assert(read->comma == written->comma);
+  assert(read->message_type == written->message_type);
+}
+
+/* Message Header: written and read back, then read and written back */
+static void check_message_header(void) {
+  MessageHeader sent;
+  MessageHeader got;
+  uint8_t wire[11];
+  uint8_t again[11];
+
+  any_message_header(&sent);
+  assert(encode_message_header(&sent, wire, 0) == 11);
+  assert(decode_message_header(&got, wire, 0) == 11);
+  equal_message_header(&got, &sent);
+
+  for (size_t i = 0; i < 11; i++) { wire[i] = arbitrary(); }
+  assert(decode_message_header(&got, wire, 0) == 11);
+  assert(encode_message_header(&got, again, 0) == 11);
+  for (size_t i = 0; i < 11; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- New Order Accepted Message: 80 bytes ------------------------------------ */
+
+/* New order accepted. */
+typedef struct {
+  uint8_t separator_1;       /* byte 0 */
+  uint8_t source[6];         /* bytes 1 to 6 */
+  uint8_t separator_2;       /* byte 7 */
+  uint8_t user[4];           /* bytes 8 to 11 */
+  uint8_t separator_3;       /* byte 12 */
+  uint8_t token[10];         /* bytes 13 to 22 */
+  uint8_t separator_4;       /* byte 23 */
+  uint8_t buy_sell;          /* byte 24 */
+  uint8_t separator_5;       /* byte 25 */
+  uint8_t shares[6];         /* bytes 26 to 31 */
+  uint8_t separator_6;       /* byte 32 */
+  uint8_t stock[6];          /* bytes 33 to 38 */
+  uint8_t separator_7;       /* byte 39 */
+  uint8_t price[11];         /* bytes 40 to 50 */
+  uint8_t separator_8;       /* byte 51 */
+  uint8_t firm[4];           /* bytes 52 to 55 */
+  uint8_t separator_9;       /* byte 56 */
+  uint8_t reference[9];      /* bytes 57 to 65 */
+  uint8_t separator_10;      /* byte 66 */
+  uint8_t time_in_force[9];  /* bytes 67 to 75 */
+  uint8_t separator_11;      /* byte 76 */
+  uint8_t liquidity_code;    /* byte 77 */
+  uint8_t separator_12;      /* byte 78 */
+  uint8_t clearing_code;     /* byte 79 */
+} NewOrderAcceptedMessage;
+
+/* any New Order Accepted Message at all: every byte one the checker chooses */
+static void any_new_order_accepted_message(NewOrderAcceptedMessage *record) {
+  record->separator_1 = arbitrary();
+  for (size_t i = 0; i < 6; i++) { record->source[i] = arbitrary(); }
+  record->separator_2 = arbitrary();
+  for (size_t i = 0; i < 4; i++) { record->user[i] = arbitrary(); }
+  record->separator_3 = arbitrary();
+  for (size_t i = 0; i < 10; i++) { record->token[i] = arbitrary(); }
+  record->separator_4 = arbitrary();
+  record->buy_sell = arbitrary();
+  record->separator_5 = arbitrary();
+  for (size_t i = 0; i < 6; i++) { record->shares[i] = arbitrary(); }
+  record->separator_6 = arbitrary();
+  for (size_t i = 0; i < 6; i++) { record->stock[i] = arbitrary(); }
+  record->separator_7 = arbitrary();
+  for (size_t i = 0; i < 11; i++) { record->price[i] = arbitrary(); }
+  record->separator_8 = arbitrary();
+  for (size_t i = 0; i < 4; i++) { record->firm[i] = arbitrary(); }
+  record->separator_9 = arbitrary();
+  for (size_t i = 0; i < 9; i++) { record->reference[i] = arbitrary(); }
+  record->separator_10 = arbitrary();
+  for (size_t i = 0; i < 9; i++) { record->time_in_force[i] = arbitrary(); }
+  record->separator_11 = arbitrary();
+  record->liquidity_code = arbitrary();
+  record->separator_12 = arbitrary();
+  record->clearing_code = arbitrary();
+}
+
+/* New Order Accepted Message to the wire: 80 bytes from at, returning where the next byte goes */
+static size_t encode_new_order_accepted_message(const NewOrderAcceptedMessage *record, uint8_t *wire, size_t at) {
+  wire[at++] = record->separator_1;
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->source[i]; }
+  wire[at++] = record->separator_2;
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->user[i]; }
+  wire[at++] = record->separator_3;
+  for (size_t i = 0; i < 10; i++) { wire[at++] = record->token[i]; }
+  wire[at++] = record->separator_4;
+  wire[at++] = record->buy_sell;
+  wire[at++] = record->separator_5;
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->shares[i]; }
+  wire[at++] = record->separator_6;
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->stock[i]; }
+  wire[at++] = record->separator_7;
+  for (size_t i = 0; i < 11; i++) { wire[at++] = record->price[i]; }
+  wire[at++] = record->separator_8;
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->firm[i]; }
+  wire[at++] = record->separator_9;
+  for (size_t i = 0; i < 9; i++) { wire[at++] = record->reference[i]; }
+  wire[at++] = record->separator_10;
+  for (size_t i = 0; i < 9; i++) { wire[at++] = record->time_in_force[i]; }
+  wire[at++] = record->separator_11;
+  wire[at++] = record->liquidity_code;
+  wire[at++] = record->separator_12;
+  wire[at++] = record->clearing_code;
+
+  return at;
+}
+
+/* New Order Accepted Message off the wire: 80 bytes from at, returning where the next byte lies */
+static size_t decode_new_order_accepted_message(NewOrderAcceptedMessage *record, const uint8_t *wire, size_t at) {
+  record->separator_1 = wire[at++];
+  for (size_t i = 0; i < 6; i++) { record->source[i] = wire[at++]; }
+  record->separator_2 = wire[at++];
+  for (size_t i = 0; i < 4; i++) { record->user[i] = wire[at++]; }
+  record->separator_3 = wire[at++];
+  for (size_t i = 0; i < 10; i++) { record->token[i] = wire[at++]; }
+  record->separator_4 = wire[at++];
+  record->buy_sell = wire[at++];
+  record->separator_5 = wire[at++];
+  for (size_t i = 0; i < 6; i++) { record->shares[i] = wire[at++]; }
+  record->separator_6 = wire[at++];
+  for (size_t i = 0; i < 6; i++) { record->stock[i] = wire[at++]; }
+  record->separator_7 = wire[at++];
+  for (size_t i = 0; i < 11; i++) { record->price[i] = wire[at++]; }
+  record->separator_8 = wire[at++];
+  for (size_t i = 0; i < 4; i++) { record->firm[i] = wire[at++]; }
+  record->separator_9 = wire[at++];
+  for (size_t i = 0; i < 9; i++) { record->reference[i] = wire[at++]; }
+  record->separator_10 = wire[at++];
+  for (size_t i = 0; i < 9; i++) { record->time_in_force[i] = wire[at++]; }
+  record->separator_11 = wire[at++];
+  record->liquidity_code = wire[at++];
+  record->separator_12 = wire[at++];
+  record->clearing_code = wire[at++];
+
+  return at;
+}
+
+/* what was read of New Order Accepted Message is what was written, byte for byte */
+static void equal_new_order_accepted_message(const NewOrderAcceptedMessage *read, const NewOrderAcceptedMessage *written) {
+  assert(read->separator_1 == written->separator_1);
+  for (size_t i = 0; i < 6; i++) { assert(read->source[i] == written->source[i]); }
+  assert(read->separator_2 == written->separator_2);
+  for (size_t i = 0; i < 4; i++) { assert(read->user[i] == written->user[i]); }
+  assert(read->separator_3 == written->separator_3);
+  for (size_t i = 0; i < 10; i++) { assert(read->token[i] == written->token[i]); }
+  assert(read->separator_4 == written->separator_4);
+  assert(read->buy_sell == written->buy_sell);
+  assert(read->separator_5 == written->separator_5);
+  for (size_t i = 0; i < 6; i++) { assert(read->shares[i] == written->shares[i]); }
+  assert(read->separator_6 == written->separator_6);
+  for (size_t i = 0; i < 6; i++) { assert(read->stock[i] == written->stock[i]); }
+  assert(read->separator_7 == written->separator_7);
+  for (size_t i = 0; i < 11; i++) { assert(read->price[i] == written->price[i]); }
+  assert(read->separator_8 == written->separator_8);
+  for (size_t i = 0; i < 4; i++) { assert(read->firm[i] == written->firm[i]); }
+  assert(read->separator_9 == written->separator_9);
+  for (size_t i = 0; i < 9; i++) { assert(read->reference[i] == written->reference[i]); }
+  assert(read->separator_10 == written->separator_10);
+  for (size_t i = 0; i < 9; i++) { assert(read->time_in_force[i] == written->time_in_force[i]); }
+  assert(read->separator_11 == written->separator_11);
+  assert(read->liquidity_code == written->liquidity_code);
+  assert(read->separator_12 == written->separator_12);
+  assert(read->clearing_code == written->clearing_code);
+}
+
+/* New Order Accepted Message: written and read back, then read and written back */
+static void check_new_order_accepted_message(void) {
+  NewOrderAcceptedMessage sent;
+  NewOrderAcceptedMessage got;
+  uint8_t wire[80];
+  uint8_t again[80];
+
+  any_new_order_accepted_message(&sent);
+  assert(encode_new_order_accepted_message(&sent, wire, 0) == 80);
+  assert(decode_new_order_accepted_message(&got, wire, 0) == 80);
+  equal_new_order_accepted_message(&got, &sent);
+
+  for (size_t i = 0; i < 80; i++) { wire[i] = arbitrary(); }
+  assert(decode_new_order_accepted_message(&got, wire, 0) == 80);
+  assert(encode_new_order_accepted_message(&got, again, 0) == 80);
+  for (size_t i = 0; i < 80; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Existing Order Executed Message: 80 bytes ------------------------------- */
+
+/* Existing order executed. */
+typedef struct {
+  uint8_t separator_1;      /* byte 0 */
+  uint8_t source[6];        /* bytes 1 to 6 */
+  uint8_t separator_2;      /* byte 7 */
+  uint8_t user[4];          /* bytes 8 to 11 */
+  uint8_t separator_3;      /* byte 12 */
+  uint8_t token[10];        /* bytes 13 to 22 */
+  uint8_t separator_4;      /* byte 23 */
+  uint8_t buy_sell;         /* byte 24 */
+  uint8_t separator_5;      /* byte 25 */
+  uint8_t shares[6];        /* bytes 26 to 31 */
+  uint8_t separator_6;      /* byte 32 */
+  uint8_t stock[6];         /* bytes 33 to 38 */
+  uint8_t separator_7;      /* byte 39 */
+  uint8_t price[11];        /* bytes 40 to 50 */
+  uint8_t separator_8;      /* byte 51 */
+  uint8_t firm[4];          /* bytes 52 to 55 */
+  uint8_t separator_9;      /* byte 56 */
+  uint8_t reference[9];     /* bytes 57 to 65 */
+  uint8_t separator_10;     /* byte 66 */
+  uint8_t match_number[9];  /* bytes 67 to 75 */
+  uint8_t separator_11;     /* byte 76 */
+  uint8_t liquidity_code;   /* byte 77 */
+  uint8_t separator_12;     /* byte 78 */
+  uint8_t clearing_code;    /* byte 79 */
+} ExistingOrderExecutedMessage;
+
+/* any Existing Order Executed Message at all: every byte one the checker chooses */
+static void any_existing_order_executed_message(ExistingOrderExecutedMessage *record) {
+  record->separator_1 = arbitrary();
+  for (size_t i = 0; i < 6; i++) { record->source[i] = arbitrary(); }
+  record->separator_2 = arbitrary();
+  for (size_t i = 0; i < 4; i++) { record->user[i] = arbitrary(); }
+  record->separator_3 = arbitrary();
+  for (size_t i = 0; i < 10; i++) { record->token[i] = arbitrary(); }
+  record->separator_4 = arbitrary();
+  record->buy_sell = arbitrary();
+  record->separator_5 = arbitrary();
+  for (size_t i = 0; i < 6; i++) { record->shares[i] = arbitrary(); }
+  record->separator_6 = arbitrary();
+  for (size_t i = 0; i < 6; i++) { record->stock[i] = arbitrary(); }
+  record->separator_7 = arbitrary();
+  for (size_t i = 0; i < 11; i++) { record->price[i] = arbitrary(); }
+  record->separator_8 = arbitrary();
+  for (size_t i = 0; i < 4; i++) { record->firm[i] = arbitrary(); }
+  record->separator_9 = arbitrary();
+  for (size_t i = 0; i < 9; i++) { record->reference[i] = arbitrary(); }
+  record->separator_10 = arbitrary();
+  for (size_t i = 0; i < 9; i++) { record->match_number[i] = arbitrary(); }
+  record->separator_11 = arbitrary();
+  record->liquidity_code = arbitrary();
+  record->separator_12 = arbitrary();
+  record->clearing_code = arbitrary();
+}
+
+/* Existing Order Executed Message to the wire: 80 bytes from at, returning where the next byte goes */
+static size_t encode_existing_order_executed_message(const ExistingOrderExecutedMessage *record, uint8_t *wire, size_t at) {
+  wire[at++] = record->separator_1;
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->source[i]; }
+  wire[at++] = record->separator_2;
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->user[i]; }
+  wire[at++] = record->separator_3;
+  for (size_t i = 0; i < 10; i++) { wire[at++] = record->token[i]; }
+  wire[at++] = record->separator_4;
+  wire[at++] = record->buy_sell;
+  wire[at++] = record->separator_5;
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->shares[i]; }
+  wire[at++] = record->separator_6;
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->stock[i]; }
+  wire[at++] = record->separator_7;
+  for (size_t i = 0; i < 11; i++) { wire[at++] = record->price[i]; }
+  wire[at++] = record->separator_8;
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->firm[i]; }
+  wire[at++] = record->separator_9;
+  for (size_t i = 0; i < 9; i++) { wire[at++] = record->reference[i]; }
+  wire[at++] = record->separator_10;
+  for (size_t i = 0; i < 9; i++) { wire[at++] = record->match_number[i]; }
+  wire[at++] = record->separator_11;
+  wire[at++] = record->liquidity_code;
+  wire[at++] = record->separator_12;
+  wire[at++] = record->clearing_code;
+
+  return at;
+}
+
+/* Existing Order Executed Message off the wire: 80 bytes from at, returning where the next byte lies */
+static size_t decode_existing_order_executed_message(ExistingOrderExecutedMessage *record, const uint8_t *wire, size_t at) {
+  record->separator_1 = wire[at++];
+  for (size_t i = 0; i < 6; i++) { record->source[i] = wire[at++]; }
+  record->separator_2 = wire[at++];
+  for (size_t i = 0; i < 4; i++) { record->user[i] = wire[at++]; }
+  record->separator_3 = wire[at++];
+  for (size_t i = 0; i < 10; i++) { record->token[i] = wire[at++]; }
+  record->separator_4 = wire[at++];
+  record->buy_sell = wire[at++];
+  record->separator_5 = wire[at++];
+  for (size_t i = 0; i < 6; i++) { record->shares[i] = wire[at++]; }
+  record->separator_6 = wire[at++];
+  for (size_t i = 0; i < 6; i++) { record->stock[i] = wire[at++]; }
+  record->separator_7 = wire[at++];
+  for (size_t i = 0; i < 11; i++) { record->price[i] = wire[at++]; }
+  record->separator_8 = wire[at++];
+  for (size_t i = 0; i < 4; i++) { record->firm[i] = wire[at++]; }
+  record->separator_9 = wire[at++];
+  for (size_t i = 0; i < 9; i++) { record->reference[i] = wire[at++]; }
+  record->separator_10 = wire[at++];
+  for (size_t i = 0; i < 9; i++) { record->match_number[i] = wire[at++]; }
+  record->separator_11 = wire[at++];
+  record->liquidity_code = wire[at++];
+  record->separator_12 = wire[at++];
+  record->clearing_code = wire[at++];
+
+  return at;
+}
+
+/* what was read of Existing Order Executed Message is what was written, byte for byte */
+static void equal_existing_order_executed_message(const ExistingOrderExecutedMessage *read, const ExistingOrderExecutedMessage *written) {
+  assert(read->separator_1 == written->separator_1);
+  for (size_t i = 0; i < 6; i++) { assert(read->source[i] == written->source[i]); }
+  assert(read->separator_2 == written->separator_2);
+  for (size_t i = 0; i < 4; i++) { assert(read->user[i] == written->user[i]); }
+  assert(read->separator_3 == written->separator_3);
+  for (size_t i = 0; i < 10; i++) { assert(read->token[i] == written->token[i]); }
+  assert(read->separator_4 == written->separator_4);
+  assert(read->buy_sell == written->buy_sell);
+  assert(read->separator_5 == written->separator_5);
+  for (size_t i = 0; i < 6; i++) { assert(read->shares[i] == written->shares[i]); }
+  assert(read->separator_6 == written->separator_6);
+  for (size_t i = 0; i < 6; i++) { assert(read->stock[i] == written->stock[i]); }
+  assert(read->separator_7 == written->separator_7);
+  for (size_t i = 0; i < 11; i++) { assert(read->price[i] == written->price[i]); }
+  assert(read->separator_8 == written->separator_8);
+  for (size_t i = 0; i < 4; i++) { assert(read->firm[i] == written->firm[i]); }
+  assert(read->separator_9 == written->separator_9);
+  for (size_t i = 0; i < 9; i++) { assert(read->reference[i] == written->reference[i]); }
+  assert(read->separator_10 == written->separator_10);
+  for (size_t i = 0; i < 9; i++) { assert(read->match_number[i] == written->match_number[i]); }
+  assert(read->separator_11 == written->separator_11);
+  assert(read->liquidity_code == written->liquidity_code);
+  assert(read->separator_12 == written->separator_12);
+  assert(read->clearing_code == written->clearing_code);
+}
+
+/* Existing Order Executed Message: written and read back, then read and written back */
+static void check_existing_order_executed_message(void) {
+  ExistingOrderExecutedMessage sent;
+  ExistingOrderExecutedMessage got;
+  uint8_t wire[80];
+  uint8_t again[80];
+
+  any_existing_order_executed_message(&sent);
+  assert(encode_existing_order_executed_message(&sent, wire, 0) == 80);
+  assert(decode_existing_order_executed_message(&got, wire, 0) == 80);
+  equal_existing_order_executed_message(&got, &sent);
+
+  for (size_t i = 0; i < 80; i++) { wire[i] = arbitrary(); }
+  assert(decode_existing_order_executed_message(&got, wire, 0) == 80);
+  assert(encode_existing_order_executed_message(&got, again, 0) == 80);
+  for (size_t i = 0; i < 80; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Existing Order Canceled Message: 80 bytes ------------------------------- */
+
+/* Existing order canceled. */
+typedef struct {
+  uint8_t separator_1;       /* byte 0 */
+  uint8_t source[6];         /* bytes 1 to 6 */
+  uint8_t separator_2;       /* byte 7 */
+  uint8_t user[4];           /* bytes 8 to 11 */
+  uint8_t separator_3;       /* byte 12 */
+  uint8_t token[10];         /* bytes 13 to 22 */
+  uint8_t separator_4;       /* byte 23 */
+  uint8_t buy_sell;          /* byte 24 */
+  uint8_t separator_5;       /* byte 25 */
+  uint8_t shares[6];         /* bytes 26 to 31 */
+  uint8_t separator_6;       /* byte 32 */
+  uint8_t stock[6];          /* bytes 33 to 38 */
+  uint8_t separator_7;       /* byte 39 */
+  uint8_t price[11];         /* bytes 40 to 50 */
+  uint8_t separator_8;       /* byte 51 */
+  uint8_t firm[4];           /* bytes 52 to 55 */
+  uint8_t separator_9;       /* byte 56 */
+  uint8_t reference[9];      /* bytes 57 to 65 */
+  uint8_t separator_10;      /* byte 66 */
+  uint8_t time_in_force[9];  /* bytes 67 to 75 */
+  uint8_t separator_11;      /* byte 76 */
+  uint8_t cancel_reason;     /* byte 77 */
+  uint8_t separator_12;      /* byte 78 */
+  uint8_t clearing_code;     /* byte 79 */
+} ExistingOrderCanceledMessage;
+
+/* any Existing Order Canceled Message at all: every byte one the checker chooses */
+static void any_existing_order_canceled_message(ExistingOrderCanceledMessage *record) {
+  record->separator_1 = arbitrary();
+  for (size_t i = 0; i < 6; i++) { record->source[i] = arbitrary(); }
+  record->separator_2 = arbitrary();
+  for (size_t i = 0; i < 4; i++) { record->user[i] = arbitrary(); }
+  record->separator_3 = arbitrary();
+  for (size_t i = 0; i < 10; i++) { record->token[i] = arbitrary(); }
+  record->separator_4 = arbitrary();
+  record->buy_sell = arbitrary();
+  record->separator_5 = arbitrary();
+  for (size_t i = 0; i < 6; i++) { record->shares[i] = arbitrary(); }
+  record->separator_6 = arbitrary();
+  for (size_t i = 0; i < 6; i++) { record->stock[i] = arbitrary(); }
+  record->separator_7 = arbitrary();
+  for (size_t i = 0; i < 11; i++) { record->price[i] = arbitrary(); }
+  record->separator_8 = arbitrary();
+  for (size_t i = 0; i < 4; i++) { record->firm[i] = arbitrary(); }
+  record->separator_9 = arbitrary();
+  for (size_t i = 0; i < 9; i++) { record->reference[i] = arbitrary(); }
+  record->separator_10 = arbitrary();
+  for (size_t i = 0; i < 9; i++) { record->time_in_force[i] = arbitrary(); }
+  record->separator_11 = arbitrary();
+  record->cancel_reason = arbitrary();
+  record->separator_12 = arbitrary();
+  record->clearing_code = arbitrary();
+}
+
+/* Existing Order Canceled Message to the wire: 80 bytes from at, returning where the next byte goes */
+static size_t encode_existing_order_canceled_message(const ExistingOrderCanceledMessage *record, uint8_t *wire, size_t at) {
+  wire[at++] = record->separator_1;
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->source[i]; }
+  wire[at++] = record->separator_2;
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->user[i]; }
+  wire[at++] = record->separator_3;
+  for (size_t i = 0; i < 10; i++) { wire[at++] = record->token[i]; }
+  wire[at++] = record->separator_4;
+  wire[at++] = record->buy_sell;
+  wire[at++] = record->separator_5;
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->shares[i]; }
+  wire[at++] = record->separator_6;
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->stock[i]; }
+  wire[at++] = record->separator_7;
+  for (size_t i = 0; i < 11; i++) { wire[at++] = record->price[i]; }
+  wire[at++] = record->separator_8;
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->firm[i]; }
+  wire[at++] = record->separator_9;
+  for (size_t i = 0; i < 9; i++) { wire[at++] = record->reference[i]; }
+  wire[at++] = record->separator_10;
+  for (size_t i = 0; i < 9; i++) { wire[at++] = record->time_in_force[i]; }
+  wire[at++] = record->separator_11;
+  wire[at++] = record->cancel_reason;
+  wire[at++] = record->separator_12;
+  wire[at++] = record->clearing_code;
+
+  return at;
+}
+
+/* Existing Order Canceled Message off the wire: 80 bytes from at, returning where the next byte lies */
+static size_t decode_existing_order_canceled_message(ExistingOrderCanceledMessage *record, const uint8_t *wire, size_t at) {
+  record->separator_1 = wire[at++];
+  for (size_t i = 0; i < 6; i++) { record->source[i] = wire[at++]; }
+  record->separator_2 = wire[at++];
+  for (size_t i = 0; i < 4; i++) { record->user[i] = wire[at++]; }
+  record->separator_3 = wire[at++];
+  for (size_t i = 0; i < 10; i++) { record->token[i] = wire[at++]; }
+  record->separator_4 = wire[at++];
+  record->buy_sell = wire[at++];
+  record->separator_5 = wire[at++];
+  for (size_t i = 0; i < 6; i++) { record->shares[i] = wire[at++]; }
+  record->separator_6 = wire[at++];
+  for (size_t i = 0; i < 6; i++) { record->stock[i] = wire[at++]; }
+  record->separator_7 = wire[at++];
+  for (size_t i = 0; i < 11; i++) { record->price[i] = wire[at++]; }
+  record->separator_8 = wire[at++];
+  for (size_t i = 0; i < 4; i++) { record->firm[i] = wire[at++]; }
+  record->separator_9 = wire[at++];
+  for (size_t i = 0; i < 9; i++) { record->reference[i] = wire[at++]; }
+  record->separator_10 = wire[at++];
+  for (size_t i = 0; i < 9; i++) { record->time_in_force[i] = wire[at++]; }
+  record->separator_11 = wire[at++];
+  record->cancel_reason = wire[at++];
+  record->separator_12 = wire[at++];
+  record->clearing_code = wire[at++];
+
+  return at;
+}
+
+/* what was read of Existing Order Canceled Message is what was written, byte for byte */
+static void equal_existing_order_canceled_message(const ExistingOrderCanceledMessage *read, const ExistingOrderCanceledMessage *written) {
+  assert(read->separator_1 == written->separator_1);
+  for (size_t i = 0; i < 6; i++) { assert(read->source[i] == written->source[i]); }
+  assert(read->separator_2 == written->separator_2);
+  for (size_t i = 0; i < 4; i++) { assert(read->user[i] == written->user[i]); }
+  assert(read->separator_3 == written->separator_3);
+  for (size_t i = 0; i < 10; i++) { assert(read->token[i] == written->token[i]); }
+  assert(read->separator_4 == written->separator_4);
+  assert(read->buy_sell == written->buy_sell);
+  assert(read->separator_5 == written->separator_5);
+  for (size_t i = 0; i < 6; i++) { assert(read->shares[i] == written->shares[i]); }
+  assert(read->separator_6 == written->separator_6);
+  for (size_t i = 0; i < 6; i++) { assert(read->stock[i] == written->stock[i]); }
+  assert(read->separator_7 == written->separator_7);
+  for (size_t i = 0; i < 11; i++) { assert(read->price[i] == written->price[i]); }
+  assert(read->separator_8 == written->separator_8);
+  for (size_t i = 0; i < 4; i++) { assert(read->firm[i] == written->firm[i]); }
+  assert(read->separator_9 == written->separator_9);
+  for (size_t i = 0; i < 9; i++) { assert(read->reference[i] == written->reference[i]); }
+  assert(read->separator_10 == written->separator_10);
+  for (size_t i = 0; i < 9; i++) { assert(read->time_in_force[i] == written->time_in_force[i]); }
+  assert(read->separator_11 == written->separator_11);
+  assert(read->cancel_reason == written->cancel_reason);
+  assert(read->separator_12 == written->separator_12);
+  assert(read->clearing_code == written->clearing_code);
+}
+
+/* Existing Order Canceled Message: written and read back, then read and written back */
+static void check_existing_order_canceled_message(void) {
+  ExistingOrderCanceledMessage sent;
+  ExistingOrderCanceledMessage got;
+  uint8_t wire[80];
+  uint8_t again[80];
+
+  any_existing_order_canceled_message(&sent);
+  assert(encode_existing_order_canceled_message(&sent, wire, 0) == 80);
+  assert(decode_existing_order_canceled_message(&got, wire, 0) == 80);
+  equal_existing_order_canceled_message(&got, &sent);
+
+  for (size_t i = 0; i < 80; i++) { wire[i] = arbitrary(); }
+  assert(decode_existing_order_canceled_message(&got, wire, 0) == 80);
+  assert(encode_existing_order_canceled_message(&got, again, 0) == 80);
+  for (size_t i = 0; i < 80; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Previous Execution Broken Message: 80 bytes ----------------------------- */
+
+/* Previous execution broken. */
+typedef struct {
+  uint8_t separator_1;      /* byte 0 */
+  uint8_t source[6];        /* bytes 1 to 6 */
+  uint8_t separator_2;      /* byte 7 */
+  uint8_t user[4];          /* bytes 8 to 11 */
+  uint8_t separator_3;      /* byte 12 */
+  uint8_t token[10];        /* bytes 13 to 22 */
+  uint8_t separator_4;      /* byte 23 */
+  uint8_t buy_sell;         /* byte 24 */
+  uint8_t separator_5;      /* byte 25 */
+  uint8_t shares[6];        /* bytes 26 to 31 */
+  uint8_t separator_6;      /* byte 32 */
+  uint8_t stock[6];         /* bytes 33 to 38 */
+  uint8_t separator_7;      /* byte 39 */
+  uint8_t price[11];        /* bytes 40 to 50 */
+  uint8_t separator_8;      /* byte 51 */
+  uint8_t firm[4];          /* bytes 52 to 55 */
+  uint8_t separator_9;      /* byte 56 */
+  uint8_t reference[9];     /* bytes 57 to 65 */
+  uint8_t separator_10;     /* byte 66 */
+  uint8_t match_number[9];  /* bytes 67 to 75 */
+  uint8_t separator_11;     /* byte 76 */
+  uint8_t liquidity_code;   /* byte 77 */
+  uint8_t separator_12;     /* byte 78 */
+  uint8_t clearing_code;    /* byte 79 */
+} PreviousExecutionBrokenMessage;
+
+/* any Previous Execution Broken Message at all: every byte one the checker chooses */
+static void any_previous_execution_broken_message(PreviousExecutionBrokenMessage *record) {
+  record->separator_1 = arbitrary();
+  for (size_t i = 0; i < 6; i++) { record->source[i] = arbitrary(); }
+  record->separator_2 = arbitrary();
+  for (size_t i = 0; i < 4; i++) { record->user[i] = arbitrary(); }
+  record->separator_3 = arbitrary();
+  for (size_t i = 0; i < 10; i++) { record->token[i] = arbitrary(); }
+  record->separator_4 = arbitrary();
+  record->buy_sell = arbitrary();
+  record->separator_5 = arbitrary();
+  for (size_t i = 0; i < 6; i++) { record->shares[i] = arbitrary(); }
+  record->separator_6 = arbitrary();
+  for (size_t i = 0; i < 6; i++) { record->stock[i] = arbitrary(); }
+  record->separator_7 = arbitrary();
+  for (size_t i = 0; i < 11; i++) { record->price[i] = arbitrary(); }
+  record->separator_8 = arbitrary();
+  for (size_t i = 0; i < 4; i++) { record->firm[i] = arbitrary(); }
+  record->separator_9 = arbitrary();
+  for (size_t i = 0; i < 9; i++) { record->reference[i] = arbitrary(); }
+  record->separator_10 = arbitrary();
+  for (size_t i = 0; i < 9; i++) { record->match_number[i] = arbitrary(); }
+  record->separator_11 = arbitrary();
+  record->liquidity_code = arbitrary();
+  record->separator_12 = arbitrary();
+  record->clearing_code = arbitrary();
+}
+
+/* Previous Execution Broken Message to the wire: 80 bytes from at, returning where the next byte goes */
+static size_t encode_previous_execution_broken_message(const PreviousExecutionBrokenMessage *record, uint8_t *wire, size_t at) {
+  wire[at++] = record->separator_1;
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->source[i]; }
+  wire[at++] = record->separator_2;
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->user[i]; }
+  wire[at++] = record->separator_3;
+  for (size_t i = 0; i < 10; i++) { wire[at++] = record->token[i]; }
+  wire[at++] = record->separator_4;
+  wire[at++] = record->buy_sell;
+  wire[at++] = record->separator_5;
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->shares[i]; }
+  wire[at++] = record->separator_6;
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->stock[i]; }
+  wire[at++] = record->separator_7;
+  for (size_t i = 0; i < 11; i++) { wire[at++] = record->price[i]; }
+  wire[at++] = record->separator_8;
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->firm[i]; }
+  wire[at++] = record->separator_9;
+  for (size_t i = 0; i < 9; i++) { wire[at++] = record->reference[i]; }
+  wire[at++] = record->separator_10;
+  for (size_t i = 0; i < 9; i++) { wire[at++] = record->match_number[i]; }
+  wire[at++] = record->separator_11;
+  wire[at++] = record->liquidity_code;
+  wire[at++] = record->separator_12;
+  wire[at++] = record->clearing_code;
+
+  return at;
+}
+
+/* Previous Execution Broken Message off the wire: 80 bytes from at, returning where the next byte lies */
+static size_t decode_previous_execution_broken_message(PreviousExecutionBrokenMessage *record, const uint8_t *wire, size_t at) {
+  record->separator_1 = wire[at++];
+  for (size_t i = 0; i < 6; i++) { record->source[i] = wire[at++]; }
+  record->separator_2 = wire[at++];
+  for (size_t i = 0; i < 4; i++) { record->user[i] = wire[at++]; }
+  record->separator_3 = wire[at++];
+  for (size_t i = 0; i < 10; i++) { record->token[i] = wire[at++]; }
+  record->separator_4 = wire[at++];
+  record->buy_sell = wire[at++];
+  record->separator_5 = wire[at++];
+  for (size_t i = 0; i < 6; i++) { record->shares[i] = wire[at++]; }
+  record->separator_6 = wire[at++];
+  for (size_t i = 0; i < 6; i++) { record->stock[i] = wire[at++]; }
+  record->separator_7 = wire[at++];
+  for (size_t i = 0; i < 11; i++) { record->price[i] = wire[at++]; }
+  record->separator_8 = wire[at++];
+  for (size_t i = 0; i < 4; i++) { record->firm[i] = wire[at++]; }
+  record->separator_9 = wire[at++];
+  for (size_t i = 0; i < 9; i++) { record->reference[i] = wire[at++]; }
+  record->separator_10 = wire[at++];
+  for (size_t i = 0; i < 9; i++) { record->match_number[i] = wire[at++]; }
+  record->separator_11 = wire[at++];
+  record->liquidity_code = wire[at++];
+  record->separator_12 = wire[at++];
+  record->clearing_code = wire[at++];
+
+  return at;
+}
+
+/* what was read of Previous Execution Broken Message is what was written, byte for byte */
+static void equal_previous_execution_broken_message(const PreviousExecutionBrokenMessage *read, const PreviousExecutionBrokenMessage *written) {
+  assert(read->separator_1 == written->separator_1);
+  for (size_t i = 0; i < 6; i++) { assert(read->source[i] == written->source[i]); }
+  assert(read->separator_2 == written->separator_2);
+  for (size_t i = 0; i < 4; i++) { assert(read->user[i] == written->user[i]); }
+  assert(read->separator_3 == written->separator_3);
+  for (size_t i = 0; i < 10; i++) { assert(read->token[i] == written->token[i]); }
+  assert(read->separator_4 == written->separator_4);
+  assert(read->buy_sell == written->buy_sell);
+  assert(read->separator_5 == written->separator_5);
+  for (size_t i = 0; i < 6; i++) { assert(read->shares[i] == written->shares[i]); }
+  assert(read->separator_6 == written->separator_6);
+  for (size_t i = 0; i < 6; i++) { assert(read->stock[i] == written->stock[i]); }
+  assert(read->separator_7 == written->separator_7);
+  for (size_t i = 0; i < 11; i++) { assert(read->price[i] == written->price[i]); }
+  assert(read->separator_8 == written->separator_8);
+  for (size_t i = 0; i < 4; i++) { assert(read->firm[i] == written->firm[i]); }
+  assert(read->separator_9 == written->separator_9);
+  for (size_t i = 0; i < 9; i++) { assert(read->reference[i] == written->reference[i]); }
+  assert(read->separator_10 == written->separator_10);
+  for (size_t i = 0; i < 9; i++) { assert(read->match_number[i] == written->match_number[i]); }
+  assert(read->separator_11 == written->separator_11);
+  assert(read->liquidity_code == written->liquidity_code);
+  assert(read->separator_12 == written->separator_12);
+  assert(read->clearing_code == written->clearing_code);
+}
+
+/* Previous Execution Broken Message: written and read back, then read and written back */
+static void check_previous_execution_broken_message(void) {
+  PreviousExecutionBrokenMessage sent;
+  PreviousExecutionBrokenMessage got;
+  uint8_t wire[80];
+  uint8_t again[80];
+
+  any_previous_execution_broken_message(&sent);
+  assert(encode_previous_execution_broken_message(&sent, wire, 0) == 80);
+  assert(decode_previous_execution_broken_message(&got, wire, 0) == 80);
+  equal_previous_execution_broken_message(&got, &sent);
+
+  for (size_t i = 0; i < 80; i++) { wire[i] = arbitrary(); }
+  assert(decode_previous_execution_broken_message(&got, wire, 0) == 80);
+  assert(encode_previous_execution_broken_message(&got, again, 0) == 80);
+  for (size_t i = 0; i < 80; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Existing Order Cancelled Aiq Message: 80 bytes -------------------------- */
+
+/* Existing order cancelled (AIQ). */
+typedef struct {
+  uint8_t separator_1;       /* byte 0 */
+  uint8_t source[6];         /* bytes 1 to 6 */
+  uint8_t separator_2;       /* byte 7 */
+  uint8_t user[4];           /* bytes 8 to 11 */
+  uint8_t separator_3;       /* byte 12 */
+  uint8_t token[10];         /* bytes 13 to 22 */
+  uint8_t separator_4;       /* byte 23 */
+  uint8_t buy_sell;          /* byte 24 */
+  uint8_t separator_5;       /* byte 25 */
+  uint8_t shares[6];         /* bytes 26 to 31 */
+  uint8_t separator_6;       /* byte 32 */
+  uint8_t stock[6];          /* bytes 33 to 38 */
+  uint8_t separator_7;       /* byte 39 */
+  uint8_t price[11];         /* bytes 40 to 50 */
+  uint8_t separator_8;       /* byte 51 */
+  uint8_t firm[4];           /* bytes 52 to 55 */
+  uint8_t separator_9;       /* byte 56 */
+  uint8_t reference[9];      /* bytes 57 to 65 */
+  uint8_t separator_10;      /* byte 66 */
+  uint8_t time_in_force[9];  /* bytes 67 to 75 */
+  uint8_t separator_11;      /* byte 76 */
+  uint8_t cancel_reason;     /* byte 77 */
+  uint8_t separator_12;      /* byte 78 */
+  uint8_t clearing_code;     /* byte 79 */
+} ExistingOrderCancelledAiqMessage;
+
+/* any Existing Order Cancelled Aiq Message at all: every byte one the checker chooses */
+static void any_existing_order_cancelled_aiq_message(ExistingOrderCancelledAiqMessage *record) {
+  record->separator_1 = arbitrary();
+  for (size_t i = 0; i < 6; i++) { record->source[i] = arbitrary(); }
+  record->separator_2 = arbitrary();
+  for (size_t i = 0; i < 4; i++) { record->user[i] = arbitrary(); }
+  record->separator_3 = arbitrary();
+  for (size_t i = 0; i < 10; i++) { record->token[i] = arbitrary(); }
+  record->separator_4 = arbitrary();
+  record->buy_sell = arbitrary();
+  record->separator_5 = arbitrary();
+  for (size_t i = 0; i < 6; i++) { record->shares[i] = arbitrary(); }
+  record->separator_6 = arbitrary();
+  for (size_t i = 0; i < 6; i++) { record->stock[i] = arbitrary(); }
+  record->separator_7 = arbitrary();
+  for (size_t i = 0; i < 11; i++) { record->price[i] = arbitrary(); }
+  record->separator_8 = arbitrary();
+  for (size_t i = 0; i < 4; i++) { record->firm[i] = arbitrary(); }
+  record->separator_9 = arbitrary();
+  for (size_t i = 0; i < 9; i++) { record->reference[i] = arbitrary(); }
+  record->separator_10 = arbitrary();
+  for (size_t i = 0; i < 9; i++) { record->time_in_force[i] = arbitrary(); }
+  record->separator_11 = arbitrary();
+  record->cancel_reason = arbitrary();
+  record->separator_12 = arbitrary();
+  record->clearing_code = arbitrary();
+}
+
+/* Existing Order Cancelled Aiq Message to the wire: 80 bytes from at, returning where the next byte goes */
+static size_t encode_existing_order_cancelled_aiq_message(const ExistingOrderCancelledAiqMessage *record, uint8_t *wire, size_t at) {
+  wire[at++] = record->separator_1;
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->source[i]; }
+  wire[at++] = record->separator_2;
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->user[i]; }
+  wire[at++] = record->separator_3;
+  for (size_t i = 0; i < 10; i++) { wire[at++] = record->token[i]; }
+  wire[at++] = record->separator_4;
+  wire[at++] = record->buy_sell;
+  wire[at++] = record->separator_5;
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->shares[i]; }
+  wire[at++] = record->separator_6;
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->stock[i]; }
+  wire[at++] = record->separator_7;
+  for (size_t i = 0; i < 11; i++) { wire[at++] = record->price[i]; }
+  wire[at++] = record->separator_8;
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->firm[i]; }
+  wire[at++] = record->separator_9;
+  for (size_t i = 0; i < 9; i++) { wire[at++] = record->reference[i]; }
+  wire[at++] = record->separator_10;
+  for (size_t i = 0; i < 9; i++) { wire[at++] = record->time_in_force[i]; }
+  wire[at++] = record->separator_11;
+  wire[at++] = record->cancel_reason;
+  wire[at++] = record->separator_12;
+  wire[at++] = record->clearing_code;
+
+  return at;
+}
+
+/* Existing Order Cancelled Aiq Message off the wire: 80 bytes from at, returning where the next byte lies */
+static size_t decode_existing_order_cancelled_aiq_message(ExistingOrderCancelledAiqMessage *record, const uint8_t *wire, size_t at) {
+  record->separator_1 = wire[at++];
+  for (size_t i = 0; i < 6; i++) { record->source[i] = wire[at++]; }
+  record->separator_2 = wire[at++];
+  for (size_t i = 0; i < 4; i++) { record->user[i] = wire[at++]; }
+  record->separator_3 = wire[at++];
+  for (size_t i = 0; i < 10; i++) { record->token[i] = wire[at++]; }
+  record->separator_4 = wire[at++];
+  record->buy_sell = wire[at++];
+  record->separator_5 = wire[at++];
+  for (size_t i = 0; i < 6; i++) { record->shares[i] = wire[at++]; }
+  record->separator_6 = wire[at++];
+  for (size_t i = 0; i < 6; i++) { record->stock[i] = wire[at++]; }
+  record->separator_7 = wire[at++];
+  for (size_t i = 0; i < 11; i++) { record->price[i] = wire[at++]; }
+  record->separator_8 = wire[at++];
+  for (size_t i = 0; i < 4; i++) { record->firm[i] = wire[at++]; }
+  record->separator_9 = wire[at++];
+  for (size_t i = 0; i < 9; i++) { record->reference[i] = wire[at++]; }
+  record->separator_10 = wire[at++];
+  for (size_t i = 0; i < 9; i++) { record->time_in_force[i] = wire[at++]; }
+  record->separator_11 = wire[at++];
+  record->cancel_reason = wire[at++];
+  record->separator_12 = wire[at++];
+  record->clearing_code = wire[at++];
+
+  return at;
+}
+
+/* what was read of Existing Order Cancelled Aiq Message is what was written, byte for byte */
+static void equal_existing_order_cancelled_aiq_message(const ExistingOrderCancelledAiqMessage *read, const ExistingOrderCancelledAiqMessage *written) {
+  assert(read->separator_1 == written->separator_1);
+  for (size_t i = 0; i < 6; i++) { assert(read->source[i] == written->source[i]); }
+  assert(read->separator_2 == written->separator_2);
+  for (size_t i = 0; i < 4; i++) { assert(read->user[i] == written->user[i]); }
+  assert(read->separator_3 == written->separator_3);
+  for (size_t i = 0; i < 10; i++) { assert(read->token[i] == written->token[i]); }
+  assert(read->separator_4 == written->separator_4);
+  assert(read->buy_sell == written->buy_sell);
+  assert(read->separator_5 == written->separator_5);
+  for (size_t i = 0; i < 6; i++) { assert(read->shares[i] == written->shares[i]); }
+  assert(read->separator_6 == written->separator_6);
+  for (size_t i = 0; i < 6; i++) { assert(read->stock[i] == written->stock[i]); }
+  assert(read->separator_7 == written->separator_7);
+  for (size_t i = 0; i < 11; i++) { assert(read->price[i] == written->price[i]); }
+  assert(read->separator_8 == written->separator_8);
+  for (size_t i = 0; i < 4; i++) { assert(read->firm[i] == written->firm[i]); }
+  assert(read->separator_9 == written->separator_9);
+  for (size_t i = 0; i < 9; i++) { assert(read->reference[i] == written->reference[i]); }
+  assert(read->separator_10 == written->separator_10);
+  for (size_t i = 0; i < 9; i++) { assert(read->time_in_force[i] == written->time_in_force[i]); }
+  assert(read->separator_11 == written->separator_11);
+  assert(read->cancel_reason == written->cancel_reason);
+  assert(read->separator_12 == written->separator_12);
+  assert(read->clearing_code == written->clearing_code);
+}
+
+/* Existing Order Cancelled Aiq Message: written and read back, then read and written back */
+static void check_existing_order_cancelled_aiq_message(void) {
+  ExistingOrderCancelledAiqMessage sent;
+  ExistingOrderCancelledAiqMessage got;
+  uint8_t wire[80];
+  uint8_t again[80];
+
+  any_existing_order_cancelled_aiq_message(&sent);
+  assert(encode_existing_order_cancelled_aiq_message(&sent, wire, 0) == 80);
+  assert(decode_existing_order_cancelled_aiq_message(&got, wire, 0) == 80);
+  equal_existing_order_cancelled_aiq_message(&got, &sent);
+
+  for (size_t i = 0; i < 80; i++) { wire[i] = arbitrary(); }
+  assert(decode_existing_order_cancelled_aiq_message(&got, wire, 0) == 80);
+  assert(encode_existing_order_cancelled_aiq_message(&got, again, 0) == 80);
+  for (size_t i = 0; i < 80; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- What esbmc checks ------------------------------------------------------- */
+
+/* every record of the protocol, each on its own buffers */
+static void checks(void) {
+  check_message_header();
+  check_new_order_accepted_message();
+  check_existing_order_executed_message();
+  check_existing_order_canceled_message();
+  check_previous_execution_broken_message();
+  check_existing_order_cancelled_aiq_message();
+}
+
+int main(void) {
+#ifdef CONCRETE
+  for (pattern = 0; pattern < 4; pattern++) { checks(); }
+#else
+  checks();
+#endif
+
+  return 0;
+}

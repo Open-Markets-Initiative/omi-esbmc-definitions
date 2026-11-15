@@ -1,0 +1,35 @@
+name: Build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Compiler Version
+      run: cc --version
+
+    - name: Run Every Definition
+      run: sh ./check.sh --concrete
+
+    - name: Install Esbmc
+      run: |
+        curl -sSL -o "$RUNNER_TEMP/esbmc.zip" https://github.com/esbmc/esbmc/releases/download/v8.6/esbmc-linux.zip
+        unzip -q "$RUNNER_TEMP/esbmc.zip" -d "$RUNNER_TEMP/esbmc"
+        checker=$(find "$RUNNER_TEMP/esbmc" -type f -name esbmc | head -n 1)
+        chmod +x "$checker"
+        dirname "$checker" >> "$GITHUB_PATH"
+
+    - name: Esbmc Version
+      run: esbmc --version
+
+    - name: Check Every Definition
+      run: sh ./check.sh

@@ -1,0 +1,1038 @@
+// nasdaq/ntxoptions/topofmarket/NtxOptions_TopOfMarket_v2_2_Udp.c
+/*
+ * National Association of Securities Dealers Automated Quotations (Nasdaq) Top Of Market
+ *
+ * Generated from the binary model. Every record is a run of fields, and esbmc checks two
+ * claims of each, for every value its bytes can take rather than for chosen ones: that any
+ * record written to the wire and read back is that record, and that any bytes read off the
+ * wire and written back are those bytes. Each takes exactly the record's width, and no
+ * write or read leaves the buffer it is made on.
+ *
+ * A field is the bytes it occupies. Nothing is read as an integer, so nothing is read in a
+ * byte order, and no rule stated here depends on a value.
+ *
+ * Check the whole file:   esbmc <file>
+ * Check one record:       esbmc <file> --function check_<record>
+ *
+ * Built with -DCONCRETE it is an ordinary program any C compiler runs: the bytes the
+ * checker would choose are drawn from four patterns instead, so the definition can be
+ * tried without the checker. That run is a test, and the checker's is the claim.
+ *
+ * What this definition does not state, and the model does:
+ *   - the dispatch that chooses a message by its type
+ *   - a run counted by a field
+ *
+ * License: MIT No Attribution
+ */
+
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+/* ---- Any byte ---------------------------------------------------------------- */
+
+#ifdef CONCRETE
+
+/* which pattern the bytes are drawn from, and how many have been drawn */
+static unsigned pattern;
+static size_t drawn;
+
+/* a byte of the pattern: zero, a space, every bit set, or one more than the last */
+static uint8_t arbitrary(void) {
+  drawn++;
+
+  switch (pattern) {
+    case 0: return 0;
+    case 1: return 32;
+    case 2: return 255;
+    default: return (uint8_t)(drawn % 256);
+  }
+}
+
+#else
+
+/* declared and never defined: a value the checker chooses */
+unsigned char __VERIFIER_nondet_uchar(void);
+
+/* a byte nobody chose, so what holds of it holds of all of them */
+static uint8_t arbitrary(void) {
+  return __VERIFIER_nondet_uchar();
+}
+
+#endif
+
+/* ---- Packet Header: 20 bytes ------------------------------------------------- */
+
+/* Itch Mold Udp 64 Packet Header */
+typedef struct {
+  uint8_t session[10];         /* bytes 0 to 9 */
+  uint8_t sequence_number[8];  /* bytes 10 to 17 */
+  uint8_t message_count[2];    /* bytes 18 to 19 */
+} PacketHeader;
+
+/* any Packet Header at all: every byte one the checker chooses */
+static void any_packet_header(PacketHeader *record) {
+  for (size_t i = 0; i < 10; i++) { record->session[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->sequence_number[i] = arbitrary(); }
+  for (size_t i = 0; i < 2; i++) { record->message_count[i] = arbitrary(); }
+}
+
+/* Packet Header to the wire: 20 bytes from at, returning where the next byte goes */
+static size_t encode_packet_header(const PacketHeader *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 10; i++) { wire[at++] = record->session[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->sequence_number[i]; }
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->message_count[i]; }
+
+  return at;
+}
+
+/* Packet Header off the wire: 20 bytes from at, returning where the next byte lies */
+static size_t decode_packet_header(PacketHeader *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 10; i++) { record->session[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->sequence_number[i] = wire[at++]; }
+  for (size_t i = 0; i < 2; i++) { record->message_count[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Packet Header is what was written, byte for byte */
+static void equal_packet_header(const PacketHeader *read, const PacketHeader *written) {
+  for (size_t i = 0; i < 10; i++) { assert(read->session[i] == written->session[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->sequence_number[i] == written->sequence_number[i]); }
+  for (size_t i = 0; i < 2; i++) { assert(read->message_count[i] == written->message_count[i]); }
+}
+
+/* Packet Header: written and read back, then read and written back */
+static void check_packet_header(void) {
+  PacketHeader sent;
+  PacketHeader got;
+  uint8_t wire[20];
+  uint8_t again[20];
+
+  any_packet_header(&sent);
+  assert(encode_packet_header(&sent, wire, 0) == 20);
+  assert(decode_packet_header(&got, wire, 0) == 20);
+  equal_packet_header(&got, &sent);
+
+  for (size_t i = 0; i < 20; i++) { wire[i] = arbitrary(); }
+  assert(decode_packet_header(&got, wire, 0) == 20);
+  assert(encode_packet_header(&got, again, 0) == 20);
+  for (size_t i = 0; i < 20; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Message Header: 3 bytes ------------------------------------------------- */
+
+/* Mold Udp 64 Message Header */
+typedef struct {
+  uint8_t message_length[2];  /* bytes 0 to 1 */
+  uint8_t message_type;       /* byte 2 */
+} MessageHeader;
+
+/* any Message Header at all: every byte one the checker chooses */
+static void any_message_header(MessageHeader *record) {
+  for (size_t i = 0; i < 2; i++) { record->message_length[i] = arbitrary(); }
+  record->message_type = arbitrary();
+}
+
+/* Message Header to the wire: 3 bytes from at, returning where the next byte goes */
+static size_t encode_message_header(const MessageHeader *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->message_length[i]; }
+  wire[at++] = record->message_type;
+
+  return at;
+}
+
+/* Message Header off the wire: 3 bytes from at, returning where the next byte lies */
+static size_t decode_message_header(MessageHeader *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 2; i++) { record->message_length[i] = wire[at++]; }
+  record->message_type = wire[at++];
+
+  return at;
+}
+
+/* what was read of Message Header is what was written, byte for byte */
+static void equal_message_header(const MessageHeader *read, const MessageHeader *written) {
+  for (size_t i = 0; i < 2; i++) { assert(read->message_length[i] == written->message_length[i]); }
+  assert(read->message_type == written->message_type);
+}
+
+/* Message Header: written and read back, then read and written back */
+static void check_message_header(void) {
+  MessageHeader sent;
+  MessageHeader got;
+  uint8_t wire[3];
+  uint8_t again[3];
+
+  any_message_header(&sent);
+  assert(encode_message_header(&sent, wire, 0) == 3);
+  assert(decode_message_header(&got, wire, 0) == 3);
+  equal_message_header(&got, &sent);
+
+  for (size_t i = 0; i < 3; i++) { wire[i] = arbitrary(); }
+  assert(decode_message_header(&got, wire, 0) == 3);
+  assert(encode_message_header(&got, again, 0) == 3);
+  for (size_t i = 0; i < 3; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- System Event Message: 11 bytes ------------------------------------------ */
+
+/* The system event message type is used to signal a market or data feed handler event. */
+typedef struct {
+  uint8_t tracking_number[2];  /* bytes 0 to 1 */
+  uint8_t timestamp[8];        /* bytes 2 to 9 */
+  uint8_t event_code;          /* byte 10 */
+} SystemEventMessage;
+
+/* any System Event Message at all: every byte one the checker chooses */
+static void any_system_event_message(SystemEventMessage *record) {
+  for (size_t i = 0; i < 2; i++) { record->tracking_number[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->timestamp[i] = arbitrary(); }
+  record->event_code = arbitrary();
+}
+
+/* System Event Message to the wire: 11 bytes from at, returning where the next byte goes */
+static size_t encode_system_event_message(const SystemEventMessage *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->tracking_number[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->timestamp[i]; }
+  wire[at++] = record->event_code;
+
+  return at;
+}
+
+/* System Event Message off the wire: 11 bytes from at, returning where the next byte lies */
+static size_t decode_system_event_message(SystemEventMessage *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 2; i++) { record->tracking_number[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->timestamp[i] = wire[at++]; }
+  record->event_code = wire[at++];
+
+  return at;
+}
+
+/* what was read of System Event Message is what was written, byte for byte */
+static void equal_system_event_message(const SystemEventMessage *read, const SystemEventMessage *written) {
+  for (size_t i = 0; i < 2; i++) { assert(read->tracking_number[i] == written->tracking_number[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->timestamp[i] == written->timestamp[i]); }
+  assert(read->event_code == written->event_code);
+}
+
+/* System Event Message: written and read back, then read and written back */
+static void check_system_event_message(void) {
+  SystemEventMessage sent;
+  SystemEventMessage got;
+  uint8_t wire[11];
+  uint8_t again[11];
+
+  any_system_event_message(&sent);
+  assert(encode_system_event_message(&sent, wire, 0) == 11);
+  assert(decode_system_event_message(&got, wire, 0) == 11);
+  equal_system_event_message(&got, &sent);
+
+  for (size_t i = 0; i < 11; i++) { wire[i] = arbitrary(); }
+  assert(decode_system_event_message(&got, wire, 0) == 11);
+  assert(encode_system_event_message(&got, again, 0) == 11);
+  for (size_t i = 0; i < 11; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Derivative Directory Message: 86 bytes ---------------------------------- */
+
+/* At the start of each trading day, Nasdaq disseminates options symbol directory messages for all active options symbols in the system. */
+typedef struct {
+  uint8_t tracking_number[2];        /* bytes 0 to 1 */
+  uint8_t timestamp[8];              /* bytes 2 to 9 */
+  uint8_t instrument_id[4];          /* bytes 10 to 13 */
+  uint8_t security_symbol[6];        /* bytes 14 to 19 */
+  uint8_t expiration_year;           /* byte 20 */
+  uint8_t expiration_month;          /* byte 21 */
+  uint8_t expiration_date;           /* byte 22 */
+  uint8_t explicit_strike_price[4];  /* bytes 23 to 26 */
+  uint8_t option_type;               /* byte 27 */
+  uint8_t underlying_symbol[13];     /* bytes 28 to 40 */
+  uint8_t closing_type;              /* byte 41 */
+  uint8_t tradable;                  /* byte 42 */
+  uint8_t mpv;                       /* byte 43 */
+  uint8_t isin[12];                  /* bytes 44 to 55 */
+  uint8_t tick_size_table_id[2];     /* bytes 56 to 57 */
+  uint8_t price_notation;            /* byte 58 */
+  uint8_t volume_notation;           /* byte 59 */
+  uint8_t financial_product[2];      /* bytes 60 to 61 */
+  uint8_t market_segment_id;         /* byte 62 */
+  uint8_t trading_currency[3];       /* bytes 63 to 65 */
+  uint8_t mic[4];                    /* bytes 66 to 69 */
+  uint8_t instrument_long_name[16];  /* bytes 70 to 85 */
+} DerivativeDirectoryMessage;
+
+/* any Derivative Directory Message at all: every byte one the checker chooses */
+static void any_derivative_directory_message(DerivativeDirectoryMessage *record) {
+  for (size_t i = 0; i < 2; i++) { record->tracking_number[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->timestamp[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->instrument_id[i] = arbitrary(); }
+  for (size_t i = 0; i < 6; i++) { record->security_symbol[i] = arbitrary(); }
+  record->expiration_year = arbitrary();
+  record->expiration_month = arbitrary();
+  record->expiration_date = arbitrary();
+  for (size_t i = 0; i < 4; i++) { record->explicit_strike_price[i] = arbitrary(); }
+  record->option_type = arbitrary();
+  for (size_t i = 0; i < 13; i++) { record->underlying_symbol[i] = arbitrary(); }
+  record->closing_type = arbitrary();
+  record->tradable = arbitrary();
+  record->mpv = arbitrary();
+  for (size_t i = 0; i < 12; i++) { record->isin[i] = arbitrary(); }
+  for (size_t i = 0; i < 2; i++) { record->tick_size_table_id[i] = arbitrary(); }
+  record->price_notation = arbitrary();
+  record->volume_notation = arbitrary();
+  for (size_t i = 0; i < 2; i++) { record->financial_product[i] = arbitrary(); }
+  record->market_segment_id = arbitrary();
+  for (size_t i = 0; i < 3; i++) { record->trading_currency[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->mic[i] = arbitrary(); }
+  for (size_t i = 0; i < 16; i++) { record->instrument_long_name[i] = arbitrary(); }
+}
+
+/* Derivative Directory Message to the wire: 86 bytes from at, returning where the next byte goes */
+static size_t encode_derivative_directory_message(const DerivativeDirectoryMessage *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->tracking_number[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->timestamp[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->instrument_id[i]; }
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->security_symbol[i]; }
+  wire[at++] = record->expiration_year;
+  wire[at++] = record->expiration_month;
+  wire[at++] = record->expiration_date;
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->explicit_strike_price[i]; }
+  wire[at++] = record->option_type;
+  for (size_t i = 0; i < 13; i++) { wire[at++] = record->underlying_symbol[i]; }
+  wire[at++] = record->closing_type;
+  wire[at++] = record->tradable;
+  wire[at++] = record->mpv;
+  for (size_t i = 0; i < 12; i++) { wire[at++] = record->isin[i]; }
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->tick_size_table_id[i]; }
+  wire[at++] = record->price_notation;
+  wire[at++] = record->volume_notation;
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->financial_product[i]; }
+  wire[at++] = record->market_segment_id;
+  for (size_t i = 0; i < 3; i++) { wire[at++] = record->trading_currency[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->mic[i]; }
+  for (size_t i = 0; i < 16; i++) { wire[at++] = record->instrument_long_name[i]; }
+
+  return at;
+}
+
+/* Derivative Directory Message off the wire: 86 bytes from at, returning where the next byte lies */
+static size_t decode_derivative_directory_message(DerivativeDirectoryMessage *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 2; i++) { record->tracking_number[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->timestamp[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->instrument_id[i] = wire[at++]; }
+  for (size_t i = 0; i < 6; i++) { record->security_symbol[i] = wire[at++]; }
+  record->expiration_year = wire[at++];
+  record->expiration_month = wire[at++];
+  record->expiration_date = wire[at++];
+  for (size_t i = 0; i < 4; i++) { record->explicit_strike_price[i] = wire[at++]; }
+  record->option_type = wire[at++];
+  for (size_t i = 0; i < 13; i++) { record->underlying_symbol[i] = wire[at++]; }
+  record->closing_type = wire[at++];
+  record->tradable = wire[at++];
+  record->mpv = wire[at++];
+  for (size_t i = 0; i < 12; i++) { record->isin[i] = wire[at++]; }
+  for (size_t i = 0; i < 2; i++) { record->tick_size_table_id[i] = wire[at++]; }
+  record->price_notation = wire[at++];
+  record->volume_notation = wire[at++];
+  for (size_t i = 0; i < 2; i++) { record->financial_product[i] = wire[at++]; }
+  record->market_segment_id = wire[at++];
+  for (size_t i = 0; i < 3; i++) { record->trading_currency[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->mic[i] = wire[at++]; }
+  for (size_t i = 0; i < 16; i++) { record->instrument_long_name[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Derivative Directory Message is what was written, byte for byte */
+static void equal_derivative_directory_message(const DerivativeDirectoryMessage *read, const DerivativeDirectoryMessage *written) {
+  for (size_t i = 0; i < 2; i++) { assert(read->tracking_number[i] == written->tracking_number[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->timestamp[i] == written->timestamp[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->instrument_id[i] == written->instrument_id[i]); }
+  for (size_t i = 0; i < 6; i++) { assert(read->security_symbol[i] == written->security_symbol[i]); }
+  assert(read->expiration_year == written->expiration_year);
+  assert(read->expiration_month == written->expiration_month);
+  assert(read->expiration_date == written->expiration_date);
+  for (size_t i = 0; i < 4; i++) { assert(read->explicit_strike_price[i] == written->explicit_strike_price[i]); }
+  assert(read->option_type == written->option_type);
+  for (size_t i = 0; i < 13; i++) { assert(read->underlying_symbol[i] == written->underlying_symbol[i]); }
+  assert(read->closing_type == written->closing_type);
+  assert(read->tradable == written->tradable);
+  assert(read->mpv == written->mpv);
+  for (size_t i = 0; i < 12; i++) { assert(read->isin[i] == written->isin[i]); }
+  for (size_t i = 0; i < 2; i++) { assert(read->tick_size_table_id[i] == written->tick_size_table_id[i]); }
+  assert(read->price_notation == written->price_notation);
+  assert(read->volume_notation == written->volume_notation);
+  for (size_t i = 0; i < 2; i++) { assert(read->financial_product[i] == written->financial_product[i]); }
+  assert(read->market_segment_id == written->market_segment_id);
+  for (size_t i = 0; i < 3; i++) { assert(read->trading_currency[i] == written->trading_currency[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->mic[i] == written->mic[i]); }
+  for (size_t i = 0; i < 16; i++) { assert(read->instrument_long_name[i] == written->instrument_long_name[i]); }
+}
+
+/* Derivative Directory Message: written and read back, then read and written back */
+static void check_derivative_directory_message(void) {
+  DerivativeDirectoryMessage sent;
+  DerivativeDirectoryMessage got;
+  uint8_t wire[86];
+  uint8_t again[86];
+
+  any_derivative_directory_message(&sent);
+  assert(encode_derivative_directory_message(&sent, wire, 0) == 86);
+  assert(decode_derivative_directory_message(&got, wire, 0) == 86);
+  equal_derivative_directory_message(&got, &sent);
+
+  for (size_t i = 0; i < 86; i++) { wire[i] = arbitrary(); }
+  assert(decode_derivative_directory_message(&got, wire, 0) == 86);
+  assert(encode_derivative_directory_message(&got, again, 0) == 86);
+  for (size_t i = 0; i < 86; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Trading Action Message: 15 bytes ---------------------------------------- */
+
+/* The options system uses this administrative message to indicate the current trading status of an index or equity option within the options market. */
+typedef struct {
+  uint8_t tracking_number[2];     /* bytes 0 to 1 */
+  uint8_t timestamp[8];           /* bytes 2 to 9 */
+  uint8_t instrument_id[4];       /* bytes 10 to 13 */
+  uint8_t current_trading_state;  /* byte 14 */
+} TradingActionMessage;
+
+/* any Trading Action Message at all: every byte one the checker chooses */
+static void any_trading_action_message(TradingActionMessage *record) {
+  for (size_t i = 0; i < 2; i++) { record->tracking_number[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->timestamp[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->instrument_id[i] = arbitrary(); }
+  record->current_trading_state = arbitrary();
+}
+
+/* Trading Action Message to the wire: 15 bytes from at, returning where the next byte goes */
+static size_t encode_trading_action_message(const TradingActionMessage *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->tracking_number[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->timestamp[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->instrument_id[i]; }
+  wire[at++] = record->current_trading_state;
+
+  return at;
+}
+
+/* Trading Action Message off the wire: 15 bytes from at, returning where the next byte lies */
+static size_t decode_trading_action_message(TradingActionMessage *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 2; i++) { record->tracking_number[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->timestamp[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->instrument_id[i] = wire[at++]; }
+  record->current_trading_state = wire[at++];
+
+  return at;
+}
+
+/* what was read of Trading Action Message is what was written, byte for byte */
+static void equal_trading_action_message(const TradingActionMessage *read, const TradingActionMessage *written) {
+  for (size_t i = 0; i < 2; i++) { assert(read->tracking_number[i] == written->tracking_number[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->timestamp[i] == written->timestamp[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->instrument_id[i] == written->instrument_id[i]); }
+  assert(read->current_trading_state == written->current_trading_state);
+}
+
+/* Trading Action Message: written and read back, then read and written back */
+static void check_trading_action_message(void) {
+  TradingActionMessage sent;
+  TradingActionMessage got;
+  uint8_t wire[15];
+  uint8_t again[15];
+
+  any_trading_action_message(&sent);
+  assert(encode_trading_action_message(&sent, wire, 0) == 15);
+  assert(decode_trading_action_message(&got, wire, 0) == 15);
+  equal_trading_action_message(&got, &sent);
+
+  for (size_t i = 0; i < 15; i++) { wire[i] = arbitrary(); }
+  assert(decode_trading_action_message(&got, wire, 0) == 15);
+  assert(encode_trading_action_message(&got, again, 0) == 15);
+  for (size_t i = 0; i < 15; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Best Bid And Ask Update Short Form Message: 35 bytes -------------------- */
+
+/* The options system will continuously calculate its best bid and offer position for active options contracts on the options market during the trading day. */
+typedef struct {
+  uint8_t tracking_number[2];              /* bytes 0 to 1 */
+  uint8_t timestamp[8];                    /* bytes 2 to 9 */
+  uint8_t instrument_id[4];                /* bytes 10 to 13 */
+  uint8_t quote_condition;                 /* byte 14 */
+  uint8_t bid_market_order_size_short[2];  /* bytes 15 to 16 */
+  uint8_t bid_price_short[2];              /* bytes 17 to 18 */
+  uint8_t bid_size_short[2];               /* bytes 19 to 20 */
+  uint8_t bid_cust_size_short[2];          /* bytes 21 to 22 */
+  uint8_t bid_pro_cust_size_short[2];      /* bytes 23 to 24 */
+  uint8_t ask_market_order_size_short[2];  /* bytes 25 to 26 */
+  uint8_t ask_price_short[2];              /* bytes 27 to 28 */
+  uint8_t ask_size_short[2];               /* bytes 29 to 30 */
+  uint8_t ask_cust_size_short[2];          /* bytes 31 to 32 */
+  uint8_t ask_pro_cust_size_short[2];      /* bytes 33 to 34 */
+} BestBidAndAskUpdateShortFormMessage;
+
+/* any Best Bid And Ask Update Short Form Message at all: every byte one the checker chooses */
+static void any_best_bid_and_ask_update_short_form_message(BestBidAndAskUpdateShortFormMessage *record) {
+  for (size_t i = 0; i < 2; i++) { record->tracking_number[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->timestamp[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->instrument_id[i] = arbitrary(); }
+  record->quote_condition = arbitrary();
+  for (size_t i = 0; i < 2; i++) { record->bid_market_order_size_short[i] = arbitrary(); }
+  for (size_t i = 0; i < 2; i++) { record->bid_price_short[i] = arbitrary(); }
+  for (size_t i = 0; i < 2; i++) { record->bid_size_short[i] = arbitrary(); }
+  for (size_t i = 0; i < 2; i++) { record->bid_cust_size_short[i] = arbitrary(); }
+  for (size_t i = 0; i < 2; i++) { record->bid_pro_cust_size_short[i] = arbitrary(); }
+  for (size_t i = 0; i < 2; i++) { record->ask_market_order_size_short[i] = arbitrary(); }
+  for (size_t i = 0; i < 2; i++) { record->ask_price_short[i] = arbitrary(); }
+  for (size_t i = 0; i < 2; i++) { record->ask_size_short[i] = arbitrary(); }
+  for (size_t i = 0; i < 2; i++) { record->ask_cust_size_short[i] = arbitrary(); }
+  for (size_t i = 0; i < 2; i++) { record->ask_pro_cust_size_short[i] = arbitrary(); }
+}
+
+/* Best Bid And Ask Update Short Form Message to the wire: 35 bytes from at, returning where the next byte goes */
+static size_t encode_best_bid_and_ask_update_short_form_message(const BestBidAndAskUpdateShortFormMessage *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->tracking_number[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->timestamp[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->instrument_id[i]; }
+  wire[at++] = record->quote_condition;
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->bid_market_order_size_short[i]; }
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->bid_price_short[i]; }
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->bid_size_short[i]; }
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->bid_cust_size_short[i]; }
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->bid_pro_cust_size_short[i]; }
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->ask_market_order_size_short[i]; }
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->ask_price_short[i]; }
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->ask_size_short[i]; }
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->ask_cust_size_short[i]; }
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->ask_pro_cust_size_short[i]; }
+
+  return at;
+}
+
+/* Best Bid And Ask Update Short Form Message off the wire: 35 bytes from at, returning where the next byte lies */
+static size_t decode_best_bid_and_ask_update_short_form_message(BestBidAndAskUpdateShortFormMessage *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 2; i++) { record->tracking_number[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->timestamp[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->instrument_id[i] = wire[at++]; }
+  record->quote_condition = wire[at++];
+  for (size_t i = 0; i < 2; i++) { record->bid_market_order_size_short[i] = wire[at++]; }
+  for (size_t i = 0; i < 2; i++) { record->bid_price_short[i] = wire[at++]; }
+  for (size_t i = 0; i < 2; i++) { record->bid_size_short[i] = wire[at++]; }
+  for (size_t i = 0; i < 2; i++) { record->bid_cust_size_short[i] = wire[at++]; }
+  for (size_t i = 0; i < 2; i++) { record->bid_pro_cust_size_short[i] = wire[at++]; }
+  for (size_t i = 0; i < 2; i++) { record->ask_market_order_size_short[i] = wire[at++]; }
+  for (size_t i = 0; i < 2; i++) { record->ask_price_short[i] = wire[at++]; }
+  for (size_t i = 0; i < 2; i++) { record->ask_size_short[i] = wire[at++]; }
+  for (size_t i = 0; i < 2; i++) { record->ask_cust_size_short[i] = wire[at++]; }
+  for (size_t i = 0; i < 2; i++) { record->ask_pro_cust_size_short[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Best Bid And Ask Update Short Form Message is what was written, byte for byte */
+static void equal_best_bid_and_ask_update_short_form_message(const BestBidAndAskUpdateShortFormMessage *read, const BestBidAndAskUpdateShortFormMessage *written) {
+  for (size_t i = 0; i < 2; i++) { assert(read->tracking_number[i] == written->tracking_number[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->timestamp[i] == written->timestamp[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->instrument_id[i] == written->instrument_id[i]); }
+  assert(read->quote_condition == written->quote_condition);
+  for (size_t i = 0; i < 2; i++) { assert(read->bid_market_order_size_short[i] == written->bid_market_order_size_short[i]); }
+  for (size_t i = 0; i < 2; i++) { assert(read->bid_price_short[i] == written->bid_price_short[i]); }
+  for (size_t i = 0; i < 2; i++) { assert(read->bid_size_short[i] == written->bid_size_short[i]); }
+  for (size_t i = 0; i < 2; i++) { assert(read->bid_cust_size_short[i] == written->bid_cust_size_short[i]); }
+  for (size_t i = 0; i < 2; i++) { assert(read->bid_pro_cust_size_short[i] == written->bid_pro_cust_size_short[i]); }
+  for (size_t i = 0; i < 2; i++) { assert(read->ask_market_order_size_short[i] == written->ask_market_order_size_short[i]); }
+  for (size_t i = 0; i < 2; i++) { assert(read->ask_price_short[i] == written->ask_price_short[i]); }
+  for (size_t i = 0; i < 2; i++) { assert(read->ask_size_short[i] == written->ask_size_short[i]); }
+  for (size_t i = 0; i < 2; i++) { assert(read->ask_cust_size_short[i] == written->ask_cust_size_short[i]); }
+  for (size_t i = 0; i < 2; i++) { assert(read->ask_pro_cust_size_short[i] == written->ask_pro_cust_size_short[i]); }
+}
+
+/* Best Bid And Ask Update Short Form Message: written and read back, then read and written back */
+static void check_best_bid_and_ask_update_short_form_message(void) {
+  BestBidAndAskUpdateShortFormMessage sent;
+  BestBidAndAskUpdateShortFormMessage got;
+  uint8_t wire[35];
+  uint8_t again[35];
+
+  any_best_bid_and_ask_update_short_form_message(&sent);
+  assert(encode_best_bid_and_ask_update_short_form_message(&sent, wire, 0) == 35);
+  assert(decode_best_bid_and_ask_update_short_form_message(&got, wire, 0) == 35);
+  equal_best_bid_and_ask_update_short_form_message(&got, &sent);
+
+  for (size_t i = 0; i < 35; i++) { wire[i] = arbitrary(); }
+  assert(decode_best_bid_and_ask_update_short_form_message(&got, wire, 0) == 35);
+  assert(encode_best_bid_and_ask_update_short_form_message(&got, again, 0) == 35);
+  for (size_t i = 0; i < 35; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Best Bid And Ask Update Long Form Message: 55 bytes --------------------- */
+
+/* This message is the same as the Best Bid AND Ask Update Message - Short Form described above except that Prices and Sizes are 4 byte Integers, the price having 4 implied decimal places. */
+typedef struct {
+  uint8_t tracking_number[2];             /* bytes 0 to 1 */
+  uint8_t timestamp[8];                   /* bytes 2 to 9 */
+  uint8_t instrument_id[4];               /* bytes 10 to 13 */
+  uint8_t quote_condition;                /* byte 14 */
+  uint8_t bid_market_order_size_long[4];  /* bytes 15 to 18 */
+  uint8_t bid_price_long[4];              /* bytes 19 to 22 */
+  uint8_t bid_size_long[4];               /* bytes 23 to 26 */
+  uint8_t bid_cust_size_long[4];          /* bytes 27 to 30 */
+  uint8_t bid_pro_cust_size_long[4];      /* bytes 31 to 34 */
+  uint8_t ask_market_order_size_long[4];  /* bytes 35 to 38 */
+  uint8_t ask_price_long[4];              /* bytes 39 to 42 */
+  uint8_t ask_size_long[4];               /* bytes 43 to 46 */
+  uint8_t ask_cust_size_long[4];          /* bytes 47 to 50 */
+  uint8_t ask_pro_cust_size_long[4];      /* bytes 51 to 54 */
+} BestBidAndAskUpdateLongFormMessage;
+
+/* any Best Bid And Ask Update Long Form Message at all: every byte one the checker chooses */
+static void any_best_bid_and_ask_update_long_form_message(BestBidAndAskUpdateLongFormMessage *record) {
+  for (size_t i = 0; i < 2; i++) { record->tracking_number[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->timestamp[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->instrument_id[i] = arbitrary(); }
+  record->quote_condition = arbitrary();
+  for (size_t i = 0; i < 4; i++) { record->bid_market_order_size_long[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->bid_price_long[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->bid_size_long[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->bid_cust_size_long[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->bid_pro_cust_size_long[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->ask_market_order_size_long[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->ask_price_long[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->ask_size_long[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->ask_cust_size_long[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->ask_pro_cust_size_long[i] = arbitrary(); }
+}
+
+/* Best Bid And Ask Update Long Form Message to the wire: 55 bytes from at, returning where the next byte goes */
+static size_t encode_best_bid_and_ask_update_long_form_message(const BestBidAndAskUpdateLongFormMessage *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->tracking_number[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->timestamp[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->instrument_id[i]; }
+  wire[at++] = record->quote_condition;
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->bid_market_order_size_long[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->bid_price_long[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->bid_size_long[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->bid_cust_size_long[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->bid_pro_cust_size_long[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->ask_market_order_size_long[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->ask_price_long[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->ask_size_long[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->ask_cust_size_long[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->ask_pro_cust_size_long[i]; }
+
+  return at;
+}
+
+/* Best Bid And Ask Update Long Form Message off the wire: 55 bytes from at, returning where the next byte lies */
+static size_t decode_best_bid_and_ask_update_long_form_message(BestBidAndAskUpdateLongFormMessage *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 2; i++) { record->tracking_number[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->timestamp[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->instrument_id[i] = wire[at++]; }
+  record->quote_condition = wire[at++];
+  for (size_t i = 0; i < 4; i++) { record->bid_market_order_size_long[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->bid_price_long[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->bid_size_long[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->bid_cust_size_long[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->bid_pro_cust_size_long[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->ask_market_order_size_long[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->ask_price_long[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->ask_size_long[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->ask_cust_size_long[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->ask_pro_cust_size_long[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Best Bid And Ask Update Long Form Message is what was written, byte for byte */
+static void equal_best_bid_and_ask_update_long_form_message(const BestBidAndAskUpdateLongFormMessage *read, const BestBidAndAskUpdateLongFormMessage *written) {
+  for (size_t i = 0; i < 2; i++) { assert(read->tracking_number[i] == written->tracking_number[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->timestamp[i] == written->timestamp[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->instrument_id[i] == written->instrument_id[i]); }
+  assert(read->quote_condition == written->quote_condition);
+  for (size_t i = 0; i < 4; i++) { assert(read->bid_market_order_size_long[i] == written->bid_market_order_size_long[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->bid_price_long[i] == written->bid_price_long[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->bid_size_long[i] == written->bid_size_long[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->bid_cust_size_long[i] == written->bid_cust_size_long[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->bid_pro_cust_size_long[i] == written->bid_pro_cust_size_long[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->ask_market_order_size_long[i] == written->ask_market_order_size_long[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->ask_price_long[i] == written->ask_price_long[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->ask_size_long[i] == written->ask_size_long[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->ask_cust_size_long[i] == written->ask_cust_size_long[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->ask_pro_cust_size_long[i] == written->ask_pro_cust_size_long[i]); }
+}
+
+/* Best Bid And Ask Update Long Form Message: written and read back, then read and written back */
+static void check_best_bid_and_ask_update_long_form_message(void) {
+  BestBidAndAskUpdateLongFormMessage sent;
+  BestBidAndAskUpdateLongFormMessage got;
+  uint8_t wire[55];
+  uint8_t again[55];
+
+  any_best_bid_and_ask_update_long_form_message(&sent);
+  assert(encode_best_bid_and_ask_update_long_form_message(&sent, wire, 0) == 55);
+  assert(decode_best_bid_and_ask_update_long_form_message(&got, wire, 0) == 55);
+  equal_best_bid_and_ask_update_long_form_message(&got, &sent);
+
+  for (size_t i = 0; i < 55; i++) { wire[i] = arbitrary(); }
+  assert(decode_best_bid_and_ask_update_long_form_message(&got, wire, 0) == 55);
+  assert(encode_best_bid_and_ask_update_long_form_message(&got, again, 0) == 55);
+  for (size_t i = 0; i < 55; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Best Bid Or Ask Update Short Form Message: 25 bytes --------------------- */
+
+/* The options system will continuously calculate its best bid and offer position for active options contracts on the options market during the trading day. Whenever the best bid or ask position changes on one side but not the other side, the options system will send its best bid or ask update via this data feed for the affected security. */
+typedef struct {
+  uint8_t tracking_number[2];          /* bytes 0 to 1 */
+  uint8_t timestamp[8];                /* bytes 2 to 9 */
+  uint8_t instrument_id[4];            /* bytes 10 to 13 */
+  uint8_t quote_condition;             /* byte 14 */
+  uint8_t market_order_size_short[2];  /* bytes 15 to 16 */
+  uint8_t price_short[2];              /* bytes 17 to 18 */
+  uint8_t size_short[2];               /* bytes 19 to 20 */
+  uint8_t cust_size_short[2];          /* bytes 21 to 22 */
+  uint8_t pro_cust_size_short[2];      /* bytes 23 to 24 */
+} BestBidOrAskUpdateShortFormMessage;
+
+/* any Best Bid Or Ask Update Short Form Message at all: every byte one the checker chooses */
+static void any_best_bid_or_ask_update_short_form_message(BestBidOrAskUpdateShortFormMessage *record) {
+  for (size_t i = 0; i < 2; i++) { record->tracking_number[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->timestamp[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->instrument_id[i] = arbitrary(); }
+  record->quote_condition = arbitrary();
+  for (size_t i = 0; i < 2; i++) { record->market_order_size_short[i] = arbitrary(); }
+  for (size_t i = 0; i < 2; i++) { record->price_short[i] = arbitrary(); }
+  for (size_t i = 0; i < 2; i++) { record->size_short[i] = arbitrary(); }
+  for (size_t i = 0; i < 2; i++) { record->cust_size_short[i] = arbitrary(); }
+  for (size_t i = 0; i < 2; i++) { record->pro_cust_size_short[i] = arbitrary(); }
+}
+
+/* Best Bid Or Ask Update Short Form Message to the wire: 25 bytes from at, returning where the next byte goes */
+static size_t encode_best_bid_or_ask_update_short_form_message(const BestBidOrAskUpdateShortFormMessage *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->tracking_number[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->timestamp[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->instrument_id[i]; }
+  wire[at++] = record->quote_condition;
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->market_order_size_short[i]; }
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->price_short[i]; }
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->size_short[i]; }
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->cust_size_short[i]; }
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->pro_cust_size_short[i]; }
+
+  return at;
+}
+
+/* Best Bid Or Ask Update Short Form Message off the wire: 25 bytes from at, returning where the next byte lies */
+static size_t decode_best_bid_or_ask_update_short_form_message(BestBidOrAskUpdateShortFormMessage *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 2; i++) { record->tracking_number[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->timestamp[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->instrument_id[i] = wire[at++]; }
+  record->quote_condition = wire[at++];
+  for (size_t i = 0; i < 2; i++) { record->market_order_size_short[i] = wire[at++]; }
+  for (size_t i = 0; i < 2; i++) { record->price_short[i] = wire[at++]; }
+  for (size_t i = 0; i < 2; i++) { record->size_short[i] = wire[at++]; }
+  for (size_t i = 0; i < 2; i++) { record->cust_size_short[i] = wire[at++]; }
+  for (size_t i = 0; i < 2; i++) { record->pro_cust_size_short[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Best Bid Or Ask Update Short Form Message is what was written, byte for byte */
+static void equal_best_bid_or_ask_update_short_form_message(const BestBidOrAskUpdateShortFormMessage *read, const BestBidOrAskUpdateShortFormMessage *written) {
+  for (size_t i = 0; i < 2; i++) { assert(read->tracking_number[i] == written->tracking_number[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->timestamp[i] == written->timestamp[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->instrument_id[i] == written->instrument_id[i]); }
+  assert(read->quote_condition == written->quote_condition);
+  for (size_t i = 0; i < 2; i++) { assert(read->market_order_size_short[i] == written->market_order_size_short[i]); }
+  for (size_t i = 0; i < 2; i++) { assert(read->price_short[i] == written->price_short[i]); }
+  for (size_t i = 0; i < 2; i++) { assert(read->size_short[i] == written->size_short[i]); }
+  for (size_t i = 0; i < 2; i++) { assert(read->cust_size_short[i] == written->cust_size_short[i]); }
+  for (size_t i = 0; i < 2; i++) { assert(read->pro_cust_size_short[i] == written->pro_cust_size_short[i]); }
+}
+
+/* Best Bid Or Ask Update Short Form Message: written and read back, then read and written back */
+static void check_best_bid_or_ask_update_short_form_message(void) {
+  BestBidOrAskUpdateShortFormMessage sent;
+  BestBidOrAskUpdateShortFormMessage got;
+  uint8_t wire[25];
+  uint8_t again[25];
+
+  any_best_bid_or_ask_update_short_form_message(&sent);
+  assert(encode_best_bid_or_ask_update_short_form_message(&sent, wire, 0) == 25);
+  assert(decode_best_bid_or_ask_update_short_form_message(&got, wire, 0) == 25);
+  equal_best_bid_or_ask_update_short_form_message(&got, &sent);
+
+  for (size_t i = 0; i < 25; i++) { wire[i] = arbitrary(); }
+  assert(decode_best_bid_or_ask_update_short_form_message(&got, wire, 0) == 25);
+  assert(encode_best_bid_or_ask_update_short_form_message(&got, again, 0) == 25);
+  for (size_t i = 0; i < 25; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Best Bid Or Ask Update Long Form Message: 35 bytes ---------------------- */
+
+/* This message is the same as the Best Bid OR Ask Update Message - Short Form described above except that Prices and Sizes are 4 byte Integers, the price having 4 implied decimal places. */
+typedef struct {
+  uint8_t tracking_number[2];         /* bytes 0 to 1 */
+  uint8_t timestamp[8];               /* bytes 2 to 9 */
+  uint8_t instrument_id[4];           /* bytes 10 to 13 */
+  uint8_t quote_condition;            /* byte 14 */
+  uint8_t market_order_size_long[4];  /* bytes 15 to 18 */
+  uint8_t price_long[4];              /* bytes 19 to 22 */
+  uint8_t size_long[4];               /* bytes 23 to 26 */
+  uint8_t cust_size_long[4];          /* bytes 27 to 30 */
+  uint8_t pro_cust_size_long[4];      /* bytes 31 to 34 */
+} BestBidOrAskUpdateLongFormMessage;
+
+/* any Best Bid Or Ask Update Long Form Message at all: every byte one the checker chooses */
+static void any_best_bid_or_ask_update_long_form_message(BestBidOrAskUpdateLongFormMessage *record) {
+  for (size_t i = 0; i < 2; i++) { record->tracking_number[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->timestamp[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->instrument_id[i] = arbitrary(); }
+  record->quote_condition = arbitrary();
+  for (size_t i = 0; i < 4; i++) { record->market_order_size_long[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->price_long[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->size_long[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->cust_size_long[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->pro_cust_size_long[i] = arbitrary(); }
+}
+
+/* Best Bid Or Ask Update Long Form Message to the wire: 35 bytes from at, returning where the next byte goes */
+static size_t encode_best_bid_or_ask_update_long_form_message(const BestBidOrAskUpdateLongFormMessage *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->tracking_number[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->timestamp[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->instrument_id[i]; }
+  wire[at++] = record->quote_condition;
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->market_order_size_long[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->price_long[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->size_long[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->cust_size_long[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->pro_cust_size_long[i]; }
+
+  return at;
+}
+
+/* Best Bid Or Ask Update Long Form Message off the wire: 35 bytes from at, returning where the next byte lies */
+static size_t decode_best_bid_or_ask_update_long_form_message(BestBidOrAskUpdateLongFormMessage *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 2; i++) { record->tracking_number[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->timestamp[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->instrument_id[i] = wire[at++]; }
+  record->quote_condition = wire[at++];
+  for (size_t i = 0; i < 4; i++) { record->market_order_size_long[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->price_long[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->size_long[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->cust_size_long[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->pro_cust_size_long[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Best Bid Or Ask Update Long Form Message is what was written, byte for byte */
+static void equal_best_bid_or_ask_update_long_form_message(const BestBidOrAskUpdateLongFormMessage *read, const BestBidOrAskUpdateLongFormMessage *written) {
+  for (size_t i = 0; i < 2; i++) { assert(read->tracking_number[i] == written->tracking_number[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->timestamp[i] == written->timestamp[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->instrument_id[i] == written->instrument_id[i]); }
+  assert(read->quote_condition == written->quote_condition);
+  for (size_t i = 0; i < 4; i++) { assert(read->market_order_size_long[i] == written->market_order_size_long[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->price_long[i] == written->price_long[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->size_long[i] == written->size_long[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->cust_size_long[i] == written->cust_size_long[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->pro_cust_size_long[i] == written->pro_cust_size_long[i]); }
+}
+
+/* Best Bid Or Ask Update Long Form Message: written and read back, then read and written back */
+static void check_best_bid_or_ask_update_long_form_message(void) {
+  BestBidOrAskUpdateLongFormMessage sent;
+  BestBidOrAskUpdateLongFormMessage got;
+  uint8_t wire[35];
+  uint8_t again[35];
+
+  any_best_bid_or_ask_update_long_form_message(&sent);
+  assert(encode_best_bid_or_ask_update_long_form_message(&sent, wire, 0) == 35);
+  assert(decode_best_bid_or_ask_update_long_form_message(&got, wire, 0) == 35);
+  equal_best_bid_or_ask_update_long_form_message(&got, &sent);
+
+  for (size_t i = 0; i < 35; i++) { wire[i] = arbitrary(); }
+  assert(decode_best_bid_or_ask_update_long_form_message(&got, wire, 0) == 35);
+  assert(encode_best_bid_or_ask_update_long_form_message(&got, again, 0) == 35);
+  for (size_t i = 0; i < 35; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Trade Report Message: 27 bytes ------------------------------------------ */
+
+/* Trade Report Message indicates that a trade has occurred for an options contract. */
+typedef struct {
+  uint8_t tracking_number[2];  /* bytes 0 to 1 */
+  uint8_t timestamp[8];        /* bytes 2 to 9 */
+  uint8_t instrument_id[4];    /* bytes 10 to 13 */
+  uint8_t cross_id[4];         /* bytes 14 to 17 */
+  uint8_t trade_condition;     /* byte 18 */
+  uint8_t price_long[4];       /* bytes 19 to 22 */
+  uint8_t volume[4];           /* bytes 23 to 26 */
+} TradeReportMessage;
+
+/* any Trade Report Message at all: every byte one the checker chooses */
+static void any_trade_report_message(TradeReportMessage *record) {
+  for (size_t i = 0; i < 2; i++) { record->tracking_number[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->timestamp[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->instrument_id[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->cross_id[i] = arbitrary(); }
+  record->trade_condition = arbitrary();
+  for (size_t i = 0; i < 4; i++) { record->price_long[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->volume[i] = arbitrary(); }
+}
+
+/* Trade Report Message to the wire: 27 bytes from at, returning where the next byte goes */
+static size_t encode_trade_report_message(const TradeReportMessage *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->tracking_number[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->timestamp[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->instrument_id[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->cross_id[i]; }
+  wire[at++] = record->trade_condition;
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->price_long[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->volume[i]; }
+
+  return at;
+}
+
+/* Trade Report Message off the wire: 27 bytes from at, returning where the next byte lies */
+static size_t decode_trade_report_message(TradeReportMessage *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 2; i++) { record->tracking_number[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->timestamp[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->instrument_id[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->cross_id[i] = wire[at++]; }
+  record->trade_condition = wire[at++];
+  for (size_t i = 0; i < 4; i++) { record->price_long[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->volume[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Trade Report Message is what was written, byte for byte */
+static void equal_trade_report_message(const TradeReportMessage *read, const TradeReportMessage *written) {
+  for (size_t i = 0; i < 2; i++) { assert(read->tracking_number[i] == written->tracking_number[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->timestamp[i] == written->timestamp[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->instrument_id[i] == written->instrument_id[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->cross_id[i] == written->cross_id[i]); }
+  assert(read->trade_condition == written->trade_condition);
+  for (size_t i = 0; i < 4; i++) { assert(read->price_long[i] == written->price_long[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->volume[i] == written->volume[i]); }
+}
+
+/* Trade Report Message: written and read back, then read and written back */
+static void check_trade_report_message(void) {
+  TradeReportMessage sent;
+  TradeReportMessage got;
+  uint8_t wire[27];
+  uint8_t again[27];
+
+  any_trade_report_message(&sent);
+  assert(encode_trade_report_message(&sent, wire, 0) == 27);
+  assert(decode_trade_report_message(&got, wire, 0) == 27);
+  equal_trade_report_message(&got, &sent);
+
+  for (size_t i = 0; i < 27; i++) { wire[i] = arbitrary(); }
+  assert(decode_trade_report_message(&got, wire, 0) == 27);
+  assert(encode_trade_report_message(&got, again, 0) == 27);
+  for (size_t i = 0; i < 27; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Broken Trade Report Message: 26 bytes ----------------------------------- */
+
+/* Broken Trade Report Message indicates that a previously reported trade has been broken. */
+typedef struct {
+  uint8_t tracking_number[2];    /* bytes 0 to 1 */
+  uint8_t timestamp[8];          /* bytes 2 to 9 */
+  uint8_t instrument_id[4];      /* bytes 10 to 13 */
+  uint8_t original_cross_id[4];  /* bytes 14 to 17 */
+  uint8_t original_price[4];     /* bytes 18 to 21 */
+  uint8_t original_volume[4];    /* bytes 22 to 25 */
+} BrokenTradeReportMessage;
+
+/* any Broken Trade Report Message at all: every byte one the checker chooses */
+static void any_broken_trade_report_message(BrokenTradeReportMessage *record) {
+  for (size_t i = 0; i < 2; i++) { record->tracking_number[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->timestamp[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->instrument_id[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->original_cross_id[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->original_price[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->original_volume[i] = arbitrary(); }
+}
+
+/* Broken Trade Report Message to the wire: 26 bytes from at, returning where the next byte goes */
+static size_t encode_broken_trade_report_message(const BrokenTradeReportMessage *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->tracking_number[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->timestamp[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->instrument_id[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->original_cross_id[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->original_price[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->original_volume[i]; }
+
+  return at;
+}
+
+/* Broken Trade Report Message off the wire: 26 bytes from at, returning where the next byte lies */
+static size_t decode_broken_trade_report_message(BrokenTradeReportMessage *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 2; i++) { record->tracking_number[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->timestamp[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->instrument_id[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->original_cross_id[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->original_price[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->original_volume[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Broken Trade Report Message is what was written, byte for byte */
+static void equal_broken_trade_report_message(const BrokenTradeReportMessage *read, const BrokenTradeReportMessage *written) {
+  for (size_t i = 0; i < 2; i++) { assert(read->tracking_number[i] == written->tracking_number[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->timestamp[i] == written->timestamp[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->instrument_id[i] == written->instrument_id[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->original_cross_id[i] == written->original_cross_id[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->original_price[i] == written->original_price[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->original_volume[i] == written->original_volume[i]); }
+}
+
+/* Broken Trade Report Message: written and read back, then read and written back */
+static void check_broken_trade_report_message(void) {
+  BrokenTradeReportMessage sent;
+  BrokenTradeReportMessage got;
+  uint8_t wire[26];
+  uint8_t again[26];
+
+  any_broken_trade_report_message(&sent);
+  assert(encode_broken_trade_report_message(&sent, wire, 0) == 26);
+  assert(decode_broken_trade_report_message(&got, wire, 0) == 26);
+  equal_broken_trade_report_message(&got, &sent);
+
+  for (size_t i = 0; i < 26; i++) { wire[i] = arbitrary(); }
+  assert(decode_broken_trade_report_message(&got, wire, 0) == 26);
+  assert(encode_broken_trade_report_message(&got, again, 0) == 26);
+  for (size_t i = 0; i < 26; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- What esbmc checks ------------------------------------------------------- */
+
+/* every record of the protocol, each on its own buffers */
+static void checks(void) {
+  check_packet_header();
+  check_message_header();
+  check_system_event_message();
+  check_derivative_directory_message();
+  check_trading_action_message();
+  check_best_bid_and_ask_update_short_form_message();
+  check_best_bid_and_ask_update_long_form_message();
+  check_best_bid_or_ask_update_short_form_message();
+  check_best_bid_or_ask_update_long_form_message();
+  check_trade_report_message();
+  check_broken_trade_report_message();
+}
+
+int main(void) {
+#ifdef CONCRETE
+  for (pattern = 0; pattern < 4; pattern++) { checks(); }
+#else
+  checks();
+#endif
+
+  return 0;
+}

@@ -1,0 +1,1078 @@
+// cboe/cfefutures/multicasttop/CfeFutures_MulticastTop_Spin_v1_2_22.c
+/*
+ * Chicago Board Options Exchange Futures Multicast Top
+ *
+ * Generated from the binary model. Every record is a run of fields, and esbmc checks two
+ * claims of each, for every value its bytes can take rather than for chosen ones: that any
+ * record written to the wire and read back is that record, and that any bytes read off the
+ * wire and written back are those bytes. Each takes exactly the record's width, and no
+ * write or read leaves the buffer it is made on.
+ *
+ * A field is the bytes it occupies. Nothing is read as an integer, so nothing is read in a
+ * byte order, and no rule stated here depends on a value.
+ *
+ * Check the whole file:   esbmc <file>
+ * Check one record:       esbmc <file> --function check_<record>
+ *
+ * Built with -DCONCRETE it is an ordinary program any C compiler runs: the bytes the
+ * checker would choose are drawn from four patterns instead, so the definition can be
+ * tried without the checker. That run is a test, and the checker's is the claim.
+ *
+ * What this definition does not state, and the model does:
+ *   - a Reassemble rule
+ *   - a run filling what frames it
+ *   - a field read in bits
+ *   - a run counted by a field
+ *
+ * License: MIT No Attribution
+ */
+
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+/* ---- Any byte ---------------------------------------------------------------- */
+
+#ifdef CONCRETE
+
+/* which pattern the bytes are drawn from, and how many have been drawn */
+static unsigned pattern;
+static size_t drawn;
+
+/* a byte of the pattern: zero, a space, every bit set, or one more than the last */
+static uint8_t arbitrary(void) {
+  drawn++;
+
+  switch (pattern) {
+    case 0: return 0;
+    case 1: return 32;
+    case 2: return 255;
+    default: return (uint8_t)(drawn % 256);
+  }
+}
+
+#else
+
+/* declared and never defined: a value the checker chooses */
+unsigned char __VERIFIER_nondet_uchar(void);
+
+/* a byte nobody chose, so what holds of it holds of all of them */
+static uint8_t arbitrary(void) {
+  return __VERIFIER_nondet_uchar();
+}
+
+#endif
+
+/* ---- Packet Header: 8 bytes -------------------------------------------------- */
+
+typedef struct {
+  uint8_t length[2];      /* bytes 0 to 1 */
+  uint8_t message_count;  /* byte 2 */
+  uint8_t unit;           /* byte 3 */
+  uint8_t sequence[4];    /* bytes 4 to 7 */
+} PacketHeader;
+
+/* any Packet Header at all: every byte one the checker chooses */
+static void any_packet_header(PacketHeader *record) {
+  for (size_t i = 0; i < 2; i++) { record->length[i] = arbitrary(); }
+  record->message_count = arbitrary();
+  record->unit = arbitrary();
+  for (size_t i = 0; i < 4; i++) { record->sequence[i] = arbitrary(); }
+}
+
+/* Packet Header to the wire: 8 bytes from at, returning where the next byte goes */
+static size_t encode_packet_header(const PacketHeader *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->length[i]; }
+  wire[at++] = record->message_count;
+  wire[at++] = record->unit;
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->sequence[i]; }
+
+  return at;
+}
+
+/* Packet Header off the wire: 8 bytes from at, returning where the next byte lies */
+static size_t decode_packet_header(PacketHeader *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 2; i++) { record->length[i] = wire[at++]; }
+  record->message_count = wire[at++];
+  record->unit = wire[at++];
+  for (size_t i = 0; i < 4; i++) { record->sequence[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Packet Header is what was written, byte for byte */
+static void equal_packet_header(const PacketHeader *read, const PacketHeader *written) {
+  for (size_t i = 0; i < 2; i++) { assert(read->length[i] == written->length[i]); }
+  assert(read->message_count == written->message_count);
+  assert(read->unit == written->unit);
+  for (size_t i = 0; i < 4; i++) { assert(read->sequence[i] == written->sequence[i]); }
+}
+
+/* Packet Header: written and read back, then read and written back */
+static void check_packet_header(void) {
+  PacketHeader sent;
+  PacketHeader got;
+  uint8_t wire[8];
+  uint8_t again[8];
+
+  any_packet_header(&sent);
+  assert(encode_packet_header(&sent, wire, 0) == 8);
+  assert(decode_packet_header(&got, wire, 0) == 8);
+  equal_packet_header(&got, &sent);
+
+  for (size_t i = 0; i < 8; i++) { wire[i] = arbitrary(); }
+  assert(decode_packet_header(&got, wire, 0) == 8);
+  assert(encode_packet_header(&got, again, 0) == 8);
+  for (size_t i = 0; i < 8; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Message Header: 2 bytes ------------------------------------------------- */
+
+typedef struct {
+  uint8_t message_length;  /* byte 0 */
+  uint8_t message_type;    /* byte 1 */
+} MessageHeader;
+
+/* any Message Header at all: every byte one the checker chooses */
+static void any_message_header(MessageHeader *record) {
+  record->message_length = arbitrary();
+  record->message_type = arbitrary();
+}
+
+/* Message Header to the wire: 2 bytes from at, returning where the next byte goes */
+static size_t encode_message_header(const MessageHeader *record, uint8_t *wire, size_t at) {
+  wire[at++] = record->message_length;
+  wire[at++] = record->message_type;
+
+  return at;
+}
+
+/* Message Header off the wire: 2 bytes from at, returning where the next byte lies */
+static size_t decode_message_header(MessageHeader *record, const uint8_t *wire, size_t at) {
+  record->message_length = wire[at++];
+  record->message_type = wire[at++];
+
+  return at;
+}
+
+/* what was read of Message Header is what was written, byte for byte */
+static void equal_message_header(const MessageHeader *read, const MessageHeader *written) {
+  assert(read->message_length == written->message_length);
+  assert(read->message_type == written->message_type);
+}
+
+/* Message Header: written and read back, then read and written back */
+static void check_message_header(void) {
+  MessageHeader sent;
+  MessageHeader got;
+  uint8_t wire[2];
+  uint8_t again[2];
+
+  any_message_header(&sent);
+  assert(encode_message_header(&sent, wire, 0) == 2);
+  assert(decode_message_header(&got, wire, 0) == 2);
+  equal_message_header(&got, &sent);
+
+  for (size_t i = 0; i < 2; i++) { wire[i] = arbitrary(); }
+  assert(decode_message_header(&got, wire, 0) == 2);
+  assert(encode_message_header(&got, again, 0) == 2);
+  for (size_t i = 0; i < 2; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Login Message: 20 bytes ------------------------------------------------- */
+
+/* The Login message is the first message sent to the Spin Server by a user's process after the connection to the Spin Server is established. Failure to login before sending any other message type will result in the connection being dropped by the Spin Server. The format of the Login message for the Spin Server is identical to that of the GRP. */
+typedef struct {
+  uint8_t session_sub_id[4];  /* bytes 0 to 3 */
+  uint8_t username[4];        /* bytes 4 to 7 */
+  uint8_t filler[2];          /* bytes 8 to 9 */
+  uint8_t password[10];       /* bytes 10 to 19 */
+} LoginMessage;
+
+/* any Login Message at all: every byte one the checker chooses */
+static void any_login_message(LoginMessage *record) {
+  for (size_t i = 0; i < 4; i++) { record->session_sub_id[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->username[i] = arbitrary(); }
+  for (size_t i = 0; i < 2; i++) { record->filler[i] = arbitrary(); }
+  for (size_t i = 0; i < 10; i++) { record->password[i] = arbitrary(); }
+}
+
+/* Login Message to the wire: 20 bytes from at, returning where the next byte goes */
+static size_t encode_login_message(const LoginMessage *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->session_sub_id[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->username[i]; }
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->filler[i]; }
+  for (size_t i = 0; i < 10; i++) { wire[at++] = record->password[i]; }
+
+  return at;
+}
+
+/* Login Message off the wire: 20 bytes from at, returning where the next byte lies */
+static size_t decode_login_message(LoginMessage *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { record->session_sub_id[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->username[i] = wire[at++]; }
+  for (size_t i = 0; i < 2; i++) { record->filler[i] = wire[at++]; }
+  for (size_t i = 0; i < 10; i++) { record->password[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Login Message is what was written, byte for byte */
+static void equal_login_message(const LoginMessage *read, const LoginMessage *written) {
+  for (size_t i = 0; i < 4; i++) { assert(read->session_sub_id[i] == written->session_sub_id[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->username[i] == written->username[i]); }
+  for (size_t i = 0; i < 2; i++) { assert(read->filler[i] == written->filler[i]); }
+  for (size_t i = 0; i < 10; i++) { assert(read->password[i] == written->password[i]); }
+}
+
+/* Login Message: written and read back, then read and written back */
+static void check_login_message(void) {
+  LoginMessage sent;
+  LoginMessage got;
+  uint8_t wire[20];
+  uint8_t again[20];
+
+  any_login_message(&sent);
+  assert(encode_login_message(&sent, wire, 0) == 20);
+  assert(decode_login_message(&got, wire, 0) == 20);
+  equal_login_message(&got, &sent);
+
+  for (size_t i = 0; i < 20; i++) { wire[i] = arbitrary(); }
+  assert(decode_login_message(&got, wire, 0) == 20);
+  assert(encode_login_message(&got, again, 0) == 20);
+  for (size_t i = 0; i < 20; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Login Response Message: 1 byte ------------------------------------------ */
+
+/* The Login Response message is sent by the Spin Server to a user's process in response to a Login message. */
+typedef struct {
+  uint8_t login_response_status;  /* byte 0 */
+} LoginResponseMessage;
+
+/* any Login Response Message at all: every byte one the checker chooses */
+static void any_login_response_message(LoginResponseMessage *record) {
+  record->login_response_status = arbitrary();
+}
+
+/* Login Response Message to the wire: 1 byte from at, returning where the next byte goes */
+static size_t encode_login_response_message(const LoginResponseMessage *record, uint8_t *wire, size_t at) {
+  wire[at++] = record->login_response_status;
+
+  return at;
+}
+
+/* Login Response Message off the wire: 1 byte from at, returning where the next byte lies */
+static size_t decode_login_response_message(LoginResponseMessage *record, const uint8_t *wire, size_t at) {
+  record->login_response_status = wire[at++];
+
+  return at;
+}
+
+/* what was read of Login Response Message is what was written, byte for byte */
+static void equal_login_response_message(const LoginResponseMessage *read, const LoginResponseMessage *written) {
+  assert(read->login_response_status == written->login_response_status);
+}
+
+/* Login Response Message: written and read back, then read and written back */
+static void check_login_response_message(void) {
+  LoginResponseMessage sent;
+  LoginResponseMessage got;
+  uint8_t wire[1];
+  uint8_t again[1];
+
+  any_login_response_message(&sent);
+  assert(encode_login_response_message(&sent, wire, 0) == 1);
+  assert(decode_login_response_message(&got, wire, 0) == 1);
+  equal_login_response_message(&got, &sent);
+
+  for (size_t i = 0; i < 1; i++) { wire[i] = arbitrary(); }
+  assert(decode_login_response_message(&got, wire, 0) == 1);
+  assert(encode_login_response_message(&got, again, 0) == 1);
+  for (size_t i = 0; i < 1; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Spin Image Available Message: 4 bytes ----------------------------------- */
+
+/* The Spin Image Available message is sent once per second and indicates through what sequence number a spin is available. */
+typedef struct {
+  uint8_t sequence[4];  /* bytes 0 to 3 */
+} SpinImageAvailableMessage;
+
+/* any Spin Image Available Message at all: every byte one the checker chooses */
+static void any_spin_image_available_message(SpinImageAvailableMessage *record) {
+  for (size_t i = 0; i < 4; i++) { record->sequence[i] = arbitrary(); }
+}
+
+/* Spin Image Available Message to the wire: 4 bytes from at, returning where the next byte goes */
+static size_t encode_spin_image_available_message(const SpinImageAvailableMessage *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->sequence[i]; }
+
+  return at;
+}
+
+/* Spin Image Available Message off the wire: 4 bytes from at, returning where the next byte lies */
+static size_t decode_spin_image_available_message(SpinImageAvailableMessage *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { record->sequence[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Spin Image Available Message is what was written, byte for byte */
+static void equal_spin_image_available_message(const SpinImageAvailableMessage *read, const SpinImageAvailableMessage *written) {
+  for (size_t i = 0; i < 4; i++) { assert(read->sequence[i] == written->sequence[i]); }
+}
+
+/* Spin Image Available Message: written and read back, then read and written back */
+static void check_spin_image_available_message(void) {
+  SpinImageAvailableMessage sent;
+  SpinImageAvailableMessage got;
+  uint8_t wire[4];
+  uint8_t again[4];
+
+  any_spin_image_available_message(&sent);
+  assert(encode_spin_image_available_message(&sent, wire, 0) == 4);
+  assert(decode_spin_image_available_message(&got, wire, 0) == 4);
+  equal_spin_image_available_message(&got, &sent);
+
+  for (size_t i = 0; i < 4; i++) { wire[i] = arbitrary(); }
+  assert(decode_spin_image_available_message(&got, wire, 0) == 4);
+  assert(encode_spin_image_available_message(&got, again, 0) == 4);
+  for (size_t i = 0; i < 4; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Spin Request Message: 4 bytes ------------------------------------------- */
+
+/* The Spin Request message is used by a user's process to request transmission of a spin of the unit's order book. */
+typedef struct {
+  uint8_t sequence[4];  /* bytes 0 to 3 */
+} SpinRequestMessage;
+
+/* any Spin Request Message at all: every byte one the checker chooses */
+static void any_spin_request_message(SpinRequestMessage *record) {
+  for (size_t i = 0; i < 4; i++) { record->sequence[i] = arbitrary(); }
+}
+
+/* Spin Request Message to the wire: 4 bytes from at, returning where the next byte goes */
+static size_t encode_spin_request_message(const SpinRequestMessage *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->sequence[i]; }
+
+  return at;
+}
+
+/* Spin Request Message off the wire: 4 bytes from at, returning where the next byte lies */
+static size_t decode_spin_request_message(SpinRequestMessage *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { record->sequence[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Spin Request Message is what was written, byte for byte */
+static void equal_spin_request_message(const SpinRequestMessage *read, const SpinRequestMessage *written) {
+  for (size_t i = 0; i < 4; i++) { assert(read->sequence[i] == written->sequence[i]); }
+}
+
+/* Spin Request Message: written and read back, then read and written back */
+static void check_spin_request_message(void) {
+  SpinRequestMessage sent;
+  SpinRequestMessage got;
+  uint8_t wire[4];
+  uint8_t again[4];
+
+  any_spin_request_message(&sent);
+  assert(encode_spin_request_message(&sent, wire, 0) == 4);
+  assert(decode_spin_request_message(&got, wire, 0) == 4);
+  equal_spin_request_message(&got, &sent);
+
+  for (size_t i = 0; i < 4; i++) { wire[i] = arbitrary(); }
+  assert(decode_spin_request_message(&got, wire, 0) == 4);
+  assert(encode_spin_request_message(&got, again, 0) == 4);
+  for (size_t i = 0; i < 4; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Spin Response Message: 9 bytes ------------------------------------------ */
+
+/* The Spin Response message is sent in response to a participant's Spin Request message indicating whether a spin will be sent. */
+typedef struct {
+  uint8_t sequence[4];           /* bytes 0 to 3 */
+  uint8_t order_count[4];        /* bytes 4 to 7 */
+  uint8_t spin_response_status;  /* byte 8 */
+} SpinResponseMessage;
+
+/* any Spin Response Message at all: every byte one the checker chooses */
+static void any_spin_response_message(SpinResponseMessage *record) {
+  for (size_t i = 0; i < 4; i++) { record->sequence[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->order_count[i] = arbitrary(); }
+  record->spin_response_status = arbitrary();
+}
+
+/* Spin Response Message to the wire: 9 bytes from at, returning where the next byte goes */
+static size_t encode_spin_response_message(const SpinResponseMessage *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->sequence[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->order_count[i]; }
+  wire[at++] = record->spin_response_status;
+
+  return at;
+}
+
+/* Spin Response Message off the wire: 9 bytes from at, returning where the next byte lies */
+static size_t decode_spin_response_message(SpinResponseMessage *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { record->sequence[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->order_count[i] = wire[at++]; }
+  record->spin_response_status = wire[at++];
+
+  return at;
+}
+
+/* what was read of Spin Response Message is what was written, byte for byte */
+static void equal_spin_response_message(const SpinResponseMessage *read, const SpinResponseMessage *written) {
+  for (size_t i = 0; i < 4; i++) { assert(read->sequence[i] == written->sequence[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->order_count[i] == written->order_count[i]); }
+  assert(read->spin_response_status == written->spin_response_status);
+}
+
+/* Spin Response Message: written and read back, then read and written back */
+static void check_spin_response_message(void) {
+  SpinResponseMessage sent;
+  SpinResponseMessage got;
+  uint8_t wire[9];
+  uint8_t again[9];
+
+  any_spin_response_message(&sent);
+  assert(encode_spin_response_message(&sent, wire, 0) == 9);
+  assert(decode_spin_response_message(&got, wire, 0) == 9);
+  equal_spin_response_message(&got, &sent);
+
+  for (size_t i = 0; i < 9; i++) { wire[i] = arbitrary(); }
+  assert(decode_spin_response_message(&got, wire, 0) == 9);
+  assert(encode_spin_response_message(&got, again, 0) == 9);
+  for (size_t i = 0; i < 9; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Spin Finished Message: 4 bytes ------------------------------------------ */
+
+/* The Spin Finished message is sent to indicate that all messages for the spin requested have been sent. A Spin Finished message is only sent if a Spin Request was not rejected. Upon receipt of a Spin Finished message, any buffered multicast messages should be applied to the participant's copy of the book to make it current. */
+typedef struct {
+  uint8_t sequence[4];  /* bytes 0 to 3 */
+} SpinFinishedMessage;
+
+/* any Spin Finished Message at all: every byte one the checker chooses */
+static void any_spin_finished_message(SpinFinishedMessage *record) {
+  for (size_t i = 0; i < 4; i++) { record->sequence[i] = arbitrary(); }
+}
+
+/* Spin Finished Message to the wire: 4 bytes from at, returning where the next byte goes */
+static size_t encode_spin_finished_message(const SpinFinishedMessage *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->sequence[i]; }
+
+  return at;
+}
+
+/* Spin Finished Message off the wire: 4 bytes from at, returning where the next byte lies */
+static size_t decode_spin_finished_message(SpinFinishedMessage *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { record->sequence[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Spin Finished Message is what was written, byte for byte */
+static void equal_spin_finished_message(const SpinFinishedMessage *read, const SpinFinishedMessage *written) {
+  for (size_t i = 0; i < 4; i++) { assert(read->sequence[i] == written->sequence[i]); }
+}
+
+/* Spin Finished Message: written and read back, then read and written back */
+static void check_spin_finished_message(void) {
+  SpinFinishedMessage sent;
+  SpinFinishedMessage got;
+  uint8_t wire[4];
+  uint8_t again[4];
+
+  any_spin_finished_message(&sent);
+  assert(encode_spin_finished_message(&sent, wire, 0) == 4);
+  assert(decode_spin_finished_message(&got, wire, 0) == 4);
+  equal_spin_finished_message(&got, &sent);
+
+  for (size_t i = 0; i < 4; i++) { wire[i] = arbitrary(); }
+  assert(decode_spin_finished_message(&got, wire, 0) == 4);
+  assert(encode_spin_finished_message(&got, again, 0) == 4);
+  for (size_t i = 0; i < 4; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Time Reference Message: 16 bytes ---------------------------------------- */
+
+/* The Time Reference message is used to provide a midnight reference point for recipients of the feed. It is sent whenever the system starts up and when the system crosses a midnight boundary. */
+typedef struct {
+  uint8_t midnight_reference[4];  /* bytes 0 to 3 */
+  uint8_t time_reference[4];      /* bytes 4 to 7 */
+  uint8_t time_offset[4];         /* bytes 8 to 11 */
+  uint8_t trade_date[4];          /* bytes 12 to 15 */
+} TimeReferenceMessage;
+
+/* any Time Reference Message at all: every byte one the checker chooses */
+static void any_time_reference_message(TimeReferenceMessage *record) {
+  for (size_t i = 0; i < 4; i++) { record->midnight_reference[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->time_reference[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->time_offset[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->trade_date[i] = arbitrary(); }
+}
+
+/* Time Reference Message to the wire: 16 bytes from at, returning where the next byte goes */
+static size_t encode_time_reference_message(const TimeReferenceMessage *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->midnight_reference[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->time_reference[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->time_offset[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->trade_date[i]; }
+
+  return at;
+}
+
+/* Time Reference Message off the wire: 16 bytes from at, returning where the next byte lies */
+static size_t decode_time_reference_message(TimeReferenceMessage *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { record->midnight_reference[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->time_reference[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->time_offset[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->trade_date[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Time Reference Message is what was written, byte for byte */
+static void equal_time_reference_message(const TimeReferenceMessage *read, const TimeReferenceMessage *written) {
+  for (size_t i = 0; i < 4; i++) { assert(read->midnight_reference[i] == written->midnight_reference[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->time_reference[i] == written->time_reference[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->time_offset[i] == written->time_offset[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->trade_date[i] == written->trade_date[i]); }
+}
+
+/* Time Reference Message: written and read back, then read and written back */
+static void check_time_reference_message(void) {
+  TimeReferenceMessage sent;
+  TimeReferenceMessage got;
+  uint8_t wire[16];
+  uint8_t again[16];
+
+  any_time_reference_message(&sent);
+  assert(encode_time_reference_message(&sent, wire, 0) == 16);
+  assert(decode_time_reference_message(&got, wire, 0) == 16);
+  equal_time_reference_message(&got, &sent);
+
+  for (size_t i = 0; i < 16; i++) { wire[i] = arbitrary(); }
+  assert(decode_time_reference_message(&got, wire, 0) == 16);
+  assert(encode_time_reference_message(&got, again, 0) == 16);
+  for (size_t i = 0; i < 16; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Time Message: 8 bytes --------------------------------------------------- */
+
+/* A Time message is immediately generated and sent when there is a TOP event for a given clock second. */
+typedef struct {
+  uint8_t time_reference[4];  /* bytes 0 to 3 */
+  uint8_t epoch_time[4];      /* bytes 4 to 7 */
+} TimeMessage;
+
+/* any Time Message at all: every byte one the checker chooses */
+static void any_time_message(TimeMessage *record) {
+  for (size_t i = 0; i < 4; i++) { record->time_reference[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->epoch_time[i] = arbitrary(); }
+}
+
+/* Time Message to the wire: 8 bytes from at, returning where the next byte goes */
+static size_t encode_time_message(const TimeMessage *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->time_reference[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->epoch_time[i]; }
+
+  return at;
+}
+
+/* Time Message off the wire: 8 bytes from at, returning where the next byte lies */
+static size_t decode_time_message(TimeMessage *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { record->time_reference[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->epoch_time[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Time Message is what was written, byte for byte */
+static void equal_time_message(const TimeMessage *read, const TimeMessage *written) {
+  for (size_t i = 0; i < 4; i++) { assert(read->time_reference[i] == written->time_reference[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->epoch_time[i] == written->epoch_time[i]); }
+}
+
+/* Time Message: written and read back, then read and written back */
+static void check_time_message(void) {
+  TimeMessage sent;
+  TimeMessage got;
+  uint8_t wire[8];
+  uint8_t again[8];
+
+  any_time_message(&sent);
+  assert(encode_time_message(&sent, wire, 0) == 8);
+  assert(decode_time_message(&got, wire, 0) == 8);
+  equal_time_message(&got, &sent);
+
+  for (size_t i = 0; i < 8; i++) { wire[i] = arbitrary(); }
+  assert(decode_time_message(&got, wire, 0) == 8);
+  assert(encode_time_message(&got, again, 0) == 8);
+  for (size_t i = 0; i < 8; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Futures Variance Symbol Mapping Message: 38 bytes ----------------------- */
+
+/* The Futures Variance Symbol Mapping message is used to disseminate symbol reference data for S&P 500 Variance Futures (VA Futures) symbols. */
+typedef struct {
+  uint8_t time_offset[4];           /* bytes 0 to 3 */
+  uint8_t unit_timestamp[4];        /* bytes 4 to 7 */
+  uint8_t feed_symbol[6];           /* bytes 8 to 13 */
+  uint8_t futures_symbol[12];       /* bytes 14 to 25 */
+  uint8_t accrued_day_variance[8];  /* bytes 26 to 33 */
+  uint8_t num_final_returns[2];     /* bytes 34 to 35 */
+  uint8_t num_elapsed_returns[2];   /* bytes 36 to 37 */
+} FuturesVarianceSymbolMappingMessage;
+
+/* any Futures Variance Symbol Mapping Message at all: every byte one the checker chooses */
+static void any_futures_variance_symbol_mapping_message(FuturesVarianceSymbolMappingMessage *record) {
+  for (size_t i = 0; i < 4; i++) { record->time_offset[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->unit_timestamp[i] = arbitrary(); }
+  for (size_t i = 0; i < 6; i++) { record->feed_symbol[i] = arbitrary(); }
+  for (size_t i = 0; i < 12; i++) { record->futures_symbol[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->accrued_day_variance[i] = arbitrary(); }
+  for (size_t i = 0; i < 2; i++) { record->num_final_returns[i] = arbitrary(); }
+  for (size_t i = 0; i < 2; i++) { record->num_elapsed_returns[i] = arbitrary(); }
+}
+
+/* Futures Variance Symbol Mapping Message to the wire: 38 bytes from at, returning where the next byte goes */
+static size_t encode_futures_variance_symbol_mapping_message(const FuturesVarianceSymbolMappingMessage *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->time_offset[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->unit_timestamp[i]; }
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->feed_symbol[i]; }
+  for (size_t i = 0; i < 12; i++) { wire[at++] = record->futures_symbol[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->accrued_day_variance[i]; }
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->num_final_returns[i]; }
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->num_elapsed_returns[i]; }
+
+  return at;
+}
+
+/* Futures Variance Symbol Mapping Message off the wire: 38 bytes from at, returning where the next byte lies */
+static size_t decode_futures_variance_symbol_mapping_message(FuturesVarianceSymbolMappingMessage *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { record->time_offset[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->unit_timestamp[i] = wire[at++]; }
+  for (size_t i = 0; i < 6; i++) { record->feed_symbol[i] = wire[at++]; }
+  for (size_t i = 0; i < 12; i++) { record->futures_symbol[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->accrued_day_variance[i] = wire[at++]; }
+  for (size_t i = 0; i < 2; i++) { record->num_final_returns[i] = wire[at++]; }
+  for (size_t i = 0; i < 2; i++) { record->num_elapsed_returns[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Futures Variance Symbol Mapping Message is what was written, byte for byte */
+static void equal_futures_variance_symbol_mapping_message(const FuturesVarianceSymbolMappingMessage *read, const FuturesVarianceSymbolMappingMessage *written) {
+  for (size_t i = 0; i < 4; i++) { assert(read->time_offset[i] == written->time_offset[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->unit_timestamp[i] == written->unit_timestamp[i]); }
+  for (size_t i = 0; i < 6; i++) { assert(read->feed_symbol[i] == written->feed_symbol[i]); }
+  for (size_t i = 0; i < 12; i++) { assert(read->futures_symbol[i] == written->futures_symbol[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->accrued_day_variance[i] == written->accrued_day_variance[i]); }
+  for (size_t i = 0; i < 2; i++) { assert(read->num_final_returns[i] == written->num_final_returns[i]); }
+  for (size_t i = 0; i < 2; i++) { assert(read->num_elapsed_returns[i] == written->num_elapsed_returns[i]); }
+}
+
+/* Futures Variance Symbol Mapping Message: written and read back, then read and written back */
+static void check_futures_variance_symbol_mapping_message(void) {
+  FuturesVarianceSymbolMappingMessage sent;
+  FuturesVarianceSymbolMappingMessage got;
+  uint8_t wire[38];
+  uint8_t again[38];
+
+  any_futures_variance_symbol_mapping_message(&sent);
+  assert(encode_futures_variance_symbol_mapping_message(&sent, wire, 0) == 38);
+  assert(decode_futures_variance_symbol_mapping_message(&got, wire, 0) == 38);
+  equal_futures_variance_symbol_mapping_message(&got, &sent);
+
+  for (size_t i = 0; i < 38; i++) { wire[i] = arbitrary(); }
+  assert(decode_futures_variance_symbol_mapping_message(&got, wire, 0) == 38);
+  assert(encode_futures_variance_symbol_mapping_message(&got, again, 0) == 38);
+  for (size_t i = 0; i < 38; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Price Limits Message: 26 bytes ------------------------------------------ */
+
+/* The Price Limits message can be sent as a sequenced or un-sequenced message. It is sent out at the start of the session for products subject to price limits per the contract specifications. */
+typedef struct {
+  uint8_t time_offset[4];        /* bytes 0 to 3 */
+  uint8_t symbol[6];             /* bytes 4 to 9 */
+  uint8_t upper_price_limit[8];  /* bytes 10 to 17 */
+  uint8_t lower_price_limit[8];  /* bytes 18 to 25 */
+} PriceLimitsMessage;
+
+/* any Price Limits Message at all: every byte one the checker chooses */
+static void any_price_limits_message(PriceLimitsMessage *record) {
+  for (size_t i = 0; i < 4; i++) { record->time_offset[i] = arbitrary(); }
+  for (size_t i = 0; i < 6; i++) { record->symbol[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->upper_price_limit[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->lower_price_limit[i] = arbitrary(); }
+}
+
+/* Price Limits Message to the wire: 26 bytes from at, returning where the next byte goes */
+static size_t encode_price_limits_message(const PriceLimitsMessage *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->time_offset[i]; }
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->symbol[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->upper_price_limit[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->lower_price_limit[i]; }
+
+  return at;
+}
+
+/* Price Limits Message off the wire: 26 bytes from at, returning where the next byte lies */
+static size_t decode_price_limits_message(PriceLimitsMessage *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { record->time_offset[i] = wire[at++]; }
+  for (size_t i = 0; i < 6; i++) { record->symbol[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->upper_price_limit[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->lower_price_limit[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Price Limits Message is what was written, byte for byte */
+static void equal_price_limits_message(const PriceLimitsMessage *read, const PriceLimitsMessage *written) {
+  for (size_t i = 0; i < 4; i++) { assert(read->time_offset[i] == written->time_offset[i]); }
+  for (size_t i = 0; i < 6; i++) { assert(read->symbol[i] == written->symbol[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->upper_price_limit[i] == written->upper_price_limit[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->lower_price_limit[i] == written->lower_price_limit[i]); }
+}
+
+/* Price Limits Message: written and read back, then read and written back */
+static void check_price_limits_message(void) {
+  PriceLimitsMessage sent;
+  PriceLimitsMessage got;
+  uint8_t wire[26];
+  uint8_t again[26];
+
+  any_price_limits_message(&sent);
+  assert(encode_price_limits_message(&sent, wire, 0) == 26);
+  assert(decode_price_limits_message(&got, wire, 0) == 26);
+  equal_price_limits_message(&got, &sent);
+
+  for (size_t i = 0; i < 26; i++) { wire[i] = arbitrary(); }
+  assert(decode_price_limits_message(&got, wire, 0) == 26);
+  assert(encode_price_limits_message(&got, again, 0) == 26);
+  for (size_t i = 0; i < 26; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Market Snapshot Short Message: 35 bytes --------------------------------- */
+
+/* A Market Snapshot message provides a snapshot of the price and size for the bid and ask, last trade price, total number of contracts traded, and the current trading status of a single symbol. */
+typedef struct {
+  uint8_t time_offset[4];             /* bytes 0 to 3 */
+  uint8_t symbol[6];                  /* bytes 4 to 9 */
+  uint8_t unit_timestamp[4];          /* bytes 10 to 13 */
+  uint8_t bid_price_short[2];         /* bytes 14 to 15 */
+  uint8_t bid_quantity_short[2];      /* bytes 16 to 17 */
+  uint8_t ask_price_short[2];         /* bytes 18 to 19 */
+  uint8_t ask_quantity_short[2];      /* bytes 20 to 21 */
+  uint8_t last_trade_price_short[2];  /* bytes 22 to 23 */
+  uint8_t last_trade_size_short[2];   /* bytes 24 to 25 */
+  uint8_t last_trade_condition;       /* byte 26 */
+  uint8_t total_volume[4];            /* bytes 27 to 30 */
+  uint8_t trading_status;             /* byte 31 */
+  uint8_t reserved_3[3];              /* bytes 32 to 34 */
+} MarketSnapshotShortMessage;
+
+/* any Market Snapshot Short Message at all: every byte one the checker chooses */
+static void any_market_snapshot_short_message(MarketSnapshotShortMessage *record) {
+  for (size_t i = 0; i < 4; i++) { record->time_offset[i] = arbitrary(); }
+  for (size_t i = 0; i < 6; i++) { record->symbol[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->unit_timestamp[i] = arbitrary(); }
+  for (size_t i = 0; i < 2; i++) { record->bid_price_short[i] = arbitrary(); }
+  for (size_t i = 0; i < 2; i++) { record->bid_quantity_short[i] = arbitrary(); }
+  for (size_t i = 0; i < 2; i++) { record->ask_price_short[i] = arbitrary(); }
+  for (size_t i = 0; i < 2; i++) { record->ask_quantity_short[i] = arbitrary(); }
+  for (size_t i = 0; i < 2; i++) { record->last_trade_price_short[i] = arbitrary(); }
+  for (size_t i = 0; i < 2; i++) { record->last_trade_size_short[i] = arbitrary(); }
+  record->last_trade_condition = arbitrary();
+  for (size_t i = 0; i < 4; i++) { record->total_volume[i] = arbitrary(); }
+  record->trading_status = arbitrary();
+  for (size_t i = 0; i < 3; i++) { record->reserved_3[i] = arbitrary(); }
+}
+
+/* Market Snapshot Short Message to the wire: 35 bytes from at, returning where the next byte goes */
+static size_t encode_market_snapshot_short_message(const MarketSnapshotShortMessage *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->time_offset[i]; }
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->symbol[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->unit_timestamp[i]; }
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->bid_price_short[i]; }
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->bid_quantity_short[i]; }
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->ask_price_short[i]; }
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->ask_quantity_short[i]; }
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->last_trade_price_short[i]; }
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->last_trade_size_short[i]; }
+  wire[at++] = record->last_trade_condition;
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->total_volume[i]; }
+  wire[at++] = record->trading_status;
+  for (size_t i = 0; i < 3; i++) { wire[at++] = record->reserved_3[i]; }
+
+  return at;
+}
+
+/* Market Snapshot Short Message off the wire: 35 bytes from at, returning where the next byte lies */
+static size_t decode_market_snapshot_short_message(MarketSnapshotShortMessage *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { record->time_offset[i] = wire[at++]; }
+  for (size_t i = 0; i < 6; i++) { record->symbol[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->unit_timestamp[i] = wire[at++]; }
+  for (size_t i = 0; i < 2; i++) { record->bid_price_short[i] = wire[at++]; }
+  for (size_t i = 0; i < 2; i++) { record->bid_quantity_short[i] = wire[at++]; }
+  for (size_t i = 0; i < 2; i++) { record->ask_price_short[i] = wire[at++]; }
+  for (size_t i = 0; i < 2; i++) { record->ask_quantity_short[i] = wire[at++]; }
+  for (size_t i = 0; i < 2; i++) { record->last_trade_price_short[i] = wire[at++]; }
+  for (size_t i = 0; i < 2; i++) { record->last_trade_size_short[i] = wire[at++]; }
+  record->last_trade_condition = wire[at++];
+  for (size_t i = 0; i < 4; i++) { record->total_volume[i] = wire[at++]; }
+  record->trading_status = wire[at++];
+  for (size_t i = 0; i < 3; i++) { record->reserved_3[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Market Snapshot Short Message is what was written, byte for byte */
+static void equal_market_snapshot_short_message(const MarketSnapshotShortMessage *read, const MarketSnapshotShortMessage *written) {
+  for (size_t i = 0; i < 4; i++) { assert(read->time_offset[i] == written->time_offset[i]); }
+  for (size_t i = 0; i < 6; i++) { assert(read->symbol[i] == written->symbol[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->unit_timestamp[i] == written->unit_timestamp[i]); }
+  for (size_t i = 0; i < 2; i++) { assert(read->bid_price_short[i] == written->bid_price_short[i]); }
+  for (size_t i = 0; i < 2; i++) { assert(read->bid_quantity_short[i] == written->bid_quantity_short[i]); }
+  for (size_t i = 0; i < 2; i++) { assert(read->ask_price_short[i] == written->ask_price_short[i]); }
+  for (size_t i = 0; i < 2; i++) { assert(read->ask_quantity_short[i] == written->ask_quantity_short[i]); }
+  for (size_t i = 0; i < 2; i++) { assert(read->last_trade_price_short[i] == written->last_trade_price_short[i]); }
+  for (size_t i = 0; i < 2; i++) { assert(read->last_trade_size_short[i] == written->last_trade_size_short[i]); }
+  assert(read->last_trade_condition == written->last_trade_condition);
+  for (size_t i = 0; i < 4; i++) { assert(read->total_volume[i] == written->total_volume[i]); }
+  assert(read->trading_status == written->trading_status);
+  for (size_t i = 0; i < 3; i++) { assert(read->reserved_3[i] == written->reserved_3[i]); }
+}
+
+/* Market Snapshot Short Message: written and read back, then read and written back */
+static void check_market_snapshot_short_message(void) {
+  MarketSnapshotShortMessage sent;
+  MarketSnapshotShortMessage got;
+  uint8_t wire[35];
+  uint8_t again[35];
+
+  any_market_snapshot_short_message(&sent);
+  assert(encode_market_snapshot_short_message(&sent, wire, 0) == 35);
+  assert(decode_market_snapshot_short_message(&got, wire, 0) == 35);
+  equal_market_snapshot_short_message(&got, &sent);
+
+  for (size_t i = 0; i < 35; i++) { wire[i] = arbitrary(); }
+  assert(decode_market_snapshot_short_message(&got, wire, 0) == 35);
+  assert(encode_market_snapshot_short_message(&got, again, 0) == 35);
+  for (size_t i = 0; i < 35; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Market Snapshot Long Message: 59 bytes ---------------------------------- */
+
+/* A Market Snapshot message provides a snapshot of the price and size for the bid and ask, last trade price, total number of contracts traded, and the current trading status of a single symbol. */
+typedef struct {
+  uint8_t time_offset[4];            /* bytes 0 to 3 */
+  uint8_t symbol[6];                 /* bytes 4 to 9 */
+  uint8_t unit_timestamp[4];         /* bytes 10 to 13 */
+  uint8_t bid_price_long[8];         /* bytes 14 to 21 */
+  uint8_t bid_quantity_long[4];      /* bytes 22 to 25 */
+  uint8_t ask_price_long[8];         /* bytes 26 to 33 */
+  uint8_t ask_quantity_long[4];      /* bytes 34 to 37 */
+  uint8_t last_trade_price_long[8];  /* bytes 38 to 45 */
+  uint8_t last_trade_size_long[4];   /* bytes 46 to 49 */
+  uint8_t last_trade_condition;      /* byte 50 */
+  uint8_t total_volume[4];           /* bytes 51 to 54 */
+  uint8_t trading_status;            /* byte 55 */
+  uint8_t reserved_3[3];             /* bytes 56 to 58 */
+} MarketSnapshotLongMessage;
+
+/* any Market Snapshot Long Message at all: every byte one the checker chooses */
+static void any_market_snapshot_long_message(MarketSnapshotLongMessage *record) {
+  for (size_t i = 0; i < 4; i++) { record->time_offset[i] = arbitrary(); }
+  for (size_t i = 0; i < 6; i++) { record->symbol[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->unit_timestamp[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->bid_price_long[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->bid_quantity_long[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->ask_price_long[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->ask_quantity_long[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->last_trade_price_long[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->last_trade_size_long[i] = arbitrary(); }
+  record->last_trade_condition = arbitrary();
+  for (size_t i = 0; i < 4; i++) { record->total_volume[i] = arbitrary(); }
+  record->trading_status = arbitrary();
+  for (size_t i = 0; i < 3; i++) { record->reserved_3[i] = arbitrary(); }
+}
+
+/* Market Snapshot Long Message to the wire: 59 bytes from at, returning where the next byte goes */
+static size_t encode_market_snapshot_long_message(const MarketSnapshotLongMessage *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->time_offset[i]; }
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->symbol[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->unit_timestamp[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->bid_price_long[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->bid_quantity_long[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->ask_price_long[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->ask_quantity_long[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->last_trade_price_long[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->last_trade_size_long[i]; }
+  wire[at++] = record->last_trade_condition;
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->total_volume[i]; }
+  wire[at++] = record->trading_status;
+  for (size_t i = 0; i < 3; i++) { wire[at++] = record->reserved_3[i]; }
+
+  return at;
+}
+
+/* Market Snapshot Long Message off the wire: 59 bytes from at, returning where the next byte lies */
+static size_t decode_market_snapshot_long_message(MarketSnapshotLongMessage *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { record->time_offset[i] = wire[at++]; }
+  for (size_t i = 0; i < 6; i++) { record->symbol[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->unit_timestamp[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->bid_price_long[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->bid_quantity_long[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->ask_price_long[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->ask_quantity_long[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->last_trade_price_long[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->last_trade_size_long[i] = wire[at++]; }
+  record->last_trade_condition = wire[at++];
+  for (size_t i = 0; i < 4; i++) { record->total_volume[i] = wire[at++]; }
+  record->trading_status = wire[at++];
+  for (size_t i = 0; i < 3; i++) { record->reserved_3[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Market Snapshot Long Message is what was written, byte for byte */
+static void equal_market_snapshot_long_message(const MarketSnapshotLongMessage *read, const MarketSnapshotLongMessage *written) {
+  for (size_t i = 0; i < 4; i++) { assert(read->time_offset[i] == written->time_offset[i]); }
+  for (size_t i = 0; i < 6; i++) { assert(read->symbol[i] == written->symbol[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->unit_timestamp[i] == written->unit_timestamp[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->bid_price_long[i] == written->bid_price_long[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->bid_quantity_long[i] == written->bid_quantity_long[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->ask_price_long[i] == written->ask_price_long[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->ask_quantity_long[i] == written->ask_quantity_long[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->last_trade_price_long[i] == written->last_trade_price_long[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->last_trade_size_long[i] == written->last_trade_size_long[i]); }
+  assert(read->last_trade_condition == written->last_trade_condition);
+  for (size_t i = 0; i < 4; i++) { assert(read->total_volume[i] == written->total_volume[i]); }
+  assert(read->trading_status == written->trading_status);
+  for (size_t i = 0; i < 3; i++) { assert(read->reserved_3[i] == written->reserved_3[i]); }
+}
+
+/* Market Snapshot Long Message: written and read back, then read and written back */
+static void check_market_snapshot_long_message(void) {
+  MarketSnapshotLongMessage sent;
+  MarketSnapshotLongMessage got;
+  uint8_t wire[59];
+  uint8_t again[59];
+
+  any_market_snapshot_long_message(&sent);
+  assert(encode_market_snapshot_long_message(&sent, wire, 0) == 59);
+  assert(decode_market_snapshot_long_message(&got, wire, 0) == 59);
+  equal_market_snapshot_long_message(&got, &sent);
+
+  for (size_t i = 0; i < 59; i++) { wire[i] = arbitrary(); }
+  assert(decode_market_snapshot_long_message(&got, wire, 0) == 59);
+  assert(encode_market_snapshot_long_message(&got, again, 0) == 59);
+  for (size_t i = 0; i < 59; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Settlement Message: 23 bytes -------------------------------------------- */
+
+/* Settlement messages are used to provide information concerning indicative, approved, or corrected daily and final settlement prices for CFE products. */
+typedef struct {
+  uint8_t time_offset[4];       /* bytes 0 to 3 */
+  uint8_t symbol[6];            /* bytes 4 to 9 */
+  uint8_t trade_date[4];        /* bytes 10 to 13 */
+  uint8_t settlement_price[8];  /* bytes 14 to 21 */
+  uint8_t issue;                /* byte 22 */
+} SettlementMessage;
+
+/* any Settlement Message at all: every byte one the checker chooses */
+static void any_settlement_message(SettlementMessage *record) {
+  for (size_t i = 0; i < 4; i++) { record->time_offset[i] = arbitrary(); }
+  for (size_t i = 0; i < 6; i++) { record->symbol[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->trade_date[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->settlement_price[i] = arbitrary(); }
+  record->issue = arbitrary();
+}
+
+/* Settlement Message to the wire: 23 bytes from at, returning where the next byte goes */
+static size_t encode_settlement_message(const SettlementMessage *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->time_offset[i]; }
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->symbol[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->trade_date[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->settlement_price[i]; }
+  wire[at++] = record->issue;
+
+  return at;
+}
+
+/* Settlement Message off the wire: 23 bytes from at, returning where the next byte lies */
+static size_t decode_settlement_message(SettlementMessage *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { record->time_offset[i] = wire[at++]; }
+  for (size_t i = 0; i < 6; i++) { record->symbol[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->trade_date[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->settlement_price[i] = wire[at++]; }
+  record->issue = wire[at++];
+
+  return at;
+}
+
+/* what was read of Settlement Message is what was written, byte for byte */
+static void equal_settlement_message(const SettlementMessage *read, const SettlementMessage *written) {
+  for (size_t i = 0; i < 4; i++) { assert(read->time_offset[i] == written->time_offset[i]); }
+  for (size_t i = 0; i < 6; i++) { assert(read->symbol[i] == written->symbol[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->trade_date[i] == written->trade_date[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->settlement_price[i] == written->settlement_price[i]); }
+  assert(read->issue == written->issue);
+}
+
+/* Settlement Message: written and read back, then read and written back */
+static void check_settlement_message(void) {
+  SettlementMessage sent;
+  SettlementMessage got;
+  uint8_t wire[23];
+  uint8_t again[23];
+
+  any_settlement_message(&sent);
+  assert(encode_settlement_message(&sent, wire, 0) == 23);
+  assert(decode_settlement_message(&got, wire, 0) == 23);
+  equal_settlement_message(&got, &sent);
+
+  for (size_t i = 0; i < 23; i++) { wire[i] = arbitrary(); }
+  assert(decode_settlement_message(&got, wire, 0) == 23);
+  assert(encode_settlement_message(&got, again, 0) == 23);
+  for (size_t i = 0; i < 23; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- What esbmc checks ------------------------------------------------------- */
+
+/* every record of the protocol, each on its own buffers */
+static void checks(void) {
+  check_packet_header();
+  check_message_header();
+  check_login_message();
+  check_login_response_message();
+  check_spin_image_available_message();
+  check_spin_request_message();
+  check_spin_response_message();
+  check_spin_finished_message();
+  check_time_reference_message();
+  check_time_message();
+  check_futures_variance_symbol_mapping_message();
+  check_price_limits_message();
+  check_market_snapshot_short_message();
+  check_market_snapshot_long_message();
+  check_settlement_message();
+}
+
+int main(void) {
+#ifdef CONCRETE
+  for (pattern = 0; pattern < 4; pattern++) { checks(); }
+#else
+  checks();
+#endif
+
+  return 0;
+}

@@ -1,0 +1,1979 @@
+// nasdaq/nomoptions/itto/NomOptions_Itto_v3_2_Server.c
+/*
+ * National Association of Securities Dealers Automated Quotations (Nasdaq) Itch to Trade Options
+ *
+ * Generated from the binary model. Every record is a run of fields, and esbmc checks two
+ * claims of each, for every value its bytes can take rather than for chosen ones: that any
+ * record written to the wire and read back is that record, and that any bytes read off the
+ * wire and written back are those bytes. Each takes exactly the record's width, and no
+ * write or read leaves the buffer it is made on.
+ *
+ * A field is the bytes it occupies. Nothing is read as an integer, so nothing is read in a
+ * byte order, and no rule stated here depends on a value.
+ *
+ * Check the whole file:   esbmc <file>
+ * Check one record:       esbmc <file> --function check_<record>
+ *
+ * Built with -DCONCRETE it is an ordinary program any C compiler runs: the bytes the
+ * checker would choose are drawn from four patterns instead, so the definition can be
+ * tried without the checker. That run is a test, and the checker's is the claim.
+ *
+ * What this definition does not state, and the model does:
+ *   - a run filling what frames it
+ *   - a length prefix framing what follows
+ *   - a run counted by a field
+ *
+ * License: MIT No Attribution
+ */
+
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
+
+/* ---- Any byte ---------------------------------------------------------------- */
+
+#ifdef CONCRETE
+
+/* which pattern the bytes are drawn from, and how many have been drawn */
+static unsigned pattern;
+static size_t drawn;
+
+/* a byte of the pattern: zero, a space, every bit set, or one more than the last */
+static uint8_t arbitrary(void) {
+  drawn++;
+
+  switch (pattern) {
+    case 0: return 0;
+    case 1: return 32;
+    case 2: return 255;
+    default: return (uint8_t)(drawn % 256);
+  }
+}
+
+#else
+
+/* declared and never defined: a value the checker chooses */
+unsigned char __VERIFIER_nondet_uchar(void);
+
+/* a byte nobody chose, so what holds of it holds of all of them */
+static uint8_t arbitrary(void) {
+  return __VERIFIER_nondet_uchar();
+}
+
+#endif
+
+/* ---- Server Packet Header: 3 bytes ------------------------------------------- */
+
+/* Packet header of a packet sent by the server */
+typedef struct {
+  uint8_t packet_length[2];    /* bytes 0 to 1 */
+  uint8_t server_packet_type;  /* byte 2 */
+} ServerPacketHeader;
+
+/* any Server Packet Header at all: every byte one the checker chooses */
+static void any_server_packet_header(ServerPacketHeader *record) {
+  for (size_t i = 0; i < 2; i++) { record->packet_length[i] = arbitrary(); }
+  record->server_packet_type = arbitrary();
+}
+
+/* Server Packet Header to the wire: 3 bytes from at, returning where the next byte goes */
+static size_t encode_server_packet_header(const ServerPacketHeader *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->packet_length[i]; }
+  wire[at++] = record->server_packet_type;
+
+  return at;
+}
+
+/* Server Packet Header off the wire: 3 bytes from at, returning where the next byte lies */
+static size_t decode_server_packet_header(ServerPacketHeader *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 2; i++) { record->packet_length[i] = wire[at++]; }
+  record->server_packet_type = wire[at++];
+
+  return at;
+}
+
+/* what was read of Server Packet Header is what was written, byte for byte */
+static void equal_server_packet_header(const ServerPacketHeader *read, const ServerPacketHeader *written) {
+  for (size_t i = 0; i < 2; i++) { assert(read->packet_length[i] == written->packet_length[i]); }
+  assert(read->server_packet_type == written->server_packet_type);
+}
+
+/* Server Packet Header: written and read back, then read and written back */
+static void check_server_packet_header(void) {
+  ServerPacketHeader sent;
+  ServerPacketHeader got;
+  uint8_t wire[3];
+  uint8_t again[3];
+
+  any_server_packet_header(&sent);
+  assert(encode_server_packet_header(&sent, wire, 0) == 3);
+  assert(decode_server_packet_header(&got, wire, 0) == 3);
+  equal_server_packet_header(&got, &sent);
+
+  for (size_t i = 0; i < 3; i++) { wire[i] = arbitrary(); }
+  assert(decode_server_packet_header(&got, wire, 0) == 3);
+  assert(encode_server_packet_header(&got, again, 0) == 3);
+  for (size_t i = 0; i < 3; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Login Accepted Packet: 30 bytes ----------------------------------------- */
+
+/* The SoupBinTCP server sends a Login Accepted Packet in response to receiving a valid Login Request from the client */
+typedef struct {
+  uint8_t accepted_session[10];          /* bytes 0 to 9 */
+  uint8_t accepted_sequence_number[20];  /* bytes 10 to 29 */
+} LoginAcceptedPacket;
+
+/* any Login Accepted Packet at all: every byte one the checker chooses */
+static void any_login_accepted_packet(LoginAcceptedPacket *record) {
+  for (size_t i = 0; i < 10; i++) { record->accepted_session[i] = arbitrary(); }
+  for (size_t i = 0; i < 20; i++) { record->accepted_sequence_number[i] = arbitrary(); }
+}
+
+/* Login Accepted Packet to the wire: 30 bytes from at, returning where the next byte goes */
+static size_t encode_login_accepted_packet(const LoginAcceptedPacket *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 10; i++) { wire[at++] = record->accepted_session[i]; }
+  for (size_t i = 0; i < 20; i++) { wire[at++] = record->accepted_sequence_number[i]; }
+
+  return at;
+}
+
+/* Login Accepted Packet off the wire: 30 bytes from at, returning where the next byte lies */
+static size_t decode_login_accepted_packet(LoginAcceptedPacket *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 10; i++) { record->accepted_session[i] = wire[at++]; }
+  for (size_t i = 0; i < 20; i++) { record->accepted_sequence_number[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Login Accepted Packet is what was written, byte for byte */
+static void equal_login_accepted_packet(const LoginAcceptedPacket *read, const LoginAcceptedPacket *written) {
+  for (size_t i = 0; i < 10; i++) { assert(read->accepted_session[i] == written->accepted_session[i]); }
+  for (size_t i = 0; i < 20; i++) { assert(read->accepted_sequence_number[i] == written->accepted_sequence_number[i]); }
+}
+
+/* Login Accepted Packet: written and read back, then read and written back */
+static void check_login_accepted_packet(void) {
+  LoginAcceptedPacket sent;
+  LoginAcceptedPacket got;
+  uint8_t wire[30];
+  uint8_t again[30];
+
+  any_login_accepted_packet(&sent);
+  assert(encode_login_accepted_packet(&sent, wire, 0) == 30);
+  assert(decode_login_accepted_packet(&got, wire, 0) == 30);
+  equal_login_accepted_packet(&got, &sent);
+
+  for (size_t i = 0; i < 30; i++) { wire[i] = arbitrary(); }
+  assert(decode_login_accepted_packet(&got, wire, 0) == 30);
+  assert(encode_login_accepted_packet(&got, again, 0) == 30);
+  for (size_t i = 0; i < 30; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Login Rejected Packet: 1 byte ------------------------------------------- */
+
+/* The SoupBinTCP server sends this packet in response to an invalid Login Request Packet from the client */
+typedef struct {
+  uint8_t reject_reason_code;  /* byte 0 */
+} LoginRejectedPacket;
+
+/* any Login Rejected Packet at all: every byte one the checker chooses */
+static void any_login_rejected_packet(LoginRejectedPacket *record) {
+  record->reject_reason_code = arbitrary();
+}
+
+/* Login Rejected Packet to the wire: 1 byte from at, returning where the next byte goes */
+static size_t encode_login_rejected_packet(const LoginRejectedPacket *record, uint8_t *wire, size_t at) {
+  wire[at++] = record->reject_reason_code;
+
+  return at;
+}
+
+/* Login Rejected Packet off the wire: 1 byte from at, returning where the next byte lies */
+static size_t decode_login_rejected_packet(LoginRejectedPacket *record, const uint8_t *wire, size_t at) {
+  record->reject_reason_code = wire[at++];
+
+  return at;
+}
+
+/* what was read of Login Rejected Packet is what was written, byte for byte */
+static void equal_login_rejected_packet(const LoginRejectedPacket *read, const LoginRejectedPacket *written) {
+  assert(read->reject_reason_code == written->reject_reason_code);
+}
+
+/* Login Rejected Packet: written and read back, then read and written back */
+static void check_login_rejected_packet(void) {
+  LoginRejectedPacket sent;
+  LoginRejectedPacket got;
+  uint8_t wire[1];
+  uint8_t again[1];
+
+  any_login_rejected_packet(&sent);
+  assert(encode_login_rejected_packet(&sent, wire, 0) == 1);
+  assert(decode_login_rejected_packet(&got, wire, 0) == 1);
+  equal_login_rejected_packet(&got, &sent);
+
+  for (size_t i = 0; i < 1; i++) { wire[i] = arbitrary(); }
+  assert(decode_login_rejected_packet(&got, wire, 0) == 1);
+  assert(encode_login_rejected_packet(&got, again, 0) == 1);
+  for (size_t i = 0; i < 1; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Seconds Message: 4 bytes ------------------------------------------------ */
+
+/* Sent every second for which at least one ITTO message is being generated. For bandwidth efficiency the timestamp is separated into this standalone Seconds message and a Nanoseconds portion carried by every other message. */
+typedef struct {
+  uint8_t second[4];  /* bytes 0 to 3 */
+} SecondsMessage;
+
+/* any Seconds Message at all: every byte one the checker chooses */
+static void any_seconds_message(SecondsMessage *record) {
+  for (size_t i = 0; i < 4; i++) { record->second[i] = arbitrary(); }
+}
+
+/* Seconds Message to the wire: 4 bytes from at, returning where the next byte goes */
+static size_t encode_seconds_message(const SecondsMessage *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->second[i]; }
+
+  return at;
+}
+
+/* Seconds Message off the wire: 4 bytes from at, returning where the next byte lies */
+static size_t decode_seconds_message(SecondsMessage *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { record->second[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Seconds Message is what was written, byte for byte */
+static void equal_seconds_message(const SecondsMessage *read, const SecondsMessage *written) {
+  for (size_t i = 0; i < 4; i++) { assert(read->second[i] == written->second[i]); }
+}
+
+/* Seconds Message: written and read back, then read and written back */
+static void check_seconds_message(void) {
+  SecondsMessage sent;
+  SecondsMessage got;
+  uint8_t wire[4];
+  uint8_t again[4];
+
+  any_seconds_message(&sent);
+  assert(encode_seconds_message(&sent, wire, 0) == 4);
+  assert(decode_seconds_message(&got, wire, 0) == 4);
+  equal_seconds_message(&got, &sent);
+
+  for (size_t i = 0; i < 4; i++) { wire[i] = arbitrary(); }
+  assert(decode_seconds_message(&got, wire, 0) == 4);
+  assert(encode_seconds_message(&got, again, 0) == 4);
+  for (size_t i = 0; i < 4; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- System Event Message: 5 bytes ------------------------------------------- */
+
+/* The system event message type is used to signal a market or data feed handler event. */
+typedef struct {
+  uint8_t nanoseconds[4];  /* bytes 0 to 3 */
+  uint8_t event_code;      /* byte 4 */
+} SystemEventMessage;
+
+/* any System Event Message at all: every byte one the checker chooses */
+static void any_system_event_message(SystemEventMessage *record) {
+  for (size_t i = 0; i < 4; i++) { record->nanoseconds[i] = arbitrary(); }
+  record->event_code = arbitrary();
+}
+
+/* System Event Message to the wire: 5 bytes from at, returning where the next byte goes */
+static size_t encode_system_event_message(const SystemEventMessage *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->nanoseconds[i]; }
+  wire[at++] = record->event_code;
+
+  return at;
+}
+
+/* System Event Message off the wire: 5 bytes from at, returning where the next byte lies */
+static size_t decode_system_event_message(SystemEventMessage *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { record->nanoseconds[i] = wire[at++]; }
+  record->event_code = wire[at++];
+
+  return at;
+}
+
+/* what was read of System Event Message is what was written, byte for byte */
+static void equal_system_event_message(const SystemEventMessage *read, const SystemEventMessage *written) {
+  for (size_t i = 0; i < 4; i++) { assert(read->nanoseconds[i] == written->nanoseconds[i]); }
+  assert(read->event_code == written->event_code);
+}
+
+/* System Event Message: written and read back, then read and written back */
+static void check_system_event_message(void) {
+  SystemEventMessage sent;
+  SystemEventMessage got;
+  uint8_t wire[5];
+  uint8_t again[5];
+
+  any_system_event_message(&sent);
+  assert(encode_system_event_message(&sent, wire, 0) == 5);
+  assert(decode_system_event_message(&got, wire, 0) == 5);
+  equal_system_event_message(&got, &sent);
+
+  for (size_t i = 0; i < 5; i++) { wire[i] = arbitrary(); }
+  assert(decode_system_event_message(&got, wire, 0) == 5);
+  assert(encode_system_event_message(&got, again, 0) == 5);
+  for (size_t i = 0; i < 5; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Base Reference Message: 12 bytes ---------------------------------------- */
+
+/* Indicates the base reference number to which all the order, quote and trade reference number deltas must be added to obtain the absolute order or quote Nasdaq reference number. Sent prior to any order, quote and trade messages. */
+typedef struct {
+  uint8_t nanoseconds[4];            /* bytes 0 to 3 */
+  uint8_t base_reference_number[8];  /* bytes 4 to 11 */
+} BaseReferenceMessage;
+
+/* any Base Reference Message at all: every byte one the checker chooses */
+static void any_base_reference_message(BaseReferenceMessage *record) {
+  for (size_t i = 0; i < 4; i++) { record->nanoseconds[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->base_reference_number[i] = arbitrary(); }
+}
+
+/* Base Reference Message to the wire: 12 bytes from at, returning where the next byte goes */
+static size_t encode_base_reference_message(const BaseReferenceMessage *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->nanoseconds[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->base_reference_number[i]; }
+
+  return at;
+}
+
+/* Base Reference Message off the wire: 12 bytes from at, returning where the next byte lies */
+static size_t decode_base_reference_message(BaseReferenceMessage *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { record->nanoseconds[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->base_reference_number[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Base Reference Message is what was written, byte for byte */
+static void equal_base_reference_message(const BaseReferenceMessage *read, const BaseReferenceMessage *written) {
+  for (size_t i = 0; i < 4; i++) { assert(read->nanoseconds[i] == written->nanoseconds[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->base_reference_number[i] == written->base_reference_number[i]); }
+}
+
+/* Base Reference Message: written and read back, then read and written back */
+static void check_base_reference_message(void) {
+  BaseReferenceMessage sent;
+  BaseReferenceMessage got;
+  uint8_t wire[12];
+  uint8_t again[12];
+
+  any_base_reference_message(&sent);
+  assert(encode_base_reference_message(&sent, wire, 0) == 12);
+  assert(decode_base_reference_message(&got, wire, 0) == 12);
+  equal_base_reference_message(&got, &sent);
+
+  for (size_t i = 0; i < 12; i++) { wire[i] = arbitrary(); }
+  assert(decode_base_reference_message(&got, wire, 0) == 12);
+  assert(encode_base_reference_message(&got, again, 0) == 12);
+  for (size_t i = 0; i < 12; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Options Directory Message: 39 bytes ------------------------------------- */
+
+/* At the start of each trading day, Nasdaq disseminates options symbol directory messages for all active options symbols in the Nasdaq option system. Intra-day updates are sent as they occur; for a given Option Id the canonical information is invariant. */
+typedef struct {
+  uint8_t nanoseconds[4];            /* bytes 0 to 3 */
+  uint8_t option_id[4];              /* bytes 4 to 7 */
+  uint8_t security_symbol[6];        /* bytes 8 to 13 */
+  uint8_t expiration_year;           /* byte 14 */
+  uint8_t expiration_month;          /* byte 15 */
+  uint8_t expiration_date;           /* byte 16 */
+  uint8_t explicit_strike_price[4];  /* bytes 17 to 20 */
+  uint8_t option_type;               /* byte 21 */
+  uint8_t source;                    /* byte 22 */
+  uint8_t underlying_symbol[13];     /* bytes 23 to 35 */
+  uint8_t options_closing_type;      /* byte 36 */
+  uint8_t tradable;                  /* byte 37 */
+  uint8_t mpv;                       /* byte 38 */
+} OptionsDirectoryMessage;
+
+/* any Options Directory Message at all: every byte one the checker chooses */
+static void any_options_directory_message(OptionsDirectoryMessage *record) {
+  for (size_t i = 0; i < 4; i++) { record->nanoseconds[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->option_id[i] = arbitrary(); }
+  for (size_t i = 0; i < 6; i++) { record->security_symbol[i] = arbitrary(); }
+  record->expiration_year = arbitrary();
+  record->expiration_month = arbitrary();
+  record->expiration_date = arbitrary();
+  for (size_t i = 0; i < 4; i++) { record->explicit_strike_price[i] = arbitrary(); }
+  record->option_type = arbitrary();
+  record->source = arbitrary();
+  for (size_t i = 0; i < 13; i++) { record->underlying_symbol[i] = arbitrary(); }
+  record->options_closing_type = arbitrary();
+  record->tradable = arbitrary();
+  record->mpv = arbitrary();
+}
+
+/* Options Directory Message to the wire: 39 bytes from at, returning where the next byte goes */
+static size_t encode_options_directory_message(const OptionsDirectoryMessage *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->nanoseconds[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->option_id[i]; }
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->security_symbol[i]; }
+  wire[at++] = record->expiration_year;
+  wire[at++] = record->expiration_month;
+  wire[at++] = record->expiration_date;
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->explicit_strike_price[i]; }
+  wire[at++] = record->option_type;
+  wire[at++] = record->source;
+  for (size_t i = 0; i < 13; i++) { wire[at++] = record->underlying_symbol[i]; }
+  wire[at++] = record->options_closing_type;
+  wire[at++] = record->tradable;
+  wire[at++] = record->mpv;
+
+  return at;
+}
+
+/* Options Directory Message off the wire: 39 bytes from at, returning where the next byte lies */
+static size_t decode_options_directory_message(OptionsDirectoryMessage *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { record->nanoseconds[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->option_id[i] = wire[at++]; }
+  for (size_t i = 0; i < 6; i++) { record->security_symbol[i] = wire[at++]; }
+  record->expiration_year = wire[at++];
+  record->expiration_month = wire[at++];
+  record->expiration_date = wire[at++];
+  for (size_t i = 0; i < 4; i++) { record->explicit_strike_price[i] = wire[at++]; }
+  record->option_type = wire[at++];
+  record->source = wire[at++];
+  for (size_t i = 0; i < 13; i++) { record->underlying_symbol[i] = wire[at++]; }
+  record->options_closing_type = wire[at++];
+  record->tradable = wire[at++];
+  record->mpv = wire[at++];
+
+  return at;
+}
+
+/* what was read of Options Directory Message is what was written, byte for byte */
+static void equal_options_directory_message(const OptionsDirectoryMessage *read, const OptionsDirectoryMessage *written) {
+  for (size_t i = 0; i < 4; i++) { assert(read->nanoseconds[i] == written->nanoseconds[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->option_id[i] == written->option_id[i]); }
+  for (size_t i = 0; i < 6; i++) { assert(read->security_symbol[i] == written->security_symbol[i]); }
+  assert(read->expiration_year == written->expiration_year);
+  assert(read->expiration_month == written->expiration_month);
+  assert(read->expiration_date == written->expiration_date);
+  for (size_t i = 0; i < 4; i++) { assert(read->explicit_strike_price[i] == written->explicit_strike_price[i]); }
+  assert(read->option_type == written->option_type);
+  assert(read->source == written->source);
+  for (size_t i = 0; i < 13; i++) { assert(read->underlying_symbol[i] == written->underlying_symbol[i]); }
+  assert(read->options_closing_type == written->options_closing_type);
+  assert(read->tradable == written->tradable);
+  assert(read->mpv == written->mpv);
+}
+
+/* Options Directory Message: written and read back, then read and written back */
+static void check_options_directory_message(void) {
+  OptionsDirectoryMessage sent;
+  OptionsDirectoryMessage got;
+  uint8_t wire[39];
+  uint8_t again[39];
+
+  any_options_directory_message(&sent);
+  assert(encode_options_directory_message(&sent, wire, 0) == 39);
+  assert(decode_options_directory_message(&got, wire, 0) == 39);
+  equal_options_directory_message(&got, &sent);
+
+  for (size_t i = 0; i < 39; i++) { wire[i] = arbitrary(); }
+  assert(decode_options_directory_message(&got, wire, 0) == 39);
+  assert(encode_options_directory_message(&got, again, 0) == 39);
+  for (size_t i = 0; i < 39; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Options Trading Action Message: 9 bytes --------------------------------- */
+
+/* Nasdaq uses this administrative message to indicate the current trading status of an index or equity option within the Nasdaq Options Market. Prior to the start of system hours Nasdaq sends a Trading Action spin carrying T (Trading Resumption) for every contract eligible for trading; an option absent from the spin should be treated as halted. */
+typedef struct {
+  uint8_t nanoseconds[4];         /* bytes 0 to 3 */
+  uint8_t option_id[4];           /* bytes 4 to 7 */
+  uint8_t current_trading_state;  /* byte 8 */
+} OptionsTradingActionMessage;
+
+/* any Options Trading Action Message at all: every byte one the checker chooses */
+static void any_options_trading_action_message(OptionsTradingActionMessage *record) {
+  for (size_t i = 0; i < 4; i++) { record->nanoseconds[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->option_id[i] = arbitrary(); }
+  record->current_trading_state = arbitrary();
+}
+
+/* Options Trading Action Message to the wire: 9 bytes from at, returning where the next byte goes */
+static size_t encode_options_trading_action_message(const OptionsTradingActionMessage *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->nanoseconds[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->option_id[i]; }
+  wire[at++] = record->current_trading_state;
+
+  return at;
+}
+
+/* Options Trading Action Message off the wire: 9 bytes from at, returning where the next byte lies */
+static size_t decode_options_trading_action_message(OptionsTradingActionMessage *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { record->nanoseconds[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->option_id[i] = wire[at++]; }
+  record->current_trading_state = wire[at++];
+
+  return at;
+}
+
+/* what was read of Options Trading Action Message is what was written, byte for byte */
+static void equal_options_trading_action_message(const OptionsTradingActionMessage *read, const OptionsTradingActionMessage *written) {
+  for (size_t i = 0; i < 4; i++) { assert(read->nanoseconds[i] == written->nanoseconds[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->option_id[i] == written->option_id[i]); }
+  assert(read->current_trading_state == written->current_trading_state);
+}
+
+/* Options Trading Action Message: written and read back, then read and written back */
+static void check_options_trading_action_message(void) {
+  OptionsTradingActionMessage sent;
+  OptionsTradingActionMessage got;
+  uint8_t wire[9];
+  uint8_t again[9];
+
+  any_options_trading_action_message(&sent);
+  assert(encode_options_trading_action_message(&sent, wire, 0) == 9);
+  assert(decode_options_trading_action_message(&got, wire, 0) == 9);
+  equal_options_trading_action_message(&got, &sent);
+
+  for (size_t i = 0; i < 9; i++) { wire[i] = arbitrary(); }
+  assert(decode_options_trading_action_message(&got, wire, 0) == 9);
+  assert(encode_options_trading_action_message(&got, again, 0) == 9);
+  for (size_t i = 0; i < 9; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Option Open Message: 9 bytes -------------------------------------------- */
+
+/* Disseminated for each option as soon as the opening is completed. On the open state the option is available for auto execution within the Nasdaq Options Market System; on the closed state it is no longer eligible. Recipients should continue to process the Trading Action spin, which this message does not override. */
+typedef struct {
+  uint8_t nanoseconds[4];  /* bytes 0 to 3 */
+  uint8_t option_id[4];    /* bytes 4 to 7 */
+  uint8_t open_state;      /* byte 8 */
+} OptionOpenMessage;
+
+/* any Option Open Message at all: every byte one the checker chooses */
+static void any_option_open_message(OptionOpenMessage *record) {
+  for (size_t i = 0; i < 4; i++) { record->nanoseconds[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->option_id[i] = arbitrary(); }
+  record->open_state = arbitrary();
+}
+
+/* Option Open Message to the wire: 9 bytes from at, returning where the next byte goes */
+static size_t encode_option_open_message(const OptionOpenMessage *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->nanoseconds[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->option_id[i]; }
+  wire[at++] = record->open_state;
+
+  return at;
+}
+
+/* Option Open Message off the wire: 9 bytes from at, returning where the next byte lies */
+static size_t decode_option_open_message(OptionOpenMessage *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { record->nanoseconds[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->option_id[i] = wire[at++]; }
+  record->open_state = wire[at++];
+
+  return at;
+}
+
+/* what was read of Option Open Message is what was written, byte for byte */
+static void equal_option_open_message(const OptionOpenMessage *read, const OptionOpenMessage *written) {
+  for (size_t i = 0; i < 4; i++) { assert(read->nanoseconds[i] == written->nanoseconds[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->option_id[i] == written->option_id[i]); }
+  assert(read->open_state == written->open_state);
+}
+
+/* Option Open Message: written and read back, then read and written back */
+static void check_option_open_message(void) {
+  OptionOpenMessage sent;
+  OptionOpenMessage got;
+  uint8_t wire[9];
+  uint8_t again[9];
+
+  any_option_open_message(&sent);
+  assert(encode_option_open_message(&sent, wire, 0) == 9);
+  assert(decode_option_open_message(&got, wire, 0) == 9);
+  equal_option_open_message(&got, &sent);
+
+  for (size_t i = 0; i < 9; i++) { wire[i] = arbitrary(); }
+  assert(decode_option_open_message(&got, wire, 0) == 9);
+  assert(encode_option_open_message(&got, again, 0) == 9);
+  for (size_t i = 0; i < 9; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Add Order Message Short Form: 17 bytes ---------------------------------- */
+
+/* Indicates that a new order has been accepted by the Nasdaq Option system and was added to the displayable book, carrying a day unique Order Reference Number. The short form of the message, published for bandwidth efficiency. */
+typedef struct {
+  uint8_t nanoseconds[4];                   /* bytes 0 to 3 */
+  uint8_t order_reference_number_delta[4];  /* bytes 4 to 7 */
+  uint8_t market_side;                      /* byte 8 */
+  uint8_t option_id[4];                     /* bytes 9 to 12 */
+  uint8_t price[2];                         /* bytes 13 to 14 */
+  uint8_t volume[2];                        /* bytes 15 to 16 */
+} AddOrderMessageShortForm;
+
+/* any Add Order Message Short Form at all: every byte one the checker chooses */
+static void any_add_order_message_short_form(AddOrderMessageShortForm *record) {
+  for (size_t i = 0; i < 4; i++) { record->nanoseconds[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->order_reference_number_delta[i] = arbitrary(); }
+  record->market_side = arbitrary();
+  for (size_t i = 0; i < 4; i++) { record->option_id[i] = arbitrary(); }
+  for (size_t i = 0; i < 2; i++) { record->price[i] = arbitrary(); }
+  for (size_t i = 0; i < 2; i++) { record->volume[i] = arbitrary(); }
+}
+
+/* Add Order Message Short Form to the wire: 17 bytes from at, returning where the next byte goes */
+static size_t encode_add_order_message_short_form(const AddOrderMessageShortForm *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->nanoseconds[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->order_reference_number_delta[i]; }
+  wire[at++] = record->market_side;
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->option_id[i]; }
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->price[i]; }
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->volume[i]; }
+
+  return at;
+}
+
+/* Add Order Message Short Form off the wire: 17 bytes from at, returning where the next byte lies */
+static size_t decode_add_order_message_short_form(AddOrderMessageShortForm *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { record->nanoseconds[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->order_reference_number_delta[i] = wire[at++]; }
+  record->market_side = wire[at++];
+  for (size_t i = 0; i < 4; i++) { record->option_id[i] = wire[at++]; }
+  for (size_t i = 0; i < 2; i++) { record->price[i] = wire[at++]; }
+  for (size_t i = 0; i < 2; i++) { record->volume[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Add Order Message Short Form is what was written, byte for byte */
+static void equal_add_order_message_short_form(const AddOrderMessageShortForm *read, const AddOrderMessageShortForm *written) {
+  for (size_t i = 0; i < 4; i++) { assert(read->nanoseconds[i] == written->nanoseconds[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->order_reference_number_delta[i] == written->order_reference_number_delta[i]); }
+  assert(read->market_side == written->market_side);
+  for (size_t i = 0; i < 4; i++) { assert(read->option_id[i] == written->option_id[i]); }
+  for (size_t i = 0; i < 2; i++) { assert(read->price[i] == written->price[i]); }
+  for (size_t i = 0; i < 2; i++) { assert(read->volume[i] == written->volume[i]); }
+}
+
+/* Add Order Message Short Form: written and read back, then read and written back */
+static void check_add_order_message_short_form(void) {
+  AddOrderMessageShortForm sent;
+  AddOrderMessageShortForm got;
+  uint8_t wire[17];
+  uint8_t again[17];
+
+  any_add_order_message_short_form(&sent);
+  assert(encode_add_order_message_short_form(&sent, wire, 0) == 17);
+  assert(decode_add_order_message_short_form(&got, wire, 0) == 17);
+  equal_add_order_message_short_form(&got, &sent);
+
+  for (size_t i = 0; i < 17; i++) { wire[i] = arbitrary(); }
+  assert(decode_add_order_message_short_form(&got, wire, 0) == 17);
+  assert(encode_add_order_message_short_form(&got, again, 0) == 17);
+  for (size_t i = 0; i < 17; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Add Order Message Long Form: 21 bytes ----------------------------------- */
+
+/* Indicates that a new order has been accepted by the Nasdaq Option system and was added to the displayable book, carrying a day unique Order Reference Number. The long form of the message, with four byte price and volume. */
+typedef struct {
+  uint8_t nanoseconds[4];                   /* bytes 0 to 3 */
+  uint8_t order_reference_number_delta[4];  /* bytes 4 to 7 */
+  uint8_t market_side;                      /* byte 8 */
+  uint8_t option_id[4];                     /* bytes 9 to 12 */
+  uint8_t price_long[4];                    /* bytes 13 to 16 */
+  uint8_t volume_long[4];                   /* bytes 17 to 20 */
+} AddOrderMessageLongForm;
+
+/* any Add Order Message Long Form at all: every byte one the checker chooses */
+static void any_add_order_message_long_form(AddOrderMessageLongForm *record) {
+  for (size_t i = 0; i < 4; i++) { record->nanoseconds[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->order_reference_number_delta[i] = arbitrary(); }
+  record->market_side = arbitrary();
+  for (size_t i = 0; i < 4; i++) { record->option_id[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->price_long[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->volume_long[i] = arbitrary(); }
+}
+
+/* Add Order Message Long Form to the wire: 21 bytes from at, returning where the next byte goes */
+static size_t encode_add_order_message_long_form(const AddOrderMessageLongForm *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->nanoseconds[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->order_reference_number_delta[i]; }
+  wire[at++] = record->market_side;
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->option_id[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->price_long[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->volume_long[i]; }
+
+  return at;
+}
+
+/* Add Order Message Long Form off the wire: 21 bytes from at, returning where the next byte lies */
+static size_t decode_add_order_message_long_form(AddOrderMessageLongForm *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { record->nanoseconds[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->order_reference_number_delta[i] = wire[at++]; }
+  record->market_side = wire[at++];
+  for (size_t i = 0; i < 4; i++) { record->option_id[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->price_long[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->volume_long[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Add Order Message Long Form is what was written, byte for byte */
+static void equal_add_order_message_long_form(const AddOrderMessageLongForm *read, const AddOrderMessageLongForm *written) {
+  for (size_t i = 0; i < 4; i++) { assert(read->nanoseconds[i] == written->nanoseconds[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->order_reference_number_delta[i] == written->order_reference_number_delta[i]); }
+  assert(read->market_side == written->market_side);
+  for (size_t i = 0; i < 4; i++) { assert(read->option_id[i] == written->option_id[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->price_long[i] == written->price_long[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->volume_long[i] == written->volume_long[i]); }
+}
+
+/* Add Order Message Long Form: written and read back, then read and written back */
+static void check_add_order_message_long_form(void) {
+  AddOrderMessageLongForm sent;
+  AddOrderMessageLongForm got;
+  uint8_t wire[21];
+  uint8_t again[21];
+
+  any_add_order_message_long_form(&sent);
+  assert(encode_add_order_message_long_form(&sent, wire, 0) == 21);
+  assert(decode_add_order_message_long_form(&got, wire, 0) == 21);
+  equal_add_order_message_long_form(&got, &sent);
+
+  for (size_t i = 0; i < 21; i++) { wire[i] = arbitrary(); }
+  assert(decode_add_order_message_long_form(&got, wire, 0) == 21);
+  assert(encode_add_order_message_long_form(&got, again, 0) == 21);
+  for (size_t i = 0; i < 21; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Add Quote Message Short Form: 24 bytes ---------------------------------- */
+
+/* Indicates that a new quote has been accepted by the Nasdaq Option system and was added to the displayable book, carrying unique Bid and Ask Reference Numbers. The short form of the message, published for bandwidth efficiency. */
+typedef struct {
+  uint8_t nanoseconds[4];                 /* bytes 0 to 3 */
+  uint8_t bid_reference_number_delta[4];  /* bytes 4 to 7 */
+  uint8_t ask_reference_number_delta[4];  /* bytes 8 to 11 */
+  uint8_t option_id[4];                   /* bytes 12 to 15 */
+  uint8_t bid_price[2];                   /* bytes 16 to 17 */
+  uint8_t bid_size[2];                    /* bytes 18 to 19 */
+  uint8_t ask_price[2];                   /* bytes 20 to 21 */
+  uint8_t ask_size[2];                    /* bytes 22 to 23 */
+} AddQuoteMessageShortForm;
+
+/* any Add Quote Message Short Form at all: every byte one the checker chooses */
+static void any_add_quote_message_short_form(AddQuoteMessageShortForm *record) {
+  for (size_t i = 0; i < 4; i++) { record->nanoseconds[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->bid_reference_number_delta[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->ask_reference_number_delta[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->option_id[i] = arbitrary(); }
+  for (size_t i = 0; i < 2; i++) { record->bid_price[i] = arbitrary(); }
+  for (size_t i = 0; i < 2; i++) { record->bid_size[i] = arbitrary(); }
+  for (size_t i = 0; i < 2; i++) { record->ask_price[i] = arbitrary(); }
+  for (size_t i = 0; i < 2; i++) { record->ask_size[i] = arbitrary(); }
+}
+
+/* Add Quote Message Short Form to the wire: 24 bytes from at, returning where the next byte goes */
+static size_t encode_add_quote_message_short_form(const AddQuoteMessageShortForm *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->nanoseconds[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->bid_reference_number_delta[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->ask_reference_number_delta[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->option_id[i]; }
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->bid_price[i]; }
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->bid_size[i]; }
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->ask_price[i]; }
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->ask_size[i]; }
+
+  return at;
+}
+
+/* Add Quote Message Short Form off the wire: 24 bytes from at, returning where the next byte lies */
+static size_t decode_add_quote_message_short_form(AddQuoteMessageShortForm *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { record->nanoseconds[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->bid_reference_number_delta[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->ask_reference_number_delta[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->option_id[i] = wire[at++]; }
+  for (size_t i = 0; i < 2; i++) { record->bid_price[i] = wire[at++]; }
+  for (size_t i = 0; i < 2; i++) { record->bid_size[i] = wire[at++]; }
+  for (size_t i = 0; i < 2; i++) { record->ask_price[i] = wire[at++]; }
+  for (size_t i = 0; i < 2; i++) { record->ask_size[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Add Quote Message Short Form is what was written, byte for byte */
+static void equal_add_quote_message_short_form(const AddQuoteMessageShortForm *read, const AddQuoteMessageShortForm *written) {
+  for (size_t i = 0; i < 4; i++) { assert(read->nanoseconds[i] == written->nanoseconds[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->bid_reference_number_delta[i] == written->bid_reference_number_delta[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->ask_reference_number_delta[i] == written->ask_reference_number_delta[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->option_id[i] == written->option_id[i]); }
+  for (size_t i = 0; i < 2; i++) { assert(read->bid_price[i] == written->bid_price[i]); }
+  for (size_t i = 0; i < 2; i++) { assert(read->bid_size[i] == written->bid_size[i]); }
+  for (size_t i = 0; i < 2; i++) { assert(read->ask_price[i] == written->ask_price[i]); }
+  for (size_t i = 0; i < 2; i++) { assert(read->ask_size[i] == written->ask_size[i]); }
+}
+
+/* Add Quote Message Short Form: written and read back, then read and written back */
+static void check_add_quote_message_short_form(void) {
+  AddQuoteMessageShortForm sent;
+  AddQuoteMessageShortForm got;
+  uint8_t wire[24];
+  uint8_t again[24];
+
+  any_add_quote_message_short_form(&sent);
+  assert(encode_add_quote_message_short_form(&sent, wire, 0) == 24);
+  assert(decode_add_quote_message_short_form(&got, wire, 0) == 24);
+  equal_add_quote_message_short_form(&got, &sent);
+
+  for (size_t i = 0; i < 24; i++) { wire[i] = arbitrary(); }
+  assert(decode_add_quote_message_short_form(&got, wire, 0) == 24);
+  assert(encode_add_quote_message_short_form(&got, again, 0) == 24);
+  for (size_t i = 0; i < 24; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Add Quote Message Long Form: 32 bytes ----------------------------------- */
+
+/* Indicates that a new quote has been accepted by the Nasdaq Option system and was added to the displayable book, carrying unique Bid and Ask Reference Numbers. The long form of the message, with four byte prices and sizes. */
+typedef struct {
+  uint8_t nanoseconds[4];                 /* bytes 0 to 3 */
+  uint8_t bid_reference_number_delta[4];  /* bytes 4 to 7 */
+  uint8_t ask_reference_number_delta[4];  /* bytes 8 to 11 */
+  uint8_t option_id[4];                   /* bytes 12 to 15 */
+  uint8_t bid[4];                         /* bytes 16 to 19 */
+  uint8_t bid_size_long[4];               /* bytes 20 to 23 */
+  uint8_t ask[4];                         /* bytes 24 to 27 */
+  uint8_t ask_size_long[4];               /* bytes 28 to 31 */
+} AddQuoteMessageLongForm;
+
+/* any Add Quote Message Long Form at all: every byte one the checker chooses */
+static void any_add_quote_message_long_form(AddQuoteMessageLongForm *record) {
+  for (size_t i = 0; i < 4; i++) { record->nanoseconds[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->bid_reference_number_delta[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->ask_reference_number_delta[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->option_id[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->bid[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->bid_size_long[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->ask[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->ask_size_long[i] = arbitrary(); }
+}
+
+/* Add Quote Message Long Form to the wire: 32 bytes from at, returning where the next byte goes */
+static size_t encode_add_quote_message_long_form(const AddQuoteMessageLongForm *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->nanoseconds[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->bid_reference_number_delta[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->ask_reference_number_delta[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->option_id[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->bid[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->bid_size_long[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->ask[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->ask_size_long[i]; }
+
+  return at;
+}
+
+/* Add Quote Message Long Form off the wire: 32 bytes from at, returning where the next byte lies */
+static size_t decode_add_quote_message_long_form(AddQuoteMessageLongForm *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { record->nanoseconds[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->bid_reference_number_delta[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->ask_reference_number_delta[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->option_id[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->bid[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->bid_size_long[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->ask[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->ask_size_long[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Add Quote Message Long Form is what was written, byte for byte */
+static void equal_add_quote_message_long_form(const AddQuoteMessageLongForm *read, const AddQuoteMessageLongForm *written) {
+  for (size_t i = 0; i < 4; i++) { assert(read->nanoseconds[i] == written->nanoseconds[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->bid_reference_number_delta[i] == written->bid_reference_number_delta[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->ask_reference_number_delta[i] == written->ask_reference_number_delta[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->option_id[i] == written->option_id[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->bid[i] == written->bid[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->bid_size_long[i] == written->bid_size_long[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->ask[i] == written->ask[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->ask_size_long[i] == written->ask_size_long[i]); }
+}
+
+/* Add Quote Message Long Form: written and read back, then read and written back */
+static void check_add_quote_message_long_form(void) {
+  AddQuoteMessageLongForm sent;
+  AddQuoteMessageLongForm got;
+  uint8_t wire[32];
+  uint8_t again[32];
+
+  any_add_quote_message_long_form(&sent);
+  assert(encode_add_quote_message_long_form(&sent, wire, 0) == 32);
+  assert(decode_add_quote_message_long_form(&got, wire, 0) == 32);
+  equal_add_quote_message_long_form(&got, &sent);
+
+  for (size_t i = 0; i < 32; i++) { wire[i] = arbitrary(); }
+  assert(decode_add_quote_message_long_form(&got, wire, 0) == 32);
+  assert(encode_add_quote_message_long_form(&got, again, 0) == 32);
+  for (size_t i = 0; i < 32; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Single Side Executed Message: 20 bytes ---------------------------------- */
+
+/* Sent whenever a Side order, an order or one side of a quote, is executed in whole or in part. Several of these messages may be received for the same Side order when it is executed in several parts, and they are cumulative. */
+typedef struct {
+  uint8_t nanoseconds[4];             /* bytes 0 to 3 */
+  uint8_t reference_number_delta[4];  /* bytes 4 to 7 */
+  uint8_t executed_contracts[4];      /* bytes 8 to 11 */
+  uint8_t cross_number[4];            /* bytes 12 to 15 */
+  uint8_t match_number[4];            /* bytes 16 to 19 */
+} SingleSideExecutedMessage;
+
+/* any Single Side Executed Message at all: every byte one the checker chooses */
+static void any_single_side_executed_message(SingleSideExecutedMessage *record) {
+  for (size_t i = 0; i < 4; i++) { record->nanoseconds[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->reference_number_delta[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->executed_contracts[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->cross_number[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->match_number[i] = arbitrary(); }
+}
+
+/* Single Side Executed Message to the wire: 20 bytes from at, returning where the next byte goes */
+static size_t encode_single_side_executed_message(const SingleSideExecutedMessage *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->nanoseconds[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->reference_number_delta[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->executed_contracts[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->cross_number[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->match_number[i]; }
+
+  return at;
+}
+
+/* Single Side Executed Message off the wire: 20 bytes from at, returning where the next byte lies */
+static size_t decode_single_side_executed_message(SingleSideExecutedMessage *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { record->nanoseconds[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->reference_number_delta[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->executed_contracts[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->cross_number[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->match_number[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Single Side Executed Message is what was written, byte for byte */
+static void equal_single_side_executed_message(const SingleSideExecutedMessage *read, const SingleSideExecutedMessage *written) {
+  for (size_t i = 0; i < 4; i++) { assert(read->nanoseconds[i] == written->nanoseconds[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->reference_number_delta[i] == written->reference_number_delta[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->executed_contracts[i] == written->executed_contracts[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->cross_number[i] == written->cross_number[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->match_number[i] == written->match_number[i]); }
+}
+
+/* Single Side Executed Message: written and read back, then read and written back */
+static void check_single_side_executed_message(void) {
+  SingleSideExecutedMessage sent;
+  SingleSideExecutedMessage got;
+  uint8_t wire[20];
+  uint8_t again[20];
+
+  any_single_side_executed_message(&sent);
+  assert(encode_single_side_executed_message(&sent, wire, 0) == 20);
+  assert(decode_single_side_executed_message(&got, wire, 0) == 20);
+  equal_single_side_executed_message(&got, &sent);
+
+  for (size_t i = 0; i < 20; i++) { wire[i] = arbitrary(); }
+  assert(decode_single_side_executed_message(&got, wire, 0) == 20);
+  assert(encode_single_side_executed_message(&got, again, 0) == 20);
+  for (size_t i = 0; i < 20; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Single Side Executed With Price Message: 25 bytes ----------------------- */
+
+/* Sent whenever an incoming Side order is executed against the book in whole or in part at a price different from the initial display price, so the execution price is carried in the message. */
+typedef struct {
+  uint8_t nanoseconds[4];             /* bytes 0 to 3 */
+  uint8_t reference_number_delta[4];  /* bytes 4 to 7 */
+  uint8_t cross_number[4];            /* bytes 8 to 11 */
+  uint8_t match_number[4];            /* bytes 12 to 15 */
+  uint8_t printable;                  /* byte 16 */
+  uint8_t price_long[4];              /* bytes 17 to 20 */
+  uint8_t volume_long[4];             /* bytes 21 to 24 */
+} SingleSideExecutedWithPriceMessage;
+
+/* any Single Side Executed With Price Message at all: every byte one the checker chooses */
+static void any_single_side_executed_with_price_message(SingleSideExecutedWithPriceMessage *record) {
+  for (size_t i = 0; i < 4; i++) { record->nanoseconds[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->reference_number_delta[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->cross_number[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->match_number[i] = arbitrary(); }
+  record->printable = arbitrary();
+  for (size_t i = 0; i < 4; i++) { record->price_long[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->volume_long[i] = arbitrary(); }
+}
+
+/* Single Side Executed With Price Message to the wire: 25 bytes from at, returning where the next byte goes */
+static size_t encode_single_side_executed_with_price_message(const SingleSideExecutedWithPriceMessage *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->nanoseconds[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->reference_number_delta[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->cross_number[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->match_number[i]; }
+  wire[at++] = record->printable;
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->price_long[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->volume_long[i]; }
+
+  return at;
+}
+
+/* Single Side Executed With Price Message off the wire: 25 bytes from at, returning where the next byte lies */
+static size_t decode_single_side_executed_with_price_message(SingleSideExecutedWithPriceMessage *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { record->nanoseconds[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->reference_number_delta[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->cross_number[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->match_number[i] = wire[at++]; }
+  record->printable = wire[at++];
+  for (size_t i = 0; i < 4; i++) { record->price_long[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->volume_long[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Single Side Executed With Price Message is what was written, byte for byte */
+static void equal_single_side_executed_with_price_message(const SingleSideExecutedWithPriceMessage *read, const SingleSideExecutedWithPriceMessage *written) {
+  for (size_t i = 0; i < 4; i++) { assert(read->nanoseconds[i] == written->nanoseconds[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->reference_number_delta[i] == written->reference_number_delta[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->cross_number[i] == written->cross_number[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->match_number[i] == written->match_number[i]); }
+  assert(read->printable == written->printable);
+  for (size_t i = 0; i < 4; i++) { assert(read->price_long[i] == written->price_long[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->volume_long[i] == written->volume_long[i]); }
+}
+
+/* Single Side Executed With Price Message: written and read back, then read and written back */
+static void check_single_side_executed_with_price_message(void) {
+  SingleSideExecutedWithPriceMessage sent;
+  SingleSideExecutedWithPriceMessage got;
+  uint8_t wire[25];
+  uint8_t again[25];
+
+  any_single_side_executed_with_price_message(&sent);
+  assert(encode_single_side_executed_with_price_message(&sent, wire, 0) == 25);
+  assert(decode_single_side_executed_with_price_message(&got, wire, 0) == 25);
+  equal_single_side_executed_with_price_message(&got, &sent);
+
+  for (size_t i = 0; i < 25; i++) { wire[i] = arbitrary(); }
+  assert(decode_single_side_executed_with_price_message(&got, wire, 0) == 25);
+  assert(encode_single_side_executed_with_price_message(&got, again, 0) == 25);
+  for (size_t i = 0; i < 25; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Order Cancel Message: 12 bytes ------------------------------------------ */
+
+/* Sent whenever an order on the book is modified as a result of a partial cancellation. */
+typedef struct {
+  uint8_t nanoseconds[4];                   /* bytes 0 to 3 */
+  uint8_t order_reference_number_delta[4];  /* bytes 4 to 7 */
+  uint8_t cancelled_contracts[4];           /* bytes 8 to 11 */
+} OrderCancelMessage;
+
+/* any Order Cancel Message at all: every byte one the checker chooses */
+static void any_order_cancel_message(OrderCancelMessage *record) {
+  for (size_t i = 0; i < 4; i++) { record->nanoseconds[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->order_reference_number_delta[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->cancelled_contracts[i] = arbitrary(); }
+}
+
+/* Order Cancel Message to the wire: 12 bytes from at, returning where the next byte goes */
+static size_t encode_order_cancel_message(const OrderCancelMessage *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->nanoseconds[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->order_reference_number_delta[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->cancelled_contracts[i]; }
+
+  return at;
+}
+
+/* Order Cancel Message off the wire: 12 bytes from at, returning where the next byte lies */
+static size_t decode_order_cancel_message(OrderCancelMessage *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { record->nanoseconds[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->order_reference_number_delta[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->cancelled_contracts[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Order Cancel Message is what was written, byte for byte */
+static void equal_order_cancel_message(const OrderCancelMessage *read, const OrderCancelMessage *written) {
+  for (size_t i = 0; i < 4; i++) { assert(read->nanoseconds[i] == written->nanoseconds[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->order_reference_number_delta[i] == written->order_reference_number_delta[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->cancelled_contracts[i] == written->cancelled_contracts[i]); }
+}
+
+/* Order Cancel Message: written and read back, then read and written back */
+static void check_order_cancel_message(void) {
+  OrderCancelMessage sent;
+  OrderCancelMessage got;
+  uint8_t wire[12];
+  uint8_t again[12];
+
+  any_order_cancel_message(&sent);
+  assert(encode_order_cancel_message(&sent, wire, 0) == 12);
+  assert(decode_order_cancel_message(&got, wire, 0) == 12);
+  equal_order_cancel_message(&got, &sent);
+
+  for (size_t i = 0; i < 12; i++) { wire[i] = arbitrary(); }
+  assert(decode_order_cancel_message(&got, wire, 0) == 12);
+  assert(encode_order_cancel_message(&got, again, 0) == 12);
+  for (size_t i = 0; i < 12; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Single Side Replace Message Short Form: 16 bytes ------------------------ */
+
+/* Sent whenever an order or one side of a quote on the book is replaced. The replacement has a new sequence number and replaces the prior sequence number. The short form of the message, published for bandwidth efficiency. */
+typedef struct {
+  uint8_t nanoseconds[4];                      /* bytes 0 to 3 */
+  uint8_t original_reference_number_delta[4];  /* bytes 4 to 7 */
+  uint8_t new_reference_number_delta[4];       /* bytes 8 to 11 */
+  uint8_t price[2];                            /* bytes 12 to 13 */
+  uint8_t volume[2];                           /* bytes 14 to 15 */
+} SingleSideReplaceMessageShortForm;
+
+/* any Single Side Replace Message Short Form at all: every byte one the checker chooses */
+static void any_single_side_replace_message_short_form(SingleSideReplaceMessageShortForm *record) {
+  for (size_t i = 0; i < 4; i++) { record->nanoseconds[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->original_reference_number_delta[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->new_reference_number_delta[i] = arbitrary(); }
+  for (size_t i = 0; i < 2; i++) { record->price[i] = arbitrary(); }
+  for (size_t i = 0; i < 2; i++) { record->volume[i] = arbitrary(); }
+}
+
+/* Single Side Replace Message Short Form to the wire: 16 bytes from at, returning where the next byte goes */
+static size_t encode_single_side_replace_message_short_form(const SingleSideReplaceMessageShortForm *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->nanoseconds[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->original_reference_number_delta[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->new_reference_number_delta[i]; }
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->price[i]; }
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->volume[i]; }
+
+  return at;
+}
+
+/* Single Side Replace Message Short Form off the wire: 16 bytes from at, returning where the next byte lies */
+static size_t decode_single_side_replace_message_short_form(SingleSideReplaceMessageShortForm *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { record->nanoseconds[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->original_reference_number_delta[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->new_reference_number_delta[i] = wire[at++]; }
+  for (size_t i = 0; i < 2; i++) { record->price[i] = wire[at++]; }
+  for (size_t i = 0; i < 2; i++) { record->volume[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Single Side Replace Message Short Form is what was written, byte for byte */
+static void equal_single_side_replace_message_short_form(const SingleSideReplaceMessageShortForm *read, const SingleSideReplaceMessageShortForm *written) {
+  for (size_t i = 0; i < 4; i++) { assert(read->nanoseconds[i] == written->nanoseconds[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->original_reference_number_delta[i] == written->original_reference_number_delta[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->new_reference_number_delta[i] == written->new_reference_number_delta[i]); }
+  for (size_t i = 0; i < 2; i++) { assert(read->price[i] == written->price[i]); }
+  for (size_t i = 0; i < 2; i++) { assert(read->volume[i] == written->volume[i]); }
+}
+
+/* Single Side Replace Message Short Form: written and read back, then read and written back */
+static void check_single_side_replace_message_short_form(void) {
+  SingleSideReplaceMessageShortForm sent;
+  SingleSideReplaceMessageShortForm got;
+  uint8_t wire[16];
+  uint8_t again[16];
+
+  any_single_side_replace_message_short_form(&sent);
+  assert(encode_single_side_replace_message_short_form(&sent, wire, 0) == 16);
+  assert(decode_single_side_replace_message_short_form(&got, wire, 0) == 16);
+  equal_single_side_replace_message_short_form(&got, &sent);
+
+  for (size_t i = 0; i < 16; i++) { wire[i] = arbitrary(); }
+  assert(decode_single_side_replace_message_short_form(&got, wire, 0) == 16);
+  assert(encode_single_side_replace_message_short_form(&got, again, 0) == 16);
+  for (size_t i = 0; i < 16; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Single Side Replace Message Long Form: 20 bytes ------------------------- */
+
+/* Sent whenever an order or one side of a quote on the book is replaced. The replacement has a new sequence number and replaces the prior sequence number. The long form of the message, with four byte price and volume. */
+typedef struct {
+  uint8_t nanoseconds[4];                      /* bytes 0 to 3 */
+  uint8_t original_reference_number_delta[4];  /* bytes 4 to 7 */
+  uint8_t new_reference_number_delta[4];       /* bytes 8 to 11 */
+  uint8_t price_long[4];                       /* bytes 12 to 15 */
+  uint8_t volume_long[4];                      /* bytes 16 to 19 */
+} SingleSideReplaceMessageLongForm;
+
+/* any Single Side Replace Message Long Form at all: every byte one the checker chooses */
+static void any_single_side_replace_message_long_form(SingleSideReplaceMessageLongForm *record) {
+  for (size_t i = 0; i < 4; i++) { record->nanoseconds[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->original_reference_number_delta[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->new_reference_number_delta[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->price_long[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->volume_long[i] = arbitrary(); }
+}
+
+/* Single Side Replace Message Long Form to the wire: 20 bytes from at, returning where the next byte goes */
+static size_t encode_single_side_replace_message_long_form(const SingleSideReplaceMessageLongForm *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->nanoseconds[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->original_reference_number_delta[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->new_reference_number_delta[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->price_long[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->volume_long[i]; }
+
+  return at;
+}
+
+/* Single Side Replace Message Long Form off the wire: 20 bytes from at, returning where the next byte lies */
+static size_t decode_single_side_replace_message_long_form(SingleSideReplaceMessageLongForm *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { record->nanoseconds[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->original_reference_number_delta[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->new_reference_number_delta[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->price_long[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->volume_long[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Single Side Replace Message Long Form is what was written, byte for byte */
+static void equal_single_side_replace_message_long_form(const SingleSideReplaceMessageLongForm *read, const SingleSideReplaceMessageLongForm *written) {
+  for (size_t i = 0; i < 4; i++) { assert(read->nanoseconds[i] == written->nanoseconds[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->original_reference_number_delta[i] == written->original_reference_number_delta[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->new_reference_number_delta[i] == written->new_reference_number_delta[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->price_long[i] == written->price_long[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->volume_long[i] == written->volume_long[i]); }
+}
+
+/* Single Side Replace Message Long Form: written and read back, then read and written back */
+static void check_single_side_replace_message_long_form(void) {
+  SingleSideReplaceMessageLongForm sent;
+  SingleSideReplaceMessageLongForm got;
+  uint8_t wire[20];
+  uint8_t again[20];
+
+  any_single_side_replace_message_long_form(&sent);
+  assert(encode_single_side_replace_message_long_form(&sent, wire, 0) == 20);
+  assert(decode_single_side_replace_message_long_form(&got, wire, 0) == 20);
+  equal_single_side_replace_message_long_form(&got, &sent);
+
+  for (size_t i = 0; i < 20; i++) { wire[i] = arbitrary(); }
+  assert(decode_single_side_replace_message_long_form(&got, wire, 0) == 20);
+  assert(encode_single_side_replace_message_long_form(&got, again, 0) == 20);
+  for (size_t i = 0; i < 20; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Single Side Delete Message: 8 bytes ------------------------------------- */
+
+/* Sent when an order or a side of a quote is being cancelled. All remaining contracts are no longer accessible so the side should be removed from the book. */
+typedef struct {
+  uint8_t nanoseconds[4];             /* bytes 0 to 3 */
+  uint8_t reference_number_delta[4];  /* bytes 4 to 7 */
+} SingleSideDeleteMessage;
+
+/* any Single Side Delete Message at all: every byte one the checker chooses */
+static void any_single_side_delete_message(SingleSideDeleteMessage *record) {
+  for (size_t i = 0; i < 4; i++) { record->nanoseconds[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->reference_number_delta[i] = arbitrary(); }
+}
+
+/* Single Side Delete Message to the wire: 8 bytes from at, returning where the next byte goes */
+static size_t encode_single_side_delete_message(const SingleSideDeleteMessage *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->nanoseconds[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->reference_number_delta[i]; }
+
+  return at;
+}
+
+/* Single Side Delete Message off the wire: 8 bytes from at, returning where the next byte lies */
+static size_t decode_single_side_delete_message(SingleSideDeleteMessage *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { record->nanoseconds[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->reference_number_delta[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Single Side Delete Message is what was written, byte for byte */
+static void equal_single_side_delete_message(const SingleSideDeleteMessage *read, const SingleSideDeleteMessage *written) {
+  for (size_t i = 0; i < 4; i++) { assert(read->nanoseconds[i] == written->nanoseconds[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->reference_number_delta[i] == written->reference_number_delta[i]); }
+}
+
+/* Single Side Delete Message: written and read back, then read and written back */
+static void check_single_side_delete_message(void) {
+  SingleSideDeleteMessage sent;
+  SingleSideDeleteMessage got;
+  uint8_t wire[8];
+  uint8_t again[8];
+
+  any_single_side_delete_message(&sent);
+  assert(encode_single_side_delete_message(&sent, wire, 0) == 8);
+  assert(decode_single_side_delete_message(&got, wire, 0) == 8);
+  equal_single_side_delete_message(&got, &sent);
+
+  for (size_t i = 0; i < 8; i++) { wire[i] = arbitrary(); }
+  assert(decode_single_side_delete_message(&got, wire, 0) == 8);
+  assert(encode_single_side_delete_message(&got, again, 0) == 8);
+  for (size_t i = 0; i < 8; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Single Side Update Message: 17 bytes ------------------------------------ */
+
+/* Sent whenever an order or a side of a quote is being updated for price and or contracts. The reference number associated with the order or quote is unchanged and it retains its priority on the book. */
+typedef struct {
+  uint8_t nanoseconds[4];             /* bytes 0 to 3 */
+  uint8_t reference_number_delta[4];  /* bytes 4 to 7 */
+  uint8_t change_reason;              /* byte 8 */
+  uint8_t price_long[4];              /* bytes 9 to 12 */
+  uint8_t volume_long[4];             /* bytes 13 to 16 */
+} SingleSideUpdateMessage;
+
+/* any Single Side Update Message at all: every byte one the checker chooses */
+static void any_single_side_update_message(SingleSideUpdateMessage *record) {
+  for (size_t i = 0; i < 4; i++) { record->nanoseconds[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->reference_number_delta[i] = arbitrary(); }
+  record->change_reason = arbitrary();
+  for (size_t i = 0; i < 4; i++) { record->price_long[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->volume_long[i] = arbitrary(); }
+}
+
+/* Single Side Update Message to the wire: 17 bytes from at, returning where the next byte goes */
+static size_t encode_single_side_update_message(const SingleSideUpdateMessage *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->nanoseconds[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->reference_number_delta[i]; }
+  wire[at++] = record->change_reason;
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->price_long[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->volume_long[i]; }
+
+  return at;
+}
+
+/* Single Side Update Message off the wire: 17 bytes from at, returning where the next byte lies */
+static size_t decode_single_side_update_message(SingleSideUpdateMessage *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { record->nanoseconds[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->reference_number_delta[i] = wire[at++]; }
+  record->change_reason = wire[at++];
+  for (size_t i = 0; i < 4; i++) { record->price_long[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->volume_long[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Single Side Update Message is what was written, byte for byte */
+static void equal_single_side_update_message(const SingleSideUpdateMessage *read, const SingleSideUpdateMessage *written) {
+  for (size_t i = 0; i < 4; i++) { assert(read->nanoseconds[i] == written->nanoseconds[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->reference_number_delta[i] == written->reference_number_delta[i]); }
+  assert(read->change_reason == written->change_reason);
+  for (size_t i = 0; i < 4; i++) { assert(read->price_long[i] == written->price_long[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->volume_long[i] == written->volume_long[i]); }
+}
+
+/* Single Side Update Message: written and read back, then read and written back */
+static void check_single_side_update_message(void) {
+  SingleSideUpdateMessage sent;
+  SingleSideUpdateMessage got;
+  uint8_t wire[17];
+  uint8_t again[17];
+
+  any_single_side_update_message(&sent);
+  assert(encode_single_side_update_message(&sent, wire, 0) == 17);
+  assert(decode_single_side_update_message(&got, wire, 0) == 17);
+  equal_single_side_update_message(&got, &sent);
+
+  for (size_t i = 0; i < 17; i++) { wire[i] = arbitrary(); }
+  assert(decode_single_side_update_message(&got, wire, 0) == 17);
+  assert(encode_single_side_update_message(&got, again, 0) == 17);
+  for (size_t i = 0; i < 17; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Quote Replace Message Short Form: 28 bytes ------------------------------ */
+
+/* Sent whenever a quote on the book is replaced. The replaced quote has new sequence numbers on both sides, replacing the prior sequence numbers. The short form of the message, published for bandwidth efficiency. */
+typedef struct {
+  uint8_t nanoseconds[4];                          /* bytes 0 to 3 */
+  uint8_t original_bid_reference_number_delta[4];  /* bytes 4 to 7 */
+  uint8_t bid_reference_number_delta[4];           /* bytes 8 to 11 */
+  uint8_t original_ask_reference_number_delta[4];  /* bytes 12 to 15 */
+  uint8_t ask_reference_delta_number[4];           /* bytes 16 to 19 */
+  uint8_t bid_price[2];                            /* bytes 20 to 21 */
+  uint8_t bid_size[2];                             /* bytes 22 to 23 */
+  uint8_t ask_price[2];                            /* bytes 24 to 25 */
+  uint8_t ask_size[2];                             /* bytes 26 to 27 */
+} QuoteReplaceMessageShortForm;
+
+/* any Quote Replace Message Short Form at all: every byte one the checker chooses */
+static void any_quote_replace_message_short_form(QuoteReplaceMessageShortForm *record) {
+  for (size_t i = 0; i < 4; i++) { record->nanoseconds[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->original_bid_reference_number_delta[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->bid_reference_number_delta[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->original_ask_reference_number_delta[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->ask_reference_delta_number[i] = arbitrary(); }
+  for (size_t i = 0; i < 2; i++) { record->bid_price[i] = arbitrary(); }
+  for (size_t i = 0; i < 2; i++) { record->bid_size[i] = arbitrary(); }
+  for (size_t i = 0; i < 2; i++) { record->ask_price[i] = arbitrary(); }
+  for (size_t i = 0; i < 2; i++) { record->ask_size[i] = arbitrary(); }
+}
+
+/* Quote Replace Message Short Form to the wire: 28 bytes from at, returning where the next byte goes */
+static size_t encode_quote_replace_message_short_form(const QuoteReplaceMessageShortForm *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->nanoseconds[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->original_bid_reference_number_delta[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->bid_reference_number_delta[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->original_ask_reference_number_delta[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->ask_reference_delta_number[i]; }
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->bid_price[i]; }
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->bid_size[i]; }
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->ask_price[i]; }
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->ask_size[i]; }
+
+  return at;
+}
+
+/* Quote Replace Message Short Form off the wire: 28 bytes from at, returning where the next byte lies */
+static size_t decode_quote_replace_message_short_form(QuoteReplaceMessageShortForm *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { record->nanoseconds[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->original_bid_reference_number_delta[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->bid_reference_number_delta[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->original_ask_reference_number_delta[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->ask_reference_delta_number[i] = wire[at++]; }
+  for (size_t i = 0; i < 2; i++) { record->bid_price[i] = wire[at++]; }
+  for (size_t i = 0; i < 2; i++) { record->bid_size[i] = wire[at++]; }
+  for (size_t i = 0; i < 2; i++) { record->ask_price[i] = wire[at++]; }
+  for (size_t i = 0; i < 2; i++) { record->ask_size[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Quote Replace Message Short Form is what was written, byte for byte */
+static void equal_quote_replace_message_short_form(const QuoteReplaceMessageShortForm *read, const QuoteReplaceMessageShortForm *written) {
+  for (size_t i = 0; i < 4; i++) { assert(read->nanoseconds[i] == written->nanoseconds[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->original_bid_reference_number_delta[i] == written->original_bid_reference_number_delta[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->bid_reference_number_delta[i] == written->bid_reference_number_delta[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->original_ask_reference_number_delta[i] == written->original_ask_reference_number_delta[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->ask_reference_delta_number[i] == written->ask_reference_delta_number[i]); }
+  for (size_t i = 0; i < 2; i++) { assert(read->bid_price[i] == written->bid_price[i]); }
+  for (size_t i = 0; i < 2; i++) { assert(read->bid_size[i] == written->bid_size[i]); }
+  for (size_t i = 0; i < 2; i++) { assert(read->ask_price[i] == written->ask_price[i]); }
+  for (size_t i = 0; i < 2; i++) { assert(read->ask_size[i] == written->ask_size[i]); }
+}
+
+/* Quote Replace Message Short Form: written and read back, then read and written back */
+static void check_quote_replace_message_short_form(void) {
+  QuoteReplaceMessageShortForm sent;
+  QuoteReplaceMessageShortForm got;
+  uint8_t wire[28];
+  uint8_t again[28];
+
+  any_quote_replace_message_short_form(&sent);
+  assert(encode_quote_replace_message_short_form(&sent, wire, 0) == 28);
+  assert(decode_quote_replace_message_short_form(&got, wire, 0) == 28);
+  equal_quote_replace_message_short_form(&got, &sent);
+
+  for (size_t i = 0; i < 28; i++) { wire[i] = arbitrary(); }
+  assert(decode_quote_replace_message_short_form(&got, wire, 0) == 28);
+  assert(encode_quote_replace_message_short_form(&got, again, 0) == 28);
+  for (size_t i = 0; i < 28; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Quote Replace Message Long Form: 36 bytes ------------------------------- */
+
+/* Sent whenever a quote on the book is replaced. The replaced quote has new sequence numbers on both sides, replacing the prior sequence numbers. The long form of the message, with four byte prices and sizes. */
+typedef struct {
+  uint8_t nanoseconds[4];                          /* bytes 0 to 3 */
+  uint8_t original_bid_reference_number_delta[4];  /* bytes 4 to 7 */
+  uint8_t bid_reference_number_delta[4];           /* bytes 8 to 11 */
+  uint8_t original_ask_reference_number_delta[4];  /* bytes 12 to 15 */
+  uint8_t ask_reference_delta_number[4];           /* bytes 16 to 19 */
+  uint8_t bid_price_long[4];                       /* bytes 20 to 23 */
+  uint8_t bid_size_long[4];                        /* bytes 24 to 27 */
+  uint8_t ask_price_long[4];                       /* bytes 28 to 31 */
+  uint8_t ask_size_long[4];                        /* bytes 32 to 35 */
+} QuoteReplaceMessageLongForm;
+
+/* any Quote Replace Message Long Form at all: every byte one the checker chooses */
+static void any_quote_replace_message_long_form(QuoteReplaceMessageLongForm *record) {
+  for (size_t i = 0; i < 4; i++) { record->nanoseconds[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->original_bid_reference_number_delta[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->bid_reference_number_delta[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->original_ask_reference_number_delta[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->ask_reference_delta_number[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->bid_price_long[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->bid_size_long[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->ask_price_long[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->ask_size_long[i] = arbitrary(); }
+}
+
+/* Quote Replace Message Long Form to the wire: 36 bytes from at, returning where the next byte goes */
+static size_t encode_quote_replace_message_long_form(const QuoteReplaceMessageLongForm *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->nanoseconds[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->original_bid_reference_number_delta[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->bid_reference_number_delta[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->original_ask_reference_number_delta[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->ask_reference_delta_number[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->bid_price_long[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->bid_size_long[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->ask_price_long[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->ask_size_long[i]; }
+
+  return at;
+}
+
+/* Quote Replace Message Long Form off the wire: 36 bytes from at, returning where the next byte lies */
+static size_t decode_quote_replace_message_long_form(QuoteReplaceMessageLongForm *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { record->nanoseconds[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->original_bid_reference_number_delta[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->bid_reference_number_delta[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->original_ask_reference_number_delta[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->ask_reference_delta_number[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->bid_price_long[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->bid_size_long[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->ask_price_long[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->ask_size_long[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Quote Replace Message Long Form is what was written, byte for byte */
+static void equal_quote_replace_message_long_form(const QuoteReplaceMessageLongForm *read, const QuoteReplaceMessageLongForm *written) {
+  for (size_t i = 0; i < 4; i++) { assert(read->nanoseconds[i] == written->nanoseconds[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->original_bid_reference_number_delta[i] == written->original_bid_reference_number_delta[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->bid_reference_number_delta[i] == written->bid_reference_number_delta[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->original_ask_reference_number_delta[i] == written->original_ask_reference_number_delta[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->ask_reference_delta_number[i] == written->ask_reference_delta_number[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->bid_price_long[i] == written->bid_price_long[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->bid_size_long[i] == written->bid_size_long[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->ask_price_long[i] == written->ask_price_long[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->ask_size_long[i] == written->ask_size_long[i]); }
+}
+
+/* Quote Replace Message Long Form: written and read back, then read and written back */
+static void check_quote_replace_message_long_form(void) {
+  QuoteReplaceMessageLongForm sent;
+  QuoteReplaceMessageLongForm got;
+  uint8_t wire[36];
+  uint8_t again[36];
+
+  any_quote_replace_message_long_form(&sent);
+  assert(encode_quote_replace_message_long_form(&sent, wire, 0) == 36);
+  assert(decode_quote_replace_message_long_form(&got, wire, 0) == 36);
+  equal_quote_replace_message_long_form(&got, &sent);
+
+  for (size_t i = 0; i < 36; i++) { wire[i] = arbitrary(); }
+  assert(decode_quote_replace_message_long_form(&got, wire, 0) == 36);
+  assert(encode_quote_replace_message_long_form(&got, again, 0) == 36);
+  for (size_t i = 0; i < 36; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Quote Delete Message: 12 bytes ------------------------------------------ */
+
+/* Sent when a single quote is being cancelled. All remaining contracts are no longer accessible so the quote should be removed from the book. */
+typedef struct {
+  uint8_t nanoseconds[4];                 /* bytes 0 to 3 */
+  uint8_t bid_reference_number_delta[4];  /* bytes 4 to 7 */
+  uint8_t ask_reference_number_delta[4];  /* bytes 8 to 11 */
+} QuoteDeleteMessage;
+
+/* any Quote Delete Message at all: every byte one the checker chooses */
+static void any_quote_delete_message(QuoteDeleteMessage *record) {
+  for (size_t i = 0; i < 4; i++) { record->nanoseconds[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->bid_reference_number_delta[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->ask_reference_number_delta[i] = arbitrary(); }
+}
+
+/* Quote Delete Message to the wire: 12 bytes from at, returning where the next byte goes */
+static size_t encode_quote_delete_message(const QuoteDeleteMessage *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->nanoseconds[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->bid_reference_number_delta[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->ask_reference_number_delta[i]; }
+
+  return at;
+}
+
+/* Quote Delete Message off the wire: 12 bytes from at, returning where the next byte lies */
+static size_t decode_quote_delete_message(QuoteDeleteMessage *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { record->nanoseconds[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->bid_reference_number_delta[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->ask_reference_number_delta[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Quote Delete Message is what was written, byte for byte */
+static void equal_quote_delete_message(const QuoteDeleteMessage *read, const QuoteDeleteMessage *written) {
+  for (size_t i = 0; i < 4; i++) { assert(read->nanoseconds[i] == written->nanoseconds[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->bid_reference_number_delta[i] == written->bid_reference_number_delta[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->ask_reference_number_delta[i] == written->ask_reference_number_delta[i]); }
+}
+
+/* Quote Delete Message: written and read back, then read and written back */
+static void check_quote_delete_message(void) {
+  QuoteDeleteMessage sent;
+  QuoteDeleteMessage got;
+  uint8_t wire[12];
+  uint8_t again[12];
+
+  any_quote_delete_message(&sent);
+  assert(encode_quote_delete_message(&sent, wire, 0) == 12);
+  assert(decode_quote_delete_message(&got, wire, 0) == 12);
+  equal_quote_delete_message(&got, &sent);
+
+  for (size_t i = 0; i < 12; i++) { wire[i] = arbitrary(); }
+  assert(decode_quote_delete_message(&got, wire, 0) == 12);
+  assert(encode_quote_delete_message(&got, again, 0) == 12);
+  for (size_t i = 0; i < 12; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Options Trade Non Auction Message: 25 bytes ----------------------------- */
+
+/* Provides execution details for normal match events involving non displayable order types, for which no Add Order or Add Quote message is generated. Auction events are reported separately by the Options Cross Trade message. */
+typedef struct {
+  uint8_t nanoseconds[4];      /* bytes 0 to 3 */
+  uint8_t buy_sell_indicator;  /* byte 4 */
+  uint8_t option_id[4];        /* bytes 5 to 8 */
+  uint8_t cross_number[4];     /* bytes 9 to 12 */
+  uint8_t match_number[4];     /* bytes 13 to 16 */
+  uint8_t price_long[4];       /* bytes 17 to 20 */
+  uint8_t volume_long[4];      /* bytes 21 to 24 */
+} OptionsTradeNonAuctionMessage;
+
+/* any Options Trade Non Auction Message at all: every byte one the checker chooses */
+static void any_options_trade_non_auction_message(OptionsTradeNonAuctionMessage *record) {
+  for (size_t i = 0; i < 4; i++) { record->nanoseconds[i] = arbitrary(); }
+  record->buy_sell_indicator = arbitrary();
+  for (size_t i = 0; i < 4; i++) { record->option_id[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->cross_number[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->match_number[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->price_long[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->volume_long[i] = arbitrary(); }
+}
+
+/* Options Trade Non Auction Message to the wire: 25 bytes from at, returning where the next byte goes */
+static size_t encode_options_trade_non_auction_message(const OptionsTradeNonAuctionMessage *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->nanoseconds[i]; }
+  wire[at++] = record->buy_sell_indicator;
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->option_id[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->cross_number[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->match_number[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->price_long[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->volume_long[i]; }
+
+  return at;
+}
+
+/* Options Trade Non Auction Message off the wire: 25 bytes from at, returning where the next byte lies */
+static size_t decode_options_trade_non_auction_message(OptionsTradeNonAuctionMessage *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { record->nanoseconds[i] = wire[at++]; }
+  record->buy_sell_indicator = wire[at++];
+  for (size_t i = 0; i < 4; i++) { record->option_id[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->cross_number[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->match_number[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->price_long[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->volume_long[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Options Trade Non Auction Message is what was written, byte for byte */
+static void equal_options_trade_non_auction_message(const OptionsTradeNonAuctionMessage *read, const OptionsTradeNonAuctionMessage *written) {
+  for (size_t i = 0; i < 4; i++) { assert(read->nanoseconds[i] == written->nanoseconds[i]); }
+  assert(read->buy_sell_indicator == written->buy_sell_indicator);
+  for (size_t i = 0; i < 4; i++) { assert(read->option_id[i] == written->option_id[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->cross_number[i] == written->cross_number[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->match_number[i] == written->match_number[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->price_long[i] == written->price_long[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->volume_long[i] == written->volume_long[i]); }
+}
+
+/* Options Trade Non Auction Message: written and read back, then read and written back */
+static void check_options_trade_non_auction_message(void) {
+  OptionsTradeNonAuctionMessage sent;
+  OptionsTradeNonAuctionMessage got;
+  uint8_t wire[25];
+  uint8_t again[25];
+
+  any_options_trade_non_auction_message(&sent);
+  assert(encode_options_trade_non_auction_message(&sent, wire, 0) == 25);
+  assert(decode_options_trade_non_auction_message(&got, wire, 0) == 25);
+  equal_options_trade_non_auction_message(&got, &sent);
+
+  for (size_t i = 0; i < 25; i++) { wire[i] = arbitrary(); }
+  assert(decode_options_trade_non_auction_message(&got, wire, 0) == 25);
+  assert(encode_options_trade_non_auction_message(&got, again, 0) == 25);
+  for (size_t i = 0; i < 25; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Options Cross Trade Message: 25 bytes ----------------------------------- */
+
+/* Sent for every option when an auction in that option is completed, indicating the bulk volume associated with the auction event. Also used to report all executions within a price improvement (PRISM) auction. To avoid double counting of auction volume, firms should not include transactions marked as auction trades. */
+typedef struct {
+  uint8_t nanoseconds[4];   /* bytes 0 to 3 */
+  uint8_t option_id[4];     /* bytes 4 to 7 */
+  uint8_t cross_number[4];  /* bytes 8 to 11 */
+  uint8_t match_number[4];  /* bytes 12 to 15 */
+  uint8_t cross_type;       /* byte 16 */
+  uint8_t price_long[4];    /* bytes 17 to 20 */
+  uint8_t volume_long[4];   /* bytes 21 to 24 */
+} OptionsCrossTradeMessage;
+
+/* any Options Cross Trade Message at all: every byte one the checker chooses */
+static void any_options_cross_trade_message(OptionsCrossTradeMessage *record) {
+  for (size_t i = 0; i < 4; i++) { record->nanoseconds[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->option_id[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->cross_number[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->match_number[i] = arbitrary(); }
+  record->cross_type = arbitrary();
+  for (size_t i = 0; i < 4; i++) { record->price_long[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->volume_long[i] = arbitrary(); }
+}
+
+/* Options Cross Trade Message to the wire: 25 bytes from at, returning where the next byte goes */
+static size_t encode_options_cross_trade_message(const OptionsCrossTradeMessage *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->nanoseconds[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->option_id[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->cross_number[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->match_number[i]; }
+  wire[at++] = record->cross_type;
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->price_long[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->volume_long[i]; }
+
+  return at;
+}
+
+/* Options Cross Trade Message off the wire: 25 bytes from at, returning where the next byte lies */
+static size_t decode_options_cross_trade_message(OptionsCrossTradeMessage *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { record->nanoseconds[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->option_id[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->cross_number[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->match_number[i] = wire[at++]; }
+  record->cross_type = wire[at++];
+  for (size_t i = 0; i < 4; i++) { record->price_long[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->volume_long[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Options Cross Trade Message is what was written, byte for byte */
+static void equal_options_cross_trade_message(const OptionsCrossTradeMessage *read, const OptionsCrossTradeMessage *written) {
+  for (size_t i = 0; i < 4; i++) { assert(read->nanoseconds[i] == written->nanoseconds[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->option_id[i] == written->option_id[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->cross_number[i] == written->cross_number[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->match_number[i] == written->match_number[i]); }
+  assert(read->cross_type == written->cross_type);
+  for (size_t i = 0; i < 4; i++) { assert(read->price_long[i] == written->price_long[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->volume_long[i] == written->volume_long[i]); }
+}
+
+/* Options Cross Trade Message: written and read back, then read and written back */
+static void check_options_cross_trade_message(void) {
+  OptionsCrossTradeMessage sent;
+  OptionsCrossTradeMessage got;
+  uint8_t wire[25];
+  uint8_t again[25];
+
+  any_options_cross_trade_message(&sent);
+  assert(encode_options_cross_trade_message(&sent, wire, 0) == 25);
+  assert(decode_options_cross_trade_message(&got, wire, 0) == 25);
+  equal_options_cross_trade_message(&got, &sent);
+
+  for (size_t i = 0; i < 25; i++) { wire[i] = arbitrary(); }
+  assert(decode_options_cross_trade_message(&got, wire, 0) == 25);
+  assert(encode_options_cross_trade_message(&got, again, 0) == 25);
+  for (size_t i = 0; i < 25; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Broken Trade Or Order Execution Message: 12 bytes ----------------------- */
+
+/* Sent whenever an execution on Nasdaq is broken, which may happen if it is found to be clearly erroneous pursuant to the Nasdaq Clearly Erroneous Policy. A trade break is final; once a trade is broken it cannot be reinstated. */
+typedef struct {
+  uint8_t nanoseconds[4];   /* bytes 0 to 3 */
+  uint8_t cross_number[4];  /* bytes 4 to 7 */
+  uint8_t match_number[4];  /* bytes 8 to 11 */
+} BrokenTradeOrOrderExecutionMessage;
+
+/* any Broken Trade Or Order Execution Message at all: every byte one the checker chooses */
+static void any_broken_trade_or_order_execution_message(BrokenTradeOrOrderExecutionMessage *record) {
+  for (size_t i = 0; i < 4; i++) { record->nanoseconds[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->cross_number[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->match_number[i] = arbitrary(); }
+}
+
+/* Broken Trade Or Order Execution Message to the wire: 12 bytes from at, returning where the next byte goes */
+static size_t encode_broken_trade_or_order_execution_message(const BrokenTradeOrOrderExecutionMessage *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->nanoseconds[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->cross_number[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->match_number[i]; }
+
+  return at;
+}
+
+/* Broken Trade Or Order Execution Message off the wire: 12 bytes from at, returning where the next byte lies */
+static size_t decode_broken_trade_or_order_execution_message(BrokenTradeOrOrderExecutionMessage *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { record->nanoseconds[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->cross_number[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->match_number[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Broken Trade Or Order Execution Message is what was written, byte for byte */
+static void equal_broken_trade_or_order_execution_message(const BrokenTradeOrOrderExecutionMessage *read, const BrokenTradeOrOrderExecutionMessage *written) {
+  for (size_t i = 0; i < 4; i++) { assert(read->nanoseconds[i] == written->nanoseconds[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->cross_number[i] == written->cross_number[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->match_number[i] == written->match_number[i]); }
+}
+
+/* Broken Trade Or Order Execution Message: written and read back, then read and written back */
+static void check_broken_trade_or_order_execution_message(void) {
+  BrokenTradeOrOrderExecutionMessage sent;
+  BrokenTradeOrOrderExecutionMessage got;
+  uint8_t wire[12];
+  uint8_t again[12];
+
+  any_broken_trade_or_order_execution_message(&sent);
+  assert(encode_broken_trade_or_order_execution_message(&sent, wire, 0) == 12);
+  assert(decode_broken_trade_or_order_execution_message(&got, wire, 0) == 12);
+  equal_broken_trade_or_order_execution_message(&got, &sent);
+
+  for (size_t i = 0; i < 12; i++) { wire[i] = arbitrary(); }
+  assert(decode_broken_trade_or_order_execution_message(&got, wire, 0) == 12);
+  assert(encode_broken_trade_or_order_execution_message(&got, again, 0) == 12);
+  for (size_t i = 0; i < 12; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Net Order Imbalance Indicator Message: 30 bytes ------------------------- */
+
+/* Nasdaq disseminates Net Order Imbalance Indicator data at five second intervals in the minutes leading up to the Nasdaq Opening Auction events, and for price improvement (PRISM) auctions. */
+typedef struct {
+  uint8_t nanoseconds[4];           /* bytes 0 to 3 */
+  uint8_t auction_id[4];            /* bytes 4 to 7 */
+  uint8_t auction_type;             /* byte 8 */
+  uint8_t paired_contracts[4];      /* bytes 9 to 12 */
+  uint8_t imbalance_direction;      /* byte 13 */
+  uint8_t option_id[4];             /* bytes 14 to 17 */
+  uint8_t imbalance_price[4];       /* bytes 18 to 21 */
+  uint8_t imbalance_volume[4];      /* bytes 22 to 25 */
+  uint8_t customer_firm_indicator;  /* byte 26 */
+  uint8_t reserved_3[3];            /* bytes 27 to 29 */
+} NetOrderImbalanceIndicatorMessage;
+
+/* any Net Order Imbalance Indicator Message at all: every byte one the checker chooses */
+static void any_net_order_imbalance_indicator_message(NetOrderImbalanceIndicatorMessage *record) {
+  for (size_t i = 0; i < 4; i++) { record->nanoseconds[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->auction_id[i] = arbitrary(); }
+  record->auction_type = arbitrary();
+  for (size_t i = 0; i < 4; i++) { record->paired_contracts[i] = arbitrary(); }
+  record->imbalance_direction = arbitrary();
+  for (size_t i = 0; i < 4; i++) { record->option_id[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->imbalance_price[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->imbalance_volume[i] = arbitrary(); }
+  record->customer_firm_indicator = arbitrary();
+  for (size_t i = 0; i < 3; i++) { record->reserved_3[i] = arbitrary(); }
+}
+
+/* Net Order Imbalance Indicator Message to the wire: 30 bytes from at, returning where the next byte goes */
+static size_t encode_net_order_imbalance_indicator_message(const NetOrderImbalanceIndicatorMessage *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->nanoseconds[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->auction_id[i]; }
+  wire[at++] = record->auction_type;
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->paired_contracts[i]; }
+  wire[at++] = record->imbalance_direction;
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->option_id[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->imbalance_price[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->imbalance_volume[i]; }
+  wire[at++] = record->customer_firm_indicator;
+  for (size_t i = 0; i < 3; i++) { wire[at++] = record->reserved_3[i]; }
+
+  return at;
+}
+
+/* Net Order Imbalance Indicator Message off the wire: 30 bytes from at, returning where the next byte lies */
+static size_t decode_net_order_imbalance_indicator_message(NetOrderImbalanceIndicatorMessage *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { record->nanoseconds[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->auction_id[i] = wire[at++]; }
+  record->auction_type = wire[at++];
+  for (size_t i = 0; i < 4; i++) { record->paired_contracts[i] = wire[at++]; }
+  record->imbalance_direction = wire[at++];
+  for (size_t i = 0; i < 4; i++) { record->option_id[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->imbalance_price[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->imbalance_volume[i] = wire[at++]; }
+  record->customer_firm_indicator = wire[at++];
+  for (size_t i = 0; i < 3; i++) { record->reserved_3[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Net Order Imbalance Indicator Message is what was written, byte for byte */
+static void equal_net_order_imbalance_indicator_message(const NetOrderImbalanceIndicatorMessage *read, const NetOrderImbalanceIndicatorMessage *written) {
+  for (size_t i = 0; i < 4; i++) { assert(read->nanoseconds[i] == written->nanoseconds[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->auction_id[i] == written->auction_id[i]); }
+  assert(read->auction_type == written->auction_type);
+  for (size_t i = 0; i < 4; i++) { assert(read->paired_contracts[i] == written->paired_contracts[i]); }
+  assert(read->imbalance_direction == written->imbalance_direction);
+  for (size_t i = 0; i < 4; i++) { assert(read->option_id[i] == written->option_id[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->imbalance_price[i] == written->imbalance_price[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->imbalance_volume[i] == written->imbalance_volume[i]); }
+  assert(read->customer_firm_indicator == written->customer_firm_indicator);
+  for (size_t i = 0; i < 3; i++) { assert(read->reserved_3[i] == written->reserved_3[i]); }
+}
+
+/* Net Order Imbalance Indicator Message: written and read back, then read and written back */
+static void check_net_order_imbalance_indicator_message(void) {
+  NetOrderImbalanceIndicatorMessage sent;
+  NetOrderImbalanceIndicatorMessage got;
+  uint8_t wire[30];
+  uint8_t again[30];
+
+  any_net_order_imbalance_indicator_message(&sent);
+  assert(encode_net_order_imbalance_indicator_message(&sent, wire, 0) == 30);
+  assert(decode_net_order_imbalance_indicator_message(&got, wire, 0) == 30);
+  equal_net_order_imbalance_indicator_message(&got, &sent);
+
+  for (size_t i = 0; i < 30; i++) { wire[i] = arbitrary(); }
+  assert(decode_net_order_imbalance_indicator_message(&got, wire, 0) == 30);
+  assert(encode_net_order_imbalance_indicator_message(&got, again, 0) == 30);
+  for (size_t i = 0; i < 30; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- What esbmc checks ------------------------------------------------------- */
+
+/* every record of the protocol, each on its own buffers */
+static void checks(void) {
+  check_server_packet_header();
+  check_login_accepted_packet();
+  check_login_rejected_packet();
+  check_seconds_message();
+  check_system_event_message();
+  check_base_reference_message();
+  check_options_directory_message();
+  check_options_trading_action_message();
+  check_option_open_message();
+  check_add_order_message_short_form();
+  check_add_order_message_long_form();
+  check_add_quote_message_short_form();
+  check_add_quote_message_long_form();
+  check_single_side_executed_message();
+  check_single_side_executed_with_price_message();
+  check_order_cancel_message();
+  check_single_side_replace_message_short_form();
+  check_single_side_replace_message_long_form();
+  check_single_side_delete_message();
+  check_single_side_update_message();
+  check_quote_replace_message_short_form();
+  check_quote_replace_message_long_form();
+  check_quote_delete_message();
+  check_options_trade_non_auction_message();
+  check_options_cross_trade_message();
+  check_broken_trade_or_order_execution_message();
+  check_net_order_imbalance_indicator_message();
+}
+
+int main(void) {
+#ifdef CONCRETE
+  for (pattern = 0; pattern < 4; pattern++) { checks(); }
+#else
+  checks();
+#endif
+
+  return 0;
+}
