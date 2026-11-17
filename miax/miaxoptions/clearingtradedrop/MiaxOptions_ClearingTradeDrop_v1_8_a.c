@@ -119,17 +119,17 @@ static void check_sesm_packet_header(void) {
 
 /* This message format is used to notify firms of the state changes of the system. Firms can use notifications as triggers in their system to ensure electronic synchronization of systems. */
 typedef struct {
-  uint8_t notification_time[8];  /* bytes 0 to 7 */
-  uint8_t ctd_version[8];        /* bytes 8 to 15 */
-  uint8_t session_i_d[4];        /* bytes 16 to 19 */
-  uint8_t system_status;         /* byte 20 */
+  uint8_t notification_time[8];   /* bytes 0 to 7 */
+  uint8_t ctd_version[8];         /* bytes 8 to 15 */
+  uint8_t trading_session_id[4];  /* bytes 16 to 19 */
+  uint8_t system_status;          /* byte 20 */
 } SystemState;
 
 /* any System State at all: every byte one the checker chooses */
 static void any_system_state(SystemState *record) {
   for (size_t i = 0; i < 8; i++) { record->notification_time[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->ctd_version[i] = arbitrary(); }
-  for (size_t i = 0; i < 4; i++) { record->session_i_d[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->trading_session_id[i] = arbitrary(); }
   record->system_status = arbitrary();
 }
 
@@ -137,7 +137,7 @@ static void any_system_state(SystemState *record) {
 static size_t encode_system_state(const SystemState *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->notification_time[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->ctd_version[i]; }
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->session_i_d[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->trading_session_id[i]; }
   wire[at++] = record->system_status;
 
   return at;
@@ -147,7 +147,7 @@ static size_t encode_system_state(const SystemState *record, uint8_t *wire, size
 static size_t decode_system_state(SystemState *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 8; i++) { record->notification_time[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->ctd_version[i] = wire[at++]; }
-  for (size_t i = 0; i < 4; i++) { record->session_i_d[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->trading_session_id[i] = wire[at++]; }
   record->system_status = wire[at++];
 
   return at;
@@ -157,7 +157,7 @@ static size_t decode_system_state(SystemState *record, const uint8_t *wire, size
 static void equal_system_state(const SystemState *read, const SystemState *written) {
   for (size_t i = 0; i < 8; i++) { assert(read->notification_time[i] == written->notification_time[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->ctd_version[i] == written->ctd_version[i]); }
-  for (size_t i = 0; i < 4; i++) { assert(read->session_i_d[i] == written->session_i_d[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->trading_session_id[i] == written->trading_session_id[i]); }
   assert(read->system_status == written->system_status);
 }
 
@@ -196,7 +196,7 @@ typedef struct {
   uint8_t reference_trade_id[4];                 /* bytes 47 to 50 */
   uint8_t reference_correction_number;           /* byte 51 */
   uint8_t correction_type;                       /* byte 52 */
-  uint8_t event_id_binary_u_4[4];                /* bytes 53 to 56 */
+  uint8_t event_id[4];                           /* bytes 53 to 56 */
   uint8_t reserved_16[16];                       /* bytes 57 to 72 */
   uint8_t product_id[4];                         /* bytes 73 to 76 */
   uint8_t underlying_symbol[11];                 /* bytes 77 to 87 */
@@ -270,7 +270,7 @@ static void any_trade_message(TradeMessage *record) {
   for (size_t i = 0; i < 4; i++) { record->reference_trade_id[i] = arbitrary(); }
   record->reference_correction_number = arbitrary();
   record->correction_type = arbitrary();
-  for (size_t i = 0; i < 4; i++) { record->event_id_binary_u_4[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->event_id[i] = arbitrary(); }
   for (size_t i = 0; i < 16; i++) { record->reserved_16[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->product_id[i] = arbitrary(); }
   for (size_t i = 0; i < 11; i++) { record->underlying_symbol[i] = arbitrary(); }
@@ -344,7 +344,7 @@ static size_t encode_trade_message(const TradeMessage *record, uint8_t *wire, si
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->reference_trade_id[i]; }
   wire[at++] = record->reference_correction_number;
   wire[at++] = record->correction_type;
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->event_id_binary_u_4[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->event_id[i]; }
   for (size_t i = 0; i < 16; i++) { wire[at++] = record->reserved_16[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->product_id[i]; }
   for (size_t i = 0; i < 11; i++) { wire[at++] = record->underlying_symbol[i]; }
@@ -420,7 +420,7 @@ static size_t decode_trade_message(TradeMessage *record, const uint8_t *wire, si
   for (size_t i = 0; i < 4; i++) { record->reference_trade_id[i] = wire[at++]; }
   record->reference_correction_number = wire[at++];
   record->correction_type = wire[at++];
-  for (size_t i = 0; i < 4; i++) { record->event_id_binary_u_4[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->event_id[i] = wire[at++]; }
   for (size_t i = 0; i < 16; i++) { record->reserved_16[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->product_id[i] = wire[at++]; }
   for (size_t i = 0; i < 11; i++) { record->underlying_symbol[i] = wire[at++]; }
@@ -496,7 +496,7 @@ static void equal_trade_message(const TradeMessage *read, const TradeMessage *wr
   for (size_t i = 0; i < 4; i++) { assert(read->reference_trade_id[i] == written->reference_trade_id[i]); }
   assert(read->reference_correction_number == written->reference_correction_number);
   assert(read->correction_type == written->correction_type);
-  for (size_t i = 0; i < 4; i++) { assert(read->event_id_binary_u_4[i] == written->event_id_binary_u_4[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->event_id[i] == written->event_id[i]); }
   for (size_t i = 0; i < 16; i++) { assert(read->reserved_16[i] == written->reserved_16[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->product_id[i] == written->product_id[i]); }
   for (size_t i = 0; i < 11; i++) { assert(read->underlying_symbol[i] == written->underlying_symbol[i]); }
@@ -584,7 +584,7 @@ typedef struct {
   uint8_t metric_type;                         /* byte 104 */
   uint8_t protection_type;                     /* byte 105 */
   uint8_t event_type;                          /* byte 106 */
-  uint8_t event_id_binary_4u_4[4];             /* bytes 107 to 110 */
+  uint8_t event_id[4];                         /* bytes 107 to 110 */
   uint8_t configured_counting_time_period[4];  /* bytes 111 to 114 */
   uint8_t configured_max_quantity[4];          /* bytes 115 to 118 */
   uint8_t current_quantity[4];                 /* bytes 119 to 122 */
@@ -602,7 +602,7 @@ static void any_risk_notification_message(RiskNotificationMessage *record) {
   record->metric_type = arbitrary();
   record->protection_type = arbitrary();
   record->event_type = arbitrary();
-  for (size_t i = 0; i < 4; i++) { record->event_id_binary_4u_4[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->event_id[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->configured_counting_time_period[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->configured_max_quantity[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->current_quantity[i] = arbitrary(); }
@@ -620,7 +620,7 @@ static size_t encode_risk_notification_message(const RiskNotificationMessage *re
   wire[at++] = record->metric_type;
   wire[at++] = record->protection_type;
   wire[at++] = record->event_type;
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->event_id_binary_4u_4[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->event_id[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->configured_counting_time_period[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->configured_max_quantity[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->current_quantity[i]; }
@@ -640,7 +640,7 @@ static size_t decode_risk_notification_message(RiskNotificationMessage *record, 
   record->metric_type = wire[at++];
   record->protection_type = wire[at++];
   record->event_type = wire[at++];
-  for (size_t i = 0; i < 4; i++) { record->event_id_binary_4u_4[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->event_id[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->configured_counting_time_period[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->configured_max_quantity[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->current_quantity[i] = wire[at++]; }
@@ -660,7 +660,7 @@ static void equal_risk_notification_message(const RiskNotificationMessage *read,
   assert(read->metric_type == written->metric_type);
   assert(read->protection_type == written->protection_type);
   assert(read->event_type == written->event_type);
-  for (size_t i = 0; i < 4; i++) { assert(read->event_id_binary_4u_4[i] == written->event_id_binary_4u_4[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->event_id[i] == written->event_id[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->configured_counting_time_period[i] == written->configured_counting_time_period[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->configured_max_quantity[i] == written->configured_max_quantity[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->current_quantity[i] == written->current_quantity[i]); }

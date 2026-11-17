@@ -455,37 +455,37 @@ static void check_subsession_leave_response_message(void) {
 
 /* OrderAckMessage */
 typedef struct {
-  uint8_t account_account[16];             /* bytes 0 to 15 */
-  uint8_t transact_time[8];                /* bytes 16 to 23 */
-  uint8_t instrument_id[4];                /* bytes 24 to 27 */
-  uint8_t market_participant_id[4];        /* bytes 28 to 31 */
-  uint8_t cl_ord_id[8];                    /* bytes 32 to 39 */
-  uint8_t clearing_account[4];             /* bytes 40 to 43 */
-  uint8_t orig_cl_ord_id[8];               /* bytes 44 to 51 */
-  uint8_t order_id[8];                     /* bytes 52 to 59 */
-  uint8_t customer_or_firm;                /* byte 60 */
-  uint8_t open_close;                      /* byte 61 */
-  uint8_t attributed_quote;                /* byte 62 */
-  uint8_t time_in_force;                   /* byte 63 */
-  uint8_t cancel_instead_of_slide;         /* byte 64 */
-  uint8_t display_inst;                    /* byte 65 */
-  uint8_t exec_inst;                       /* byte 66 */
-  uint8_t ord_type;                        /* byte 67 */
-  uint8_t target_party_id[4];              /* bytes 68 to 71 */
-  uint8_t auction_id[4];                   /* bytes 72 to 75 */
-  uint8_t clearing_firm[4];                /* bytes 76 to 79 */
-  uint8_t optional_data[16];               /* bytes 80 to 95 */
-  uint8_t routing_firm_id[4];              /* bytes 96 to 99 */
-  uint8_t aiq[3];                          /* bytes 100 to 102 */
-  uint8_t side;                            /* byte 103 */
-  uint8_t price_price_8[8];                /* bytes 104 to 111 */
-  uint8_t order_qty_quantity_non_zero[4];  /* bytes 112 to 115 */
-  uint8_t leaves_qty[4];                   /* bytes 116 to 119 */
-  uint8_t effective_limit_price[8];        /* bytes 120 to 127 */
-  uint8_t display_price[8];                /* bytes 128 to 135 */
-  uint8_t reason_code;                     /* byte 136 */
-  uint8_t ack_type;                        /* byte 137 */
-  uint8_t throttle_indicator;              /* byte 138 */
+  uint8_t account_account[16];       /* bytes 0 to 15 */
+  uint8_t transact_time[8];          /* bytes 16 to 23 */
+  uint8_t instrument_id[4];          /* bytes 24 to 27 */
+  uint8_t market_participant_id[4];  /* bytes 28 to 31 */
+  uint8_t cl_ord_id[8];              /* bytes 32 to 39 */
+  uint8_t clearing_account[4];       /* bytes 40 to 43 */
+  uint8_t orig_cl_ord_id[8];         /* bytes 44 to 51 */
+  uint8_t order_id[8];               /* bytes 52 to 59 */
+  uint8_t customer_or_firm;          /* byte 60 */
+  uint8_t open_close;                /* byte 61 */
+  uint8_t attributed_quote;          /* byte 62 */
+  uint8_t time_in_force;             /* byte 63 */
+  uint8_t cancel_instead_of_slide;   /* byte 64 */
+  uint8_t display_inst;              /* byte 65 */
+  uint8_t exec_inst;                 /* byte 66 */
+  uint8_t ord_type;                  /* byte 67 */
+  uint8_t target_party_id[4];        /* bytes 68 to 71 */
+  uint8_t auction_id[4];             /* bytes 72 to 75 */
+  uint8_t clearing_firm[4];          /* bytes 76 to 79 */
+  uint8_t optional_data[16];         /* bytes 80 to 95 */
+  uint8_t routing_firm_id[4];        /* bytes 96 to 99 */
+  uint8_t aiq[3];                    /* bytes 100 to 102 */
+  uint8_t side;                      /* byte 103 */
+  uint8_t price_price_8[8];          /* bytes 104 to 111 */
+  uint8_t order_qty[4];              /* bytes 112 to 115 */
+  uint8_t leaves_qty[4];             /* bytes 116 to 119 */
+  uint8_t effective_limit_price[8];  /* bytes 120 to 127 */
+  uint8_t display_price[8];          /* bytes 128 to 135 */
+  uint8_t reason_code;               /* byte 136 */
+  uint8_t ack_type;                  /* byte 137 */
+  uint8_t throttle_indicator;        /* byte 138 */
 } OrderAckMessage;
 
 /* any Order Ack Message at all: every byte one the checker chooses */
@@ -514,7 +514,7 @@ static void any_order_ack_message(OrderAckMessage *record) {
   for (size_t i = 0; i < 3; i++) { record->aiq[i] = arbitrary(); }
   record->side = arbitrary();
   for (size_t i = 0; i < 8; i++) { record->price_price_8[i] = arbitrary(); }
-  for (size_t i = 0; i < 4; i++) { record->order_qty_quantity_non_zero[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->order_qty[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->leaves_qty[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->effective_limit_price[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->display_price[i] = arbitrary(); }
@@ -549,7 +549,7 @@ static size_t encode_order_ack_message(const OrderAckMessage *record, uint8_t *w
   for (size_t i = 0; i < 3; i++) { wire[at++] = record->aiq[i]; }
   wire[at++] = record->side;
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->price_price_8[i]; }
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->order_qty_quantity_non_zero[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->order_qty[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->leaves_qty[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->effective_limit_price[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->display_price[i]; }
@@ -586,7 +586,7 @@ static size_t decode_order_ack_message(OrderAckMessage *record, const uint8_t *w
   for (size_t i = 0; i < 3; i++) { record->aiq[i] = wire[at++]; }
   record->side = wire[at++];
   for (size_t i = 0; i < 8; i++) { record->price_price_8[i] = wire[at++]; }
-  for (size_t i = 0; i < 4; i++) { record->order_qty_quantity_non_zero[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->order_qty[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->leaves_qty[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->effective_limit_price[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->display_price[i] = wire[at++]; }
@@ -623,7 +623,7 @@ static void equal_order_ack_message(const OrderAckMessage *read, const OrderAckM
   for (size_t i = 0; i < 3; i++) { assert(read->aiq[i] == written->aiq[i]); }
   assert(read->side == written->side);
   for (size_t i = 0; i < 8; i++) { assert(read->price_price_8[i] == written->price_price_8[i]); }
-  for (size_t i = 0; i < 4; i++) { assert(read->order_qty_quantity_non_zero[i] == written->order_qty_quantity_non_zero[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->order_qty[i] == written->order_qty[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->leaves_qty[i] == written->leaves_qty[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->effective_limit_price[i] == written->effective_limit_price[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->display_price[i] == written->display_price[i]); }
@@ -654,19 +654,19 @@ static void check_order_ack_message(void) {
 
 /* UnsolicitedModifyAckMessage */
 typedef struct {
-  uint8_t transact_time[8];                /* bytes 0 to 7 */
-  uint8_t instrument_id[4];                /* bytes 8 to 11 */
-  uint8_t market_participant_id[4];        /* bytes 12 to 15 */
-  uint8_t orig_cl_ord_id[8];               /* bytes 16 to 23 */
-  uint8_t order_id[8];                     /* bytes 24 to 31 */
-  uint8_t price_price_8[8];                /* bytes 32 to 39 */
-  uint8_t order_qty_quantity_non_zero[4];  /* bytes 40 to 43 */
-  uint8_t leaves_qty[4];                   /* bytes 44 to 47 */
-  uint8_t effective_limit_price[8];        /* bytes 48 to 55 */
-  uint8_t display_price[8];                /* bytes 56 to 63 */
-  uint8_t restatement_reason;              /* byte 64 */
-  uint8_t reason_code;                     /* byte 65 */
-  uint8_t ack_type;                        /* byte 66 */
+  uint8_t transact_time[8];          /* bytes 0 to 7 */
+  uint8_t instrument_id[4];          /* bytes 8 to 11 */
+  uint8_t market_participant_id[4];  /* bytes 12 to 15 */
+  uint8_t orig_cl_ord_id[8];         /* bytes 16 to 23 */
+  uint8_t order_id[8];               /* bytes 24 to 31 */
+  uint8_t price_price_8[8];          /* bytes 32 to 39 */
+  uint8_t order_qty[4];              /* bytes 40 to 43 */
+  uint8_t leaves_qty[4];             /* bytes 44 to 47 */
+  uint8_t effective_limit_price[8];  /* bytes 48 to 55 */
+  uint8_t display_price[8];          /* bytes 56 to 63 */
+  uint8_t restatement_reason;        /* byte 64 */
+  uint8_t reason_code;               /* byte 65 */
+  uint8_t ack_type;                  /* byte 66 */
 } UnsolicitedModifyAckMessage;
 
 /* any Unsolicited Modify Ack Message at all: every byte one the checker chooses */
@@ -677,7 +677,7 @@ static void any_unsolicited_modify_ack_message(UnsolicitedModifyAckMessage *reco
   for (size_t i = 0; i < 8; i++) { record->orig_cl_ord_id[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->order_id[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->price_price_8[i] = arbitrary(); }
-  for (size_t i = 0; i < 4; i++) { record->order_qty_quantity_non_zero[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->order_qty[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->leaves_qty[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->effective_limit_price[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->display_price[i] = arbitrary(); }
@@ -694,7 +694,7 @@ static size_t encode_unsolicited_modify_ack_message(const UnsolicitedModifyAckMe
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->orig_cl_ord_id[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->order_id[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->price_price_8[i]; }
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->order_qty_quantity_non_zero[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->order_qty[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->leaves_qty[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->effective_limit_price[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->display_price[i]; }
@@ -713,7 +713,7 @@ static size_t decode_unsolicited_modify_ack_message(UnsolicitedModifyAckMessage 
   for (size_t i = 0; i < 8; i++) { record->orig_cl_ord_id[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->order_id[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->price_price_8[i] = wire[at++]; }
-  for (size_t i = 0; i < 4; i++) { record->order_qty_quantity_non_zero[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->order_qty[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->leaves_qty[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->effective_limit_price[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->display_price[i] = wire[at++]; }
@@ -732,7 +732,7 @@ static void equal_unsolicited_modify_ack_message(const UnsolicitedModifyAckMessa
   for (size_t i = 0; i < 8; i++) { assert(read->orig_cl_ord_id[i] == written->orig_cl_ord_id[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->order_id[i] == written->order_id[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->price_price_8[i] == written->price_price_8[i]); }
-  for (size_t i = 0; i < 4; i++) { assert(read->order_qty_quantity_non_zero[i] == written->order_qty_quantity_non_zero[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->order_qty[i] == written->order_qty[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->leaves_qty[i] == written->leaves_qty[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->effective_limit_price[i] == written->effective_limit_price[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->display_price[i] == written->display_price[i]); }
@@ -1010,19 +1010,19 @@ static void check_quote_acks_group_encoding(void) {
 
 /* NewIocQuoteAckMessage */
 typedef struct {
-  uint8_t transact_time[8];                /* bytes 0 to 7 */
-  uint8_t market_participant_id[4];        /* bytes 8 to 11 */
-  uint8_t cl_ord_id[8];                    /* bytes 12 to 19 */
-  uint8_t clearing_account[4];             /* bytes 20 to 23 */
-  uint8_t aiq[3];                          /* bytes 24 to 26 */
-  uint8_t instrument_id[4];                /* bytes 27 to 30 */
-  uint8_t side;                            /* byte 31 */
-  uint8_t order_id[8];                     /* bytes 32 to 39 */
-  uint8_t ack_type;                        /* byte 40 */
-  uint8_t price_price_4[4];                /* bytes 41 to 44 */
-  uint8_t order_qty_quantity_non_zero[4];  /* bytes 45 to 48 */
-  uint8_t reason_code;                     /* byte 49 */
-  uint8_t throttle_indicator;              /* byte 50 */
+  uint8_t transact_time[8];          /* bytes 0 to 7 */
+  uint8_t market_participant_id[4];  /* bytes 8 to 11 */
+  uint8_t cl_ord_id[8];              /* bytes 12 to 19 */
+  uint8_t clearing_account[4];       /* bytes 20 to 23 */
+  uint8_t aiq[3];                    /* bytes 24 to 26 */
+  uint8_t instrument_id[4];          /* bytes 27 to 30 */
+  uint8_t side;                      /* byte 31 */
+  uint8_t order_id[8];               /* bytes 32 to 39 */
+  uint8_t ack_type;                  /* byte 40 */
+  uint8_t price_price_4[4];          /* bytes 41 to 44 */
+  uint8_t order_qty[4];              /* bytes 45 to 48 */
+  uint8_t reason_code;               /* byte 49 */
+  uint8_t throttle_indicator;        /* byte 50 */
 } NewIocQuoteAckMessage;
 
 /* any New Ioc Quote Ack Message at all: every byte one the checker chooses */
@@ -1037,7 +1037,7 @@ static void any_new_ioc_quote_ack_message(NewIocQuoteAckMessage *record) {
   for (size_t i = 0; i < 8; i++) { record->order_id[i] = arbitrary(); }
   record->ack_type = arbitrary();
   for (size_t i = 0; i < 4; i++) { record->price_price_4[i] = arbitrary(); }
-  for (size_t i = 0; i < 4; i++) { record->order_qty_quantity_non_zero[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->order_qty[i] = arbitrary(); }
   record->reason_code = arbitrary();
   record->throttle_indicator = arbitrary();
 }
@@ -1054,7 +1054,7 @@ static size_t encode_new_ioc_quote_ack_message(const NewIocQuoteAckMessage *reco
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->order_id[i]; }
   wire[at++] = record->ack_type;
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->price_price_4[i]; }
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->order_qty_quantity_non_zero[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->order_qty[i]; }
   wire[at++] = record->reason_code;
   wire[at++] = record->throttle_indicator;
 
@@ -1073,7 +1073,7 @@ static size_t decode_new_ioc_quote_ack_message(NewIocQuoteAckMessage *record, co
   for (size_t i = 0; i < 8; i++) { record->order_id[i] = wire[at++]; }
   record->ack_type = wire[at++];
   for (size_t i = 0; i < 4; i++) { record->price_price_4[i] = wire[at++]; }
-  for (size_t i = 0; i < 4; i++) { record->order_qty_quantity_non_zero[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->order_qty[i] = wire[at++]; }
   record->reason_code = wire[at++];
   record->throttle_indicator = wire[at++];
 
@@ -1092,7 +1092,7 @@ static void equal_new_ioc_quote_ack_message(const NewIocQuoteAckMessage *read, c
   for (size_t i = 0; i < 8; i++) { assert(read->order_id[i] == written->order_id[i]); }
   assert(read->ack_type == written->ack_type);
   for (size_t i = 0; i < 4; i++) { assert(read->price_price_4[i] == written->price_price_4[i]); }
-  for (size_t i = 0; i < 4; i++) { assert(read->order_qty_quantity_non_zero[i] == written->order_qty_quantity_non_zero[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->order_qty[i] == written->order_qty[i]); }
   assert(read->reason_code == written->reason_code);
   assert(read->throttle_indicator == written->throttle_indicator);
 }

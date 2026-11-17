@@ -441,19 +441,19 @@ static void check_quantity(void) {
 
 /* NewOrderRequestMessage */
 typedef struct {
-  uint8_t mantissa[8];  /* bytes 0 to 7 */
-  uint8_t exponent;     /* byte 8 */
+  uint8_t mantissa_optional[8];  /* bytes 0 to 7 */
+  uint8_t exponent;              /* byte 8 */
 } ShowQty;
 
 /* any Show Qty at all: every byte one the checker chooses */
 static void any_show_qty(ShowQty *record) {
-  for (size_t i = 0; i < 8; i++) { record->mantissa[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->mantissa_optional[i] = arbitrary(); }
   record->exponent = arbitrary();
 }
 
 /* Show Qty to the wire: 9 bytes from at, returning where the next byte goes */
 static size_t encode_show_qty(const ShowQty *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 8; i++) { wire[at++] = record->mantissa[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->mantissa_optional[i]; }
   wire[at++] = record->exponent;
 
   return at;
@@ -461,7 +461,7 @@ static size_t encode_show_qty(const ShowQty *record, uint8_t *wire, size_t at) {
 
 /* Show Qty off the wire: 9 bytes from at, returning where the next byte lies */
 static size_t decode_show_qty(ShowQty *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 8; i++) { record->mantissa[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->mantissa_optional[i] = wire[at++]; }
   record->exponent = wire[at++];
 
   return at;
@@ -469,7 +469,7 @@ static size_t decode_show_qty(ShowQty *record, const uint8_t *wire, size_t at) {
 
 /* what was read of Show Qty is what was written, byte for byte */
 static void equal_show_qty(const ShowQty *read, const ShowQty *written) {
-  for (size_t i = 0; i < 8; i++) { assert(read->mantissa[i] == written->mantissa[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->mantissa_optional[i] == written->mantissa_optional[i]); }
   assert(read->exponent == written->exponent);
 }
 
@@ -1493,23 +1493,23 @@ static void check_get_mass_quote_mmp_status_response_message(void) {
 
 /* GetMassQuoteMmpStatusRejectMessage */
 typedef struct {
-  uint8_t timestamp[8];                     /* bytes 0 to 7 */
-  uint8_t correlation_id[8];                /* bytes 8 to 15 */
-  uint8_t reason_mmp_status_reject_reason;  /* byte 16 */
+  uint8_t timestamp[8];              /* bytes 0 to 7 */
+  uint8_t correlation_id[8];         /* bytes 8 to 15 */
+  uint8_t mmp_status_reject_reason;  /* byte 16 */
 } GetMassQuoteMmpStatusRejectMessage;
 
 /* any Get Mass Quote Mmp Status Reject Message at all: every byte one the checker chooses */
 static void any_get_mass_quote_mmp_status_reject_message(GetMassQuoteMmpStatusRejectMessage *record) {
   for (size_t i = 0; i < 8; i++) { record->timestamp[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->correlation_id[i] = arbitrary(); }
-  record->reason_mmp_status_reject_reason = arbitrary();
+  record->mmp_status_reject_reason = arbitrary();
 }
 
 /* Get Mass Quote Mmp Status Reject Message to the wire: 17 bytes from at, returning where the next byte goes */
 static size_t encode_get_mass_quote_mmp_status_reject_message(const GetMassQuoteMmpStatusRejectMessage *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->timestamp[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->correlation_id[i]; }
-  wire[at++] = record->reason_mmp_status_reject_reason;
+  wire[at++] = record->mmp_status_reject_reason;
 
   return at;
 }
@@ -1518,7 +1518,7 @@ static size_t encode_get_mass_quote_mmp_status_reject_message(const GetMassQuote
 static size_t decode_get_mass_quote_mmp_status_reject_message(GetMassQuoteMmpStatusRejectMessage *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 8; i++) { record->timestamp[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->correlation_id[i] = wire[at++]; }
-  record->reason_mmp_status_reject_reason = wire[at++];
+  record->mmp_status_reject_reason = wire[at++];
 
   return at;
 }
@@ -1527,7 +1527,7 @@ static size_t decode_get_mass_quote_mmp_status_reject_message(GetMassQuoteMmpSta
 static void equal_get_mass_quote_mmp_status_reject_message(const GetMassQuoteMmpStatusRejectMessage *read, const GetMassQuoteMmpStatusRejectMessage *written) {
   for (size_t i = 0; i < 8; i++) { assert(read->timestamp[i] == written->timestamp[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->correlation_id[i] == written->correlation_id[i]); }
-  assert(read->reason_mmp_status_reject_reason == written->reason_mmp_status_reject_reason);
+  assert(read->mmp_status_reject_reason == written->mmp_status_reject_reason);
 }
 
 /* Get Mass Quote Mmp Status Reject Message: written and read back, then read and written back */
@@ -1616,23 +1616,23 @@ static void check_get_orders_mmp_status_response_message(void) {
 
 /* GetOrdersMmpStatusRejectMessage */
 typedef struct {
-  uint8_t timestamp[8];                     /* bytes 0 to 7 */
-  uint8_t correlation_id[8];                /* bytes 8 to 15 */
-  uint8_t reason_mmp_status_reject_reason;  /* byte 16 */
+  uint8_t timestamp[8];              /* bytes 0 to 7 */
+  uint8_t correlation_id[8];         /* bytes 8 to 15 */
+  uint8_t mmp_status_reject_reason;  /* byte 16 */
 } GetOrdersMmpStatusRejectMessage;
 
 /* any Get Orders Mmp Status Reject Message at all: every byte one the checker chooses */
 static void any_get_orders_mmp_status_reject_message(GetOrdersMmpStatusRejectMessage *record) {
   for (size_t i = 0; i < 8; i++) { record->timestamp[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->correlation_id[i] = arbitrary(); }
-  record->reason_mmp_status_reject_reason = arbitrary();
+  record->mmp_status_reject_reason = arbitrary();
 }
 
 /* Get Orders Mmp Status Reject Message to the wire: 17 bytes from at, returning where the next byte goes */
 static size_t encode_get_orders_mmp_status_reject_message(const GetOrdersMmpStatusRejectMessage *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->timestamp[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->correlation_id[i]; }
-  wire[at++] = record->reason_mmp_status_reject_reason;
+  wire[at++] = record->mmp_status_reject_reason;
 
   return at;
 }
@@ -1641,7 +1641,7 @@ static size_t encode_get_orders_mmp_status_reject_message(const GetOrdersMmpStat
 static size_t decode_get_orders_mmp_status_reject_message(GetOrdersMmpStatusRejectMessage *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 8; i++) { record->timestamp[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->correlation_id[i] = wire[at++]; }
-  record->reason_mmp_status_reject_reason = wire[at++];
+  record->mmp_status_reject_reason = wire[at++];
 
   return at;
 }
@@ -1650,7 +1650,7 @@ static size_t decode_get_orders_mmp_status_reject_message(GetOrdersMmpStatusReje
 static void equal_get_orders_mmp_status_reject_message(const GetOrdersMmpStatusRejectMessage *read, const GetOrdersMmpStatusRejectMessage *written) {
   for (size_t i = 0; i < 8; i++) { assert(read->timestamp[i] == written->timestamp[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->correlation_id[i] == written->correlation_id[i]); }
-  assert(read->reason_mmp_status_reject_reason == written->reason_mmp_status_reject_reason);
+  assert(read->mmp_status_reject_reason == written->mmp_status_reject_reason);
 }
 
 /* Get Orders Mmp Status Reject Message: written and read back, then read and written back */

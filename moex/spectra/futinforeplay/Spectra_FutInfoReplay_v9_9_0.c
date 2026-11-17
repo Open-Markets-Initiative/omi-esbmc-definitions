@@ -329,14 +329,14 @@ static void check_trading_session_status_message(void) {
 
 /* SecurityGroupStatusMessage */
 typedef struct {
-  uint8_t security_group_id[8];                      /* bytes 0 to 7 */
-  uint8_t halt_type;                                 /* byte 8 */
-  uint8_t trade_mode_mask[4];                        /* bytes 9 to 12 */
-  uint8_t group_mask_int_64_null_optional[8];        /* bytes 13 to 20 */
-  uint8_t section_id_int_32_null_optional[4];        /* bytes 21 to 24 */
-  uint8_t base_contract_id_int_32_null_optional[4];  /* bytes 25 to 28 */
-  uint8_t security_trading_status;                   /* byte 29 */
-  uint8_t status_change_time[8];                     /* bytes 30 to 37 */
+  uint8_t security_group_id[8];          /* bytes 0 to 7 */
+  uint8_t halt_type;                     /* byte 8 */
+  uint8_t trade_mode_mask[4];            /* bytes 9 to 12 */
+  uint8_t group_mask_optional[8];        /* bytes 13 to 20 */
+  uint8_t section_id_optional[4];        /* bytes 21 to 24 */
+  uint8_t base_contract_id_optional[4];  /* bytes 25 to 28 */
+  uint8_t security_trading_status;       /* byte 29 */
+  uint8_t status_change_time[8];         /* bytes 30 to 37 */
 } SecurityGroupStatusMessage;
 
 /* any Security Group Status Message at all: every byte one the checker chooses */
@@ -344,9 +344,9 @@ static void any_security_group_status_message(SecurityGroupStatusMessage *record
   for (size_t i = 0; i < 8; i++) { record->security_group_id[i] = arbitrary(); }
   record->halt_type = arbitrary();
   for (size_t i = 0; i < 4; i++) { record->trade_mode_mask[i] = arbitrary(); }
-  for (size_t i = 0; i < 8; i++) { record->group_mask_int_64_null_optional[i] = arbitrary(); }
-  for (size_t i = 0; i < 4; i++) { record->section_id_int_32_null_optional[i] = arbitrary(); }
-  for (size_t i = 0; i < 4; i++) { record->base_contract_id_int_32_null_optional[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->group_mask_optional[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->section_id_optional[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->base_contract_id_optional[i] = arbitrary(); }
   record->security_trading_status = arbitrary();
   for (size_t i = 0; i < 8; i++) { record->status_change_time[i] = arbitrary(); }
 }
@@ -356,9 +356,9 @@ static size_t encode_security_group_status_message(const SecurityGroupStatusMess
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->security_group_id[i]; }
   wire[at++] = record->halt_type;
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->trade_mode_mask[i]; }
-  for (size_t i = 0; i < 8; i++) { wire[at++] = record->group_mask_int_64_null_optional[i]; }
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->section_id_int_32_null_optional[i]; }
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->base_contract_id_int_32_null_optional[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->group_mask_optional[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->section_id_optional[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->base_contract_id_optional[i]; }
   wire[at++] = record->security_trading_status;
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->status_change_time[i]; }
 
@@ -370,9 +370,9 @@ static size_t decode_security_group_status_message(SecurityGroupStatusMessage *r
   for (size_t i = 0; i < 8; i++) { record->security_group_id[i] = wire[at++]; }
   record->halt_type = wire[at++];
   for (size_t i = 0; i < 4; i++) { record->trade_mode_mask[i] = wire[at++]; }
-  for (size_t i = 0; i < 8; i++) { record->group_mask_int_64_null_optional[i] = wire[at++]; }
-  for (size_t i = 0; i < 4; i++) { record->section_id_int_32_null_optional[i] = wire[at++]; }
-  for (size_t i = 0; i < 4; i++) { record->base_contract_id_int_32_null_optional[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->group_mask_optional[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->section_id_optional[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->base_contract_id_optional[i] = wire[at++]; }
   record->security_trading_status = wire[at++];
   for (size_t i = 0; i < 8; i++) { record->status_change_time[i] = wire[at++]; }
 
@@ -384,9 +384,9 @@ static void equal_security_group_status_message(const SecurityGroupStatusMessage
   for (size_t i = 0; i < 8; i++) { assert(read->security_group_id[i] == written->security_group_id[i]); }
   assert(read->halt_type == written->halt_type);
   for (size_t i = 0; i < 4; i++) { assert(read->trade_mode_mask[i] == written->trade_mode_mask[i]); }
-  for (size_t i = 0; i < 8; i++) { assert(read->group_mask_int_64_null_optional[i] == written->group_mask_int_64_null_optional[i]); }
-  for (size_t i = 0; i < 4; i++) { assert(read->section_id_int_32_null_optional[i] == written->section_id_int_32_null_optional[i]); }
-  for (size_t i = 0; i < 4; i++) { assert(read->base_contract_id_int_32_null_optional[i] == written->base_contract_id_int_32_null_optional[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->group_mask_optional[i] == written->group_mask_optional[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->section_id_optional[i] == written->section_id_optional[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->base_contract_id_optional[i] == written->base_contract_id_optional[i]); }
   assert(read->security_trading_status == written->security_trading_status);
   for (size_t i = 0; i < 8; i++) { assert(read->status_change_time[i] == written->status_change_time[i]); }
 }

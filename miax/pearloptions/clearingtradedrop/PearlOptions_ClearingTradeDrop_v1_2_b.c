@@ -119,17 +119,17 @@ static void check_sesm_packet_header(void) {
 
 /* This message format is used to notify firms of the state changes of the system. Firms can use notifications as triggers in their system to ensure electronic synchronization of systems. */
 typedef struct {
-  uint8_t notification_time[8];  /* bytes 0 to 7 */
-  uint8_t ctd_version[8];        /* bytes 8 to 15 */
-  uint8_t session_i_d[4];        /* bytes 16 to 19 */
-  uint8_t system_status;         /* byte 20 */
+  uint8_t notification_time[8];   /* bytes 0 to 7 */
+  uint8_t ctd_version[8];         /* bytes 8 to 15 */
+  uint8_t trading_session_id[4];  /* bytes 16 to 19 */
+  uint8_t system_status;          /* byte 20 */
 } SystemState;
 
 /* any System State at all: every byte one the checker chooses */
 static void any_system_state(SystemState *record) {
   for (size_t i = 0; i < 8; i++) { record->notification_time[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->ctd_version[i] = arbitrary(); }
-  for (size_t i = 0; i < 4; i++) { record->session_i_d[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->trading_session_id[i] = arbitrary(); }
   record->system_status = arbitrary();
 }
 
@@ -137,7 +137,7 @@ static void any_system_state(SystemState *record) {
 static size_t encode_system_state(const SystemState *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->notification_time[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->ctd_version[i]; }
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->session_i_d[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->trading_session_id[i]; }
   wire[at++] = record->system_status;
 
   return at;
@@ -147,7 +147,7 @@ static size_t encode_system_state(const SystemState *record, uint8_t *wire, size
 static size_t decode_system_state(SystemState *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 8; i++) { record->notification_time[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->ctd_version[i] = wire[at++]; }
-  for (size_t i = 0; i < 4; i++) { record->session_i_d[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->trading_session_id[i] = wire[at++]; }
   record->system_status = wire[at++];
 
   return at;
@@ -157,7 +157,7 @@ static size_t decode_system_state(SystemState *record, const uint8_t *wire, size
 static void equal_system_state(const SystemState *read, const SystemState *written) {
   for (size_t i = 0; i < 8; i++) { assert(read->notification_time[i] == written->notification_time[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->ctd_version[i] == written->ctd_version[i]); }
-  for (size_t i = 0; i < 4; i++) { assert(read->session_i_d[i] == written->session_i_d[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->trading_session_id[i] == written->trading_session_id[i]); }
   assert(read->system_status == written->system_status);
 }
 

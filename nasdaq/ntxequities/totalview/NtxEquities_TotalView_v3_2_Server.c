@@ -417,7 +417,7 @@ typedef struct {
   uint8_t order_reference_number[12];  /* bytes 0 to 11 */
   uint8_t buy_sell_indicator;          /* byte 12 */
   uint8_t shares[6];                   /* bytes 13 to 18 */
-  uint8_t stock_alpha_8[8];            /* bytes 19 to 26 */
+  uint8_t stock[8];                    /* bytes 19 to 26 */
   uint8_t price[10];                   /* bytes 27 to 36 */
 } AddOrderMessage;
 
@@ -426,7 +426,7 @@ static void any_add_order_message(AddOrderMessage *record) {
   for (size_t i = 0; i < 12; i++) { record->order_reference_number[i] = arbitrary(); }
   record->buy_sell_indicator = arbitrary();
   for (size_t i = 0; i < 6; i++) { record->shares[i] = arbitrary(); }
-  for (size_t i = 0; i < 8; i++) { record->stock_alpha_8[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->stock[i] = arbitrary(); }
   for (size_t i = 0; i < 10; i++) { record->price[i] = arbitrary(); }
 }
 
@@ -435,7 +435,7 @@ static size_t encode_add_order_message(const AddOrderMessage *record, uint8_t *w
   for (size_t i = 0; i < 12; i++) { wire[at++] = record->order_reference_number[i]; }
   wire[at++] = record->buy_sell_indicator;
   for (size_t i = 0; i < 6; i++) { wire[at++] = record->shares[i]; }
-  for (size_t i = 0; i < 8; i++) { wire[at++] = record->stock_alpha_8[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->stock[i]; }
   for (size_t i = 0; i < 10; i++) { wire[at++] = record->price[i]; }
 
   return at;
@@ -446,7 +446,7 @@ static size_t decode_add_order_message(AddOrderMessage *record, const uint8_t *w
   for (size_t i = 0; i < 12; i++) { record->order_reference_number[i] = wire[at++]; }
   record->buy_sell_indicator = wire[at++];
   for (size_t i = 0; i < 6; i++) { record->shares[i] = wire[at++]; }
-  for (size_t i = 0; i < 8; i++) { record->stock_alpha_8[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->stock[i] = wire[at++]; }
   for (size_t i = 0; i < 10; i++) { record->price[i] = wire[at++]; }
 
   return at;
@@ -457,7 +457,7 @@ static void equal_add_order_message(const AddOrderMessage *read, const AddOrderM
   for (size_t i = 0; i < 12; i++) { assert(read->order_reference_number[i] == written->order_reference_number[i]); }
   assert(read->buy_sell_indicator == written->buy_sell_indicator);
   for (size_t i = 0; i < 6; i++) { assert(read->shares[i] == written->shares[i]); }
-  for (size_t i = 0; i < 8; i++) { assert(read->stock_alpha_8[i] == written->stock_alpha_8[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->stock[i] == written->stock[i]); }
   for (size_t i = 0; i < 10; i++) { assert(read->price[i] == written->price[i]); }
 }
 
@@ -486,7 +486,7 @@ typedef struct {
   uint8_t order_reference_number[12];  /* bytes 0 to 11 */
   uint8_t buy_sell_indicator;          /* byte 12 */
   uint8_t shares[6];                   /* bytes 13 to 18 */
-  uint8_t stock_alpha_8[8];            /* bytes 19 to 26 */
+  uint8_t stock[8];                    /* bytes 19 to 26 */
   uint8_t price[10];                   /* bytes 27 to 36 */
   uint8_t attribution[4];              /* bytes 37 to 40 */
 } AddOrderMpidAttributionMessage;
@@ -496,7 +496,7 @@ static void any_add_order_mpid_attribution_message(AddOrderMpidAttributionMessag
   for (size_t i = 0; i < 12; i++) { record->order_reference_number[i] = arbitrary(); }
   record->buy_sell_indicator = arbitrary();
   for (size_t i = 0; i < 6; i++) { record->shares[i] = arbitrary(); }
-  for (size_t i = 0; i < 8; i++) { record->stock_alpha_8[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->stock[i] = arbitrary(); }
   for (size_t i = 0; i < 10; i++) { record->price[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->attribution[i] = arbitrary(); }
 }
@@ -506,7 +506,7 @@ static size_t encode_add_order_mpid_attribution_message(const AddOrderMpidAttrib
   for (size_t i = 0; i < 12; i++) { wire[at++] = record->order_reference_number[i]; }
   wire[at++] = record->buy_sell_indicator;
   for (size_t i = 0; i < 6; i++) { wire[at++] = record->shares[i]; }
-  for (size_t i = 0; i < 8; i++) { wire[at++] = record->stock_alpha_8[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->stock[i]; }
   for (size_t i = 0; i < 10; i++) { wire[at++] = record->price[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->attribution[i]; }
 
@@ -518,7 +518,7 @@ static size_t decode_add_order_mpid_attribution_message(AddOrderMpidAttributionM
   for (size_t i = 0; i < 12; i++) { record->order_reference_number[i] = wire[at++]; }
   record->buy_sell_indicator = wire[at++];
   for (size_t i = 0; i < 6; i++) { record->shares[i] = wire[at++]; }
-  for (size_t i = 0; i < 8; i++) { record->stock_alpha_8[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->stock[i] = wire[at++]; }
   for (size_t i = 0; i < 10; i++) { record->price[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->attribution[i] = wire[at++]; }
 
@@ -530,7 +530,7 @@ static void equal_add_order_mpid_attribution_message(const AddOrderMpidAttributi
   for (size_t i = 0; i < 12; i++) { assert(read->order_reference_number[i] == written->order_reference_number[i]); }
   assert(read->buy_sell_indicator == written->buy_sell_indicator);
   for (size_t i = 0; i < 6; i++) { assert(read->shares[i] == written->shares[i]); }
-  for (size_t i = 0; i < 8; i++) { assert(read->stock_alpha_8[i] == written->stock_alpha_8[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->stock[i] == written->stock[i]); }
   for (size_t i = 0; i < 10; i++) { assert(read->price[i] == written->price[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->attribution[i] == written->attribution[i]); }
 }
@@ -557,7 +557,7 @@ static void check_add_order_mpid_attribution_message(void) {
 
 /* At the start of each trading day, NASDAQ OMX BX disseminates stock directory messages for all active symbols in the system for the current trading day. Please note that the Symbol Directory spin may include halted issues. */
 typedef struct {
-  uint8_t stock_alphabetic_8[8];       /* bytes 0 to 7 */
+  uint8_t stock[8];                    /* bytes 0 to 7 */
   uint8_t market_category;             /* byte 8 */
   uint8_t financial_status_indicator;  /* byte 9 */
   uint8_t round_lot_size[6];           /* bytes 10 to 15 */
@@ -566,7 +566,7 @@ typedef struct {
 
 /* any Stock Directory Message at all: every byte one the checker chooses */
 static void any_stock_directory_message(StockDirectoryMessage *record) {
-  for (size_t i = 0; i < 8; i++) { record->stock_alphabetic_8[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->stock[i] = arbitrary(); }
   record->market_category = arbitrary();
   record->financial_status_indicator = arbitrary();
   for (size_t i = 0; i < 6; i++) { record->round_lot_size[i] = arbitrary(); }
@@ -575,7 +575,7 @@ static void any_stock_directory_message(StockDirectoryMessage *record) {
 
 /* Stock Directory Message to the wire: 17 bytes from at, returning where the next byte goes */
 static size_t encode_stock_directory_message(const StockDirectoryMessage *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 8; i++) { wire[at++] = record->stock_alphabetic_8[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->stock[i]; }
   wire[at++] = record->market_category;
   wire[at++] = record->financial_status_indicator;
   for (size_t i = 0; i < 6; i++) { wire[at++] = record->round_lot_size[i]; }
@@ -586,7 +586,7 @@ static size_t encode_stock_directory_message(const StockDirectoryMessage *record
 
 /* Stock Directory Message off the wire: 17 bytes from at, returning where the next byte lies */
 static size_t decode_stock_directory_message(StockDirectoryMessage *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 8; i++) { record->stock_alphabetic_8[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->stock[i] = wire[at++]; }
   record->market_category = wire[at++];
   record->financial_status_indicator = wire[at++];
   for (size_t i = 0; i < 6; i++) { record->round_lot_size[i] = wire[at++]; }
@@ -597,7 +597,7 @@ static size_t decode_stock_directory_message(StockDirectoryMessage *record, cons
 
 /* what was read of Stock Directory Message is what was written, byte for byte */
 static void equal_stock_directory_message(const StockDirectoryMessage *read, const StockDirectoryMessage *written) {
-  for (size_t i = 0; i < 8; i++) { assert(read->stock_alphabetic_8[i] == written->stock_alphabetic_8[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->stock[i] == written->stock[i]); }
   assert(read->market_category == written->market_category);
   assert(read->financial_status_indicator == written->financial_status_indicator);
   for (size_t i = 0; i < 6; i++) { assert(read->round_lot_size[i] == written->round_lot_size[i]); }
@@ -626,15 +626,15 @@ static void check_stock_directory_message(void) {
 
 /* In the GLIMPSE transmission, BX will send out a Stock Trading Action message for only those NASDAQ, NYSE, NYSE Amex, NYSE Arca and BATS issues that were eligible for trading during the current trading session. */
 typedef struct {
-  uint8_t stock_alphanumeric_8[8];  /* bytes 0 to 7 */
-  uint8_t trading_state;            /* byte 8 */
-  uint8_t reserved_1;               /* byte 9 */
-  uint8_t reason[4];                /* bytes 10 to 13 */
+  uint8_t stock[8];       /* bytes 0 to 7 */
+  uint8_t trading_state;  /* byte 8 */
+  uint8_t reserved_1;     /* byte 9 */
+  uint8_t reason[4];      /* bytes 10 to 13 */
 } StockTradingActionMessage;
 
 /* any Stock Trading Action Message at all: every byte one the checker chooses */
 static void any_stock_trading_action_message(StockTradingActionMessage *record) {
-  for (size_t i = 0; i < 8; i++) { record->stock_alphanumeric_8[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->stock[i] = arbitrary(); }
   record->trading_state = arbitrary();
   record->reserved_1 = arbitrary();
   for (size_t i = 0; i < 4; i++) { record->reason[i] = arbitrary(); }
@@ -642,7 +642,7 @@ static void any_stock_trading_action_message(StockTradingActionMessage *record) 
 
 /* Stock Trading Action Message to the wire: 14 bytes from at, returning where the next byte goes */
 static size_t encode_stock_trading_action_message(const StockTradingActionMessage *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 8; i++) { wire[at++] = record->stock_alphanumeric_8[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->stock[i]; }
   wire[at++] = record->trading_state;
   wire[at++] = record->reserved_1;
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->reason[i]; }
@@ -652,7 +652,7 @@ static size_t encode_stock_trading_action_message(const StockTradingActionMessag
 
 /* Stock Trading Action Message off the wire: 14 bytes from at, returning where the next byte lies */
 static size_t decode_stock_trading_action_message(StockTradingActionMessage *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 8; i++) { record->stock_alphanumeric_8[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->stock[i] = wire[at++]; }
   record->trading_state = wire[at++];
   record->reserved_1 = wire[at++];
   for (size_t i = 0; i < 4; i++) { record->reason[i] = wire[at++]; }
@@ -662,7 +662,7 @@ static size_t decode_stock_trading_action_message(StockTradingActionMessage *rec
 
 /* what was read of Stock Trading Action Message is what was written, byte for byte */
 static void equal_stock_trading_action_message(const StockTradingActionMessage *read, const StockTradingActionMessage *written) {
-  for (size_t i = 0; i < 8; i++) { assert(read->stock_alphanumeric_8[i] == written->stock_alphanumeric_8[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->stock[i] == written->stock[i]); }
   assert(read->trading_state == written->trading_state);
   assert(read->reserved_1 == written->reserved_1);
   for (size_t i = 0; i < 4; i++) { assert(read->reason[i] == written->reason[i]); }
@@ -690,19 +690,19 @@ static void check_stock_trading_action_message(void) {
 
 /* Reg SHO Short Sale Price Test Restricted Indicator */
 typedef struct {
-  uint8_t stock_alpha_8[8];  /* bytes 0 to 7 */
-  uint8_t reg_sho_action;    /* byte 8 */
+  uint8_t stock[8];        /* bytes 0 to 7 */
+  uint8_t reg_sho_action;  /* byte 8 */
 } RegShoRestrictionMessage;
 
 /* any Reg Sho Restriction Message at all: every byte one the checker chooses */
 static void any_reg_sho_restriction_message(RegShoRestrictionMessage *record) {
-  for (size_t i = 0; i < 8; i++) { record->stock_alpha_8[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->stock[i] = arbitrary(); }
   record->reg_sho_action = arbitrary();
 }
 
 /* Reg Sho Restriction Message to the wire: 9 bytes from at, returning where the next byte goes */
 static size_t encode_reg_sho_restriction_message(const RegShoRestrictionMessage *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 8; i++) { wire[at++] = record->stock_alpha_8[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->stock[i]; }
   wire[at++] = record->reg_sho_action;
 
   return at;
@@ -710,7 +710,7 @@ static size_t encode_reg_sho_restriction_message(const RegShoRestrictionMessage 
 
 /* Reg Sho Restriction Message off the wire: 9 bytes from at, returning where the next byte lies */
 static size_t decode_reg_sho_restriction_message(RegShoRestrictionMessage *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 8; i++) { record->stock_alpha_8[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->stock[i] = wire[at++]; }
   record->reg_sho_action = wire[at++];
 
   return at;
@@ -718,7 +718,7 @@ static size_t decode_reg_sho_restriction_message(RegShoRestrictionMessage *recor
 
 /* what was read of Reg Sho Restriction Message is what was written, byte for byte */
 static void equal_reg_sho_restriction_message(const RegShoRestrictionMessage *read, const RegShoRestrictionMessage *written) {
-  for (size_t i = 0; i < 8; i++) { assert(read->stock_alpha_8[i] == written->stock_alpha_8[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->stock[i] == written->stock[i]); }
   assert(read->reg_sho_action == written->reg_sho_action);
 }
 

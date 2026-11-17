@@ -67,20 +67,20 @@ static uint8_t arbitrary(void) {
 
 /* MarketDataDummyMessage */
 typedef struct {
-  uint8_t transact_time[8];                /* bytes 0 to 7 */
-  uint8_t exchange_trading_session_id[4];  /* bytes 8 to 11 */
+  uint8_t transact_time[8];                         /* bytes 0 to 7 */
+  uint8_t exchange_trading_session_id_optional[4];  /* bytes 8 to 11 */
 } IncrementalPacketHeader;
 
 /* any Incremental Packet Header at all: every byte one the checker chooses */
 static void any_incremental_packet_header(IncrementalPacketHeader *record) {
   for (size_t i = 0; i < 8; i++) { record->transact_time[i] = arbitrary(); }
-  for (size_t i = 0; i < 4; i++) { record->exchange_trading_session_id[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->exchange_trading_session_id_optional[i] = arbitrary(); }
 }
 
 /* Incremental Packet Header to the wire: 12 bytes from at, returning where the next byte goes */
 static size_t encode_incremental_packet_header(const IncrementalPacketHeader *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->transact_time[i]; }
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->exchange_trading_session_id[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->exchange_trading_session_id_optional[i]; }
 
   return at;
 }
@@ -88,7 +88,7 @@ static size_t encode_incremental_packet_header(const IncrementalPacketHeader *re
 /* Incremental Packet Header off the wire: 12 bytes from at, returning where the next byte lies */
 static size_t decode_incremental_packet_header(IncrementalPacketHeader *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 8; i++) { record->transact_time[i] = wire[at++]; }
-  for (size_t i = 0; i < 4; i++) { record->exchange_trading_session_id[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->exchange_trading_session_id_optional[i] = wire[at++]; }
 
   return at;
 }
@@ -96,7 +96,7 @@ static size_t decode_incremental_packet_header(IncrementalPacketHeader *record, 
 /* what was read of Incremental Packet Header is what was written, byte for byte */
 static void equal_incremental_packet_header(const IncrementalPacketHeader *read, const IncrementalPacketHeader *written) {
   for (size_t i = 0; i < 8; i++) { assert(read->transact_time[i] == written->transact_time[i]); }
-  for (size_t i = 0; i < 4; i++) { assert(read->exchange_trading_session_id[i] == written->exchange_trading_session_id[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->exchange_trading_session_id_optional[i] == written->exchange_trading_session_id_optional[i]); }
 }
 
 /* Incremental Packet Header: written and read back, then read and written back */
@@ -288,31 +288,31 @@ static void check_group_size(void) {
 
 /* EmptyBookMessage */
 typedef struct {
-  uint8_t last_msg_seq_num_processed_u_int_32_null_optional[4];  /* bytes 0 to 3 */
+  uint8_t last_msg_seq_num_processed_optional[4];  /* bytes 0 to 3 */
 } EmptyBookMessage;
 
 /* any Empty Book Message at all: every byte one the checker chooses */
 static void any_empty_book_message(EmptyBookMessage *record) {
-  for (size_t i = 0; i < 4; i++) { record->last_msg_seq_num_processed_u_int_32_null_optional[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->last_msg_seq_num_processed_optional[i] = arbitrary(); }
 }
 
 /* Empty Book Message to the wire: 4 bytes from at, returning where the next byte goes */
 static size_t encode_empty_book_message(const EmptyBookMessage *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->last_msg_seq_num_processed_u_int_32_null_optional[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->last_msg_seq_num_processed_optional[i]; }
 
   return at;
 }
 
 /* Empty Book Message off the wire: 4 bytes from at, returning where the next byte lies */
 static size_t decode_empty_book_message(EmptyBookMessage *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 4; i++) { record->last_msg_seq_num_processed_u_int_32_null_optional[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->last_msg_seq_num_processed_optional[i] = wire[at++]; }
 
   return at;
 }
 
 /* what was read of Empty Book Message is what was written, byte for byte */
 static void equal_empty_book_message(const EmptyBookMessage *read, const EmptyBookMessage *written) {
-  for (size_t i = 0; i < 4; i++) { assert(read->last_msg_seq_num_processed_u_int_32_null_optional[i] == written->last_msg_seq_num_processed_u_int_32_null_optional[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->last_msg_seq_num_processed_optional[i] == written->last_msg_seq_num_processed_optional[i]); }
 }
 
 /* Empty Book Message: written and read back, then read and written back */

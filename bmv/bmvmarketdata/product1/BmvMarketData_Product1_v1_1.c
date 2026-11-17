@@ -430,7 +430,7 @@ static void check_weighted_average_price_settlement_prices_message(void) {
 typedef struct {
   uint8_t instrument_number[4];  /* bytes 0 to 3 */
   uint8_t trade_time[8];         /* bytes 4 to 11 */
-  uint8_t volume_int_324[4];     /* bytes 12 to 15 */
+  uint8_t volume[4];             /* bytes 12 to 15 */
   uint8_t price[8];              /* bytes 16 to 23 */
   uint8_t concertation_type;     /* byte 24 */
   uint8_t trade_number[4];       /* bytes 25 to 28 */
@@ -447,7 +447,7 @@ typedef struct {
 static void any_capital_trades_message(CapitalTradesMessage *record) {
   for (size_t i = 0; i < 4; i++) { record->instrument_number[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->trade_time[i] = arbitrary(); }
-  for (size_t i = 0; i < 4; i++) { record->volume_int_324[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->volume[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->price[i] = arbitrary(); }
   record->concertation_type = arbitrary();
   for (size_t i = 0; i < 4; i++) { record->trade_number[i] = arbitrary(); }
@@ -464,7 +464,7 @@ static void any_capital_trades_message(CapitalTradesMessage *record) {
 static size_t encode_capital_trades_message(const CapitalTradesMessage *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->instrument_number[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->trade_time[i]; }
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->volume_int_324[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->volume[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->price[i]; }
   wire[at++] = record->concertation_type;
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->trade_number[i]; }
@@ -483,7 +483,7 @@ static size_t encode_capital_trades_message(const CapitalTradesMessage *record, 
 static size_t decode_capital_trades_message(CapitalTradesMessage *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 4; i++) { record->instrument_number[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->trade_time[i] = wire[at++]; }
-  for (size_t i = 0; i < 4; i++) { record->volume_int_324[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->volume[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->price[i] = wire[at++]; }
   record->concertation_type = wire[at++];
   for (size_t i = 0; i < 4; i++) { record->trade_number[i] = wire[at++]; }
@@ -502,7 +502,7 @@ static size_t decode_capital_trades_message(CapitalTradesMessage *record, const 
 static void equal_capital_trades_message(const CapitalTradesMessage *read, const CapitalTradesMessage *written) {
   for (size_t i = 0; i < 4; i++) { assert(read->instrument_number[i] == written->instrument_number[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->trade_time[i] == written->trade_time[i]); }
-  for (size_t i = 0; i < 4; i++) { assert(read->volume_int_324[i] == written->volume_int_324[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->volume[i] == written->volume[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->price[i] == written->price[i]); }
   assert(read->concertation_type == written->concertation_type);
   for (size_t i = 0; i < 4; i++) { assert(read->trade_number[i] == written->trade_number[i]); }
@@ -539,21 +539,21 @@ static void check_capital_trades_message(void) {
 typedef struct {
   uint8_t instrument_number[4];          /* bytes 0 to 3 */
   uint8_t probable_allocation_price[8];  /* bytes 4 to 11 */
-  uint8_t volume_int_324[4];             /* bytes 12 to 15 */
+  uint8_t volume[4];                     /* bytes 12 to 15 */
 } ProbableAllocationPriceMessage;
 
 /* any Probable Allocation Price Message at all: every byte one the checker chooses */
 static void any_probable_allocation_price_message(ProbableAllocationPriceMessage *record) {
   for (size_t i = 0; i < 4; i++) { record->instrument_number[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->probable_allocation_price[i] = arbitrary(); }
-  for (size_t i = 0; i < 4; i++) { record->volume_int_324[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->volume[i] = arbitrary(); }
 }
 
 /* Probable Allocation Price Message to the wire: 16 bytes from at, returning where the next byte goes */
 static size_t encode_probable_allocation_price_message(const ProbableAllocationPriceMessage *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->instrument_number[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->probable_allocation_price[i]; }
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->volume_int_324[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->volume[i]; }
 
   return at;
 }
@@ -562,7 +562,7 @@ static size_t encode_probable_allocation_price_message(const ProbableAllocationP
 static size_t decode_probable_allocation_price_message(ProbableAllocationPriceMessage *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 4; i++) { record->instrument_number[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->probable_allocation_price[i] = wire[at++]; }
-  for (size_t i = 0; i < 4; i++) { record->volume_int_324[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->volume[i] = wire[at++]; }
 
   return at;
 }
@@ -571,7 +571,7 @@ static size_t decode_probable_allocation_price_message(ProbableAllocationPriceMe
 static void equal_probable_allocation_price_message(const ProbableAllocationPriceMessage *read, const ProbableAllocationPriceMessage *written) {
   for (size_t i = 0; i < 4; i++) { assert(read->instrument_number[i] == written->instrument_number[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->probable_allocation_price[i] == written->probable_allocation_price[i]); }
-  for (size_t i = 0; i < 4; i++) { assert(read->volume_int_324[i] == written->volume_int_324[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->volume[i] == written->volume[i]); }
 }
 
 /* Probable Allocation Price Message: written and read back, then read and written back */
@@ -795,7 +795,7 @@ static void check_mutual_fund_trades_message(void) {
 typedef struct {
   uint8_t instrument_number[4];     /* bytes 0 to 3 */
   uint8_t number_of_operations[4];  /* bytes 4 to 7 */
-  uint8_t volume_int_648[8];        /* bytes 8 to 15 */
+  uint8_t volume_long[8];           /* bytes 8 to 15 */
   uint8_t amount[8];                /* bytes 16 to 23 */
   uint8_t opening_price[8];         /* bytes 24 to 31 */
   uint8_t maximum[8];               /* bytes 32 to 39 */
@@ -808,7 +808,7 @@ typedef struct {
 static void any_tradability_message(TradabilityMessage *record) {
   for (size_t i = 0; i < 4; i++) { record->instrument_number[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->number_of_operations[i] = arbitrary(); }
-  for (size_t i = 0; i < 8; i++) { record->volume_int_648[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->volume_long[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->amount[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->opening_price[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->maximum[i] = arbitrary(); }
@@ -821,7 +821,7 @@ static void any_tradability_message(TradabilityMessage *record) {
 static size_t encode_tradability_message(const TradabilityMessage *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->instrument_number[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->number_of_operations[i]; }
-  for (size_t i = 0; i < 8; i++) { wire[at++] = record->volume_int_648[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->volume_long[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->amount[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->opening_price[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->maximum[i]; }
@@ -836,7 +836,7 @@ static size_t encode_tradability_message(const TradabilityMessage *record, uint8
 static size_t decode_tradability_message(TradabilityMessage *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 4; i++) { record->instrument_number[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->number_of_operations[i] = wire[at++]; }
-  for (size_t i = 0; i < 8; i++) { record->volume_int_648[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->volume_long[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->amount[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->opening_price[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->maximum[i] = wire[at++]; }
@@ -851,7 +851,7 @@ static size_t decode_tradability_message(TradabilityMessage *record, const uint8
 static void equal_tradability_message(const TradabilityMessage *read, const TradabilityMessage *written) {
   for (size_t i = 0; i < 4; i++) { assert(read->instrument_number[i] == written->instrument_number[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->number_of_operations[i] == written->number_of_operations[i]); }
-  for (size_t i = 0; i < 8; i++) { assert(read->volume_int_648[i] == written->volume_int_648[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->volume_long[i] == written->volume_long[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->amount[i] == written->amount[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->opening_price[i] == written->opening_price[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->maximum[i] == written->maximum[i]); }
@@ -886,7 +886,7 @@ typedef struct {
   uint8_t virtual_trades_status;  /* byte 4 */
   uint8_t operation_type;         /* byte 5 */
   uint8_t number[4];              /* bytes 6 to 9 */
-  uint8_t volume_int_324[4];      /* bytes 10 to 13 */
+  uint8_t volume[4];              /* bytes 10 to 13 */
   uint8_t concertation;           /* byte 14 */
   uint8_t buy[5];                 /* bytes 15 to 19 */
   uint8_t sell[5];                /* bytes 20 to 24 */
@@ -898,7 +898,7 @@ static void any_virtual_trades_message(VirtualTradesMessage *record) {
   record->virtual_trades_status = arbitrary();
   record->operation_type = arbitrary();
   for (size_t i = 0; i < 4; i++) { record->number[i] = arbitrary(); }
-  for (size_t i = 0; i < 4; i++) { record->volume_int_324[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->volume[i] = arbitrary(); }
   record->concertation = arbitrary();
   for (size_t i = 0; i < 5; i++) { record->buy[i] = arbitrary(); }
   for (size_t i = 0; i < 5; i++) { record->sell[i] = arbitrary(); }
@@ -910,7 +910,7 @@ static size_t encode_virtual_trades_message(const VirtualTradesMessage *record, 
   wire[at++] = record->virtual_trades_status;
   wire[at++] = record->operation_type;
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->number[i]; }
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->volume_int_324[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->volume[i]; }
   wire[at++] = record->concertation;
   for (size_t i = 0; i < 5; i++) { wire[at++] = record->buy[i]; }
   for (size_t i = 0; i < 5; i++) { wire[at++] = record->sell[i]; }
@@ -924,7 +924,7 @@ static size_t decode_virtual_trades_message(VirtualTradesMessage *record, const 
   record->virtual_trades_status = wire[at++];
   record->operation_type = wire[at++];
   for (size_t i = 0; i < 4; i++) { record->number[i] = wire[at++]; }
-  for (size_t i = 0; i < 4; i++) { record->volume_int_324[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->volume[i] = wire[at++]; }
   record->concertation = wire[at++];
   for (size_t i = 0; i < 5; i++) { record->buy[i] = wire[at++]; }
   for (size_t i = 0; i < 5; i++) { record->sell[i] = wire[at++]; }
@@ -938,7 +938,7 @@ static void equal_virtual_trades_message(const VirtualTradesMessage *read, const
   assert(read->virtual_trades_status == written->virtual_trades_status);
   assert(read->operation_type == written->operation_type);
   for (size_t i = 0; i < 4; i++) { assert(read->number[i] == written->number[i]); }
-  for (size_t i = 0; i < 4; i++) { assert(read->volume_int_324[i] == written->volume_int_324[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->volume[i] == written->volume[i]); }
   assert(read->concertation == written->concertation);
   for (size_t i = 0; i < 5; i++) { assert(read->buy[i] == written->buy[i]); }
   for (size_t i = 0; i < 5; i++) { assert(read->sell[i] == written->sell[i]); }
@@ -970,7 +970,7 @@ typedef struct {
   uint8_t date_and_time[8];      /* bytes 4 to 11 */
   uint8_t number[4];             /* bytes 12 to 15 */
   uint8_t direction;             /* byte 16 */
-  uint8_t volume_int_324[4];     /* bytes 17 to 20 */
+  uint8_t volume[4];             /* bytes 17 to 20 */
   uint8_t price[8];              /* bytes 21 to 28 */
   uint8_t participant[5];        /* bytes 29 to 33 */
 } OrderAdditionMessage;
@@ -981,7 +981,7 @@ static void any_order_addition_message(OrderAdditionMessage *record) {
   for (size_t i = 0; i < 8; i++) { record->date_and_time[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->number[i] = arbitrary(); }
   record->direction = arbitrary();
-  for (size_t i = 0; i < 4; i++) { record->volume_int_324[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->volume[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->price[i] = arbitrary(); }
   for (size_t i = 0; i < 5; i++) { record->participant[i] = arbitrary(); }
 }
@@ -992,7 +992,7 @@ static size_t encode_order_addition_message(const OrderAdditionMessage *record, 
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->date_and_time[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->number[i]; }
   wire[at++] = record->direction;
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->volume_int_324[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->volume[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->price[i]; }
   for (size_t i = 0; i < 5; i++) { wire[at++] = record->participant[i]; }
 
@@ -1005,7 +1005,7 @@ static size_t decode_order_addition_message(OrderAdditionMessage *record, const 
   for (size_t i = 0; i < 8; i++) { record->date_and_time[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->number[i] = wire[at++]; }
   record->direction = wire[at++];
-  for (size_t i = 0; i < 4; i++) { record->volume_int_324[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->volume[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->price[i] = wire[at++]; }
   for (size_t i = 0; i < 5; i++) { record->participant[i] = wire[at++]; }
 
@@ -1018,7 +1018,7 @@ static void equal_order_addition_message(const OrderAdditionMessage *read, const
   for (size_t i = 0; i < 8; i++) { assert(read->date_and_time[i] == written->date_and_time[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->number[i] == written->number[i]); }
   assert(read->direction == written->direction);
-  for (size_t i = 0; i < 4; i++) { assert(read->volume_int_324[i] == written->volume_int_324[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->volume[i] == written->volume[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->price[i] == written->price[i]); }
   for (size_t i = 0; i < 5; i++) { assert(read->participant[i] == written->participant[i]); }
 }
@@ -1048,7 +1048,7 @@ typedef struct {
   uint8_t instrument_number[4];  /* bytes 0 to 3 */
   uint8_t date[8];               /* bytes 4 to 11 */
   uint8_t number[4];             /* bytes 12 to 15 */
-  uint8_t volume_int_324[4];     /* bytes 16 to 19 */
+  uint8_t volume[4];             /* bytes 16 to 19 */
   uint8_t trade_number[4];       /* bytes 20 to 23 */
   uint8_t execution_price[8];    /* bytes 24 to 31 */
 } ExecutionOfOrdersMessage;
@@ -1058,7 +1058,7 @@ static void any_execution_of_orders_message(ExecutionOfOrdersMessage *record) {
   for (size_t i = 0; i < 4; i++) { record->instrument_number[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->date[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->number[i] = arbitrary(); }
-  for (size_t i = 0; i < 4; i++) { record->volume_int_324[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->volume[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->trade_number[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->execution_price[i] = arbitrary(); }
 }
@@ -1068,7 +1068,7 @@ static size_t encode_execution_of_orders_message(const ExecutionOfOrdersMessage 
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->instrument_number[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->date[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->number[i]; }
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->volume_int_324[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->volume[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->trade_number[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->execution_price[i]; }
 
@@ -1080,7 +1080,7 @@ static size_t decode_execution_of_orders_message(ExecutionOfOrdersMessage *recor
   for (size_t i = 0; i < 4; i++) { record->instrument_number[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->date[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->number[i] = wire[at++]; }
-  for (size_t i = 0; i < 4; i++) { record->volume_int_324[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->volume[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->trade_number[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->execution_price[i] = wire[at++]; }
 
@@ -1092,7 +1092,7 @@ static void equal_execution_of_orders_message(const ExecutionOfOrdersMessage *re
   for (size_t i = 0; i < 4; i++) { assert(read->instrument_number[i] == written->instrument_number[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->date[i] == written->date[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->number[i] == written->number[i]); }
-  for (size_t i = 0; i < 4; i++) { assert(read->volume_int_324[i] == written->volume_int_324[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->volume[i] == written->volume[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->trade_number[i] == written->trade_number[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->execution_price[i] == written->execution_price[i]); }
 }
@@ -1184,7 +1184,7 @@ typedef struct {
   uint8_t new_date[8];           /* bytes 16 to 23 */
   uint8_t new_number[4];         /* bytes 24 to 27 */
   uint8_t direction;             /* byte 28 */
-  uint8_t volume_int_324[4];     /* bytes 29 to 32 */
+  uint8_t volume[4];             /* bytes 29 to 32 */
   uint8_t price[8];              /* bytes 33 to 40 */
 } OrderChangeMessage;
 
@@ -1196,7 +1196,7 @@ static void any_order_change_message(OrderChangeMessage *record) {
   for (size_t i = 0; i < 8; i++) { record->new_date[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->new_number[i] = arbitrary(); }
   record->direction = arbitrary();
-  for (size_t i = 0; i < 4; i++) { record->volume_int_324[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->volume[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->price[i] = arbitrary(); }
 }
 
@@ -1208,7 +1208,7 @@ static size_t encode_order_change_message(const OrderChangeMessage *record, uint
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->new_date[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->new_number[i]; }
   wire[at++] = record->direction;
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->volume_int_324[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->volume[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->price[i]; }
 
   return at;
@@ -1222,7 +1222,7 @@ static size_t decode_order_change_message(OrderChangeMessage *record, const uint
   for (size_t i = 0; i < 8; i++) { record->new_date[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->new_number[i] = wire[at++]; }
   record->direction = wire[at++];
-  for (size_t i = 0; i < 4; i++) { record->volume_int_324[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->volume[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->price[i] = wire[at++]; }
 
   return at;
@@ -1236,7 +1236,7 @@ static void equal_order_change_message(const OrderChangeMessage *read, const Ord
   for (size_t i = 0; i < 8; i++) { assert(read->new_date[i] == written->new_date[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->new_number[i] == written->new_number[i]); }
   assert(read->direction == written->direction);
-  for (size_t i = 0; i < 4; i++) { assert(read->volume_int_324[i] == written->volume_int_324[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->volume[i] == written->volume[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->price[i] == written->price[i]); }
 }
 

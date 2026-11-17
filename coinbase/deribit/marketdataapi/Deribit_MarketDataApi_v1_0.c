@@ -170,15 +170,68 @@ static void check_index_definition_message(void) {
   for (size_t i = 0; i < 136; i++) { assert(again[i] == wire[i]); }
 }
 
-/* ---- Instrument Info Message: 40 bytes --------------------------------------- */
+/* ---- Index Info Message: 16 bytes -------------------------------------------- */
+
+/* IndexInfoMessage */
+typedef struct {
+  uint8_t index_id[8];     /* bytes 0 to 7 */
+  uint8_t index_price[8];  /* bytes 8 to 15 */
+} IndexInfoMessage;
+
+/* any Index Info Message at all: every byte one the checker chooses */
+static void any_index_info_message(IndexInfoMessage *record) {
+  for (size_t i = 0; i < 8; i++) { record->index_id[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->index_price[i] = arbitrary(); }
+}
+
+/* Index Info Message to the wire: 16 bytes from at, returning where the next byte goes */
+static size_t encode_index_info_message(const IndexInfoMessage *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->index_id[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->index_price[i]; }
+
+  return at;
+}
+
+/* Index Info Message off the wire: 16 bytes from at, returning where the next byte lies */
+static size_t decode_index_info_message(IndexInfoMessage *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 8; i++) { record->index_id[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->index_price[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Index Info Message is what was written, byte for byte */
+static void equal_index_info_message(const IndexInfoMessage *read, const IndexInfoMessage *written) {
+  for (size_t i = 0; i < 8; i++) { assert(read->index_id[i] == written->index_id[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->index_price[i] == written->index_price[i]); }
+}
+
+/* Index Info Message: written and read back, then read and written back */
+static void check_index_info_message(void) {
+  IndexInfoMessage sent;
+  IndexInfoMessage got;
+  uint8_t wire[16];
+  uint8_t again[16];
+
+  any_index_info_message(&sent);
+  assert(encode_index_info_message(&sent, wire, 0) == 16);
+  assert(decode_index_info_message(&got, wire, 0) == 16);
+  equal_index_info_message(&got, &sent);
+
+  for (size_t i = 0; i < 16; i++) { wire[i] = arbitrary(); }
+  assert(decode_index_info_message(&got, wire, 0) == 16);
+  assert(encode_index_info_message(&got, again, 0) == 16);
+  for (size_t i = 0; i < 16; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Instrument Info Message: 32 bytes --------------------------------------- */
 
 /* InstrumentInfoMessage */
 typedef struct {
   uint8_t instrument_id[8];   /* bytes 0 to 7 */
   uint8_t min_sell_price[8];  /* bytes 8 to 15 */
   uint8_t max_buy_price[8];   /* bytes 16 to 23 */
-  uint8_t index_price[8];     /* bytes 24 to 31 */
-  uint8_t mark_price[8];      /* bytes 32 to 39 */
+  uint8_t mark_price[8];      /* bytes 24 to 31 */
 } InstrumentInfoMessage;
 
 /* any Instrument Info Message at all: every byte one the checker chooses */
@@ -186,27 +239,24 @@ static void any_instrument_info_message(InstrumentInfoMessage *record) {
   for (size_t i = 0; i < 8; i++) { record->instrument_id[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->min_sell_price[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->max_buy_price[i] = arbitrary(); }
-  for (size_t i = 0; i < 8; i++) { record->index_price[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->mark_price[i] = arbitrary(); }
 }
 
-/* Instrument Info Message to the wire: 40 bytes from at, returning where the next byte goes */
+/* Instrument Info Message to the wire: 32 bytes from at, returning where the next byte goes */
 static size_t encode_instrument_info_message(const InstrumentInfoMessage *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->instrument_id[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->min_sell_price[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->max_buy_price[i]; }
-  for (size_t i = 0; i < 8; i++) { wire[at++] = record->index_price[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->mark_price[i]; }
 
   return at;
 }
 
-/* Instrument Info Message off the wire: 40 bytes from at, returning where the next byte lies */
+/* Instrument Info Message off the wire: 32 bytes from at, returning where the next byte lies */
 static size_t decode_instrument_info_message(InstrumentInfoMessage *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 8; i++) { record->instrument_id[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->min_sell_price[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->max_buy_price[i] = wire[at++]; }
-  for (size_t i = 0; i < 8; i++) { record->index_price[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->mark_price[i] = wire[at++]; }
 
   return at;
@@ -217,7 +267,6 @@ static void equal_instrument_info_message(const InstrumentInfoMessage *read, con
   for (size_t i = 0; i < 8; i++) { assert(read->instrument_id[i] == written->instrument_id[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->min_sell_price[i] == written->min_sell_price[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->max_buy_price[i] == written->max_buy_price[i]); }
-  for (size_t i = 0; i < 8; i++) { assert(read->index_price[i] == written->index_price[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->mark_price[i] == written->mark_price[i]); }
 }
 
@@ -225,21 +274,21 @@ static void equal_instrument_info_message(const InstrumentInfoMessage *read, con
 static void check_instrument_info_message(void) {
   InstrumentInfoMessage sent;
   InstrumentInfoMessage got;
-  uint8_t wire[40];
-  uint8_t again[40];
+  uint8_t wire[32];
+  uint8_t again[32];
 
   any_instrument_info_message(&sent);
-  assert(encode_instrument_info_message(&sent, wire, 0) == 40);
-  assert(decode_instrument_info_message(&got, wire, 0) == 40);
+  assert(encode_instrument_info_message(&sent, wire, 0) == 32);
+  assert(decode_instrument_info_message(&got, wire, 0) == 32);
   equal_instrument_info_message(&got, &sent);
 
-  for (size_t i = 0; i < 40; i++) { wire[i] = arbitrary(); }
-  assert(decode_instrument_info_message(&got, wire, 0) == 40);
-  assert(encode_instrument_info_message(&got, again, 0) == 40);
-  for (size_t i = 0; i < 40; i++) { assert(again[i] == wire[i]); }
+  for (size_t i = 0; i < 32; i++) { wire[i] = arbitrary(); }
+  assert(decode_instrument_info_message(&got, wire, 0) == 32);
+  assert(encode_instrument_info_message(&got, again, 0) == 32);
+  for (size_t i = 0; i < 32; i++) { assert(again[i] == wire[i]); }
 }
 
-/* ---- Instrument Ref Message: 48 bytes ---------------------------------------- */
+/* ---- Instrument Ref Message: 56 bytes ---------------------------------------- */
 
 /* InstrumentRefMessage */
 typedef struct {
@@ -249,6 +298,7 @@ typedef struct {
   uint8_t estimated_delivery_price[8];  /* bytes 24 to 31 */
   uint8_t delivery_price[8];            /* bytes 32 to 39 */
   uint8_t settlement_price[8];          /* bytes 40 to 47 */
+  uint8_t open_interest[8];             /* bytes 48 to 55 */
 } InstrumentRefMessage;
 
 /* any Instrument Ref Message at all: every byte one the checker chooses */
@@ -259,9 +309,10 @@ static void any_instrument_ref_message(InstrumentRefMessage *record) {
   for (size_t i = 0; i < 8; i++) { record->estimated_delivery_price[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->delivery_price[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->settlement_price[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->open_interest[i] = arbitrary(); }
 }
 
-/* Instrument Ref Message to the wire: 48 bytes from at, returning where the next byte goes */
+/* Instrument Ref Message to the wire: 56 bytes from at, returning where the next byte goes */
 static size_t encode_instrument_ref_message(const InstrumentRefMessage *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->instrument_id[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->current_funding[i]; }
@@ -269,11 +320,12 @@ static size_t encode_instrument_ref_message(const InstrumentRefMessage *record, 
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->estimated_delivery_price[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->delivery_price[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->settlement_price[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->open_interest[i]; }
 
   return at;
 }
 
-/* Instrument Ref Message off the wire: 48 bytes from at, returning where the next byte lies */
+/* Instrument Ref Message off the wire: 56 bytes from at, returning where the next byte lies */
 static size_t decode_instrument_ref_message(InstrumentRefMessage *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 8; i++) { record->instrument_id[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->current_funding[i] = wire[at++]; }
@@ -281,6 +333,7 @@ static size_t decode_instrument_ref_message(InstrumentRefMessage *record, const 
   for (size_t i = 0; i < 8; i++) { record->estimated_delivery_price[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->delivery_price[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->settlement_price[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->open_interest[i] = wire[at++]; }
 
   return at;
 }
@@ -293,24 +346,25 @@ static void equal_instrument_ref_message(const InstrumentRefMessage *read, const
   for (size_t i = 0; i < 8; i++) { assert(read->estimated_delivery_price[i] == written->estimated_delivery_price[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->delivery_price[i] == written->delivery_price[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->settlement_price[i] == written->settlement_price[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->open_interest[i] == written->open_interest[i]); }
 }
 
 /* Instrument Ref Message: written and read back, then read and written back */
 static void check_instrument_ref_message(void) {
   InstrumentRefMessage sent;
   InstrumentRefMessage got;
-  uint8_t wire[48];
-  uint8_t again[48];
+  uint8_t wire[56];
+  uint8_t again[56];
 
   any_instrument_ref_message(&sent);
-  assert(encode_instrument_ref_message(&sent, wire, 0) == 48);
-  assert(decode_instrument_ref_message(&got, wire, 0) == 48);
+  assert(encode_instrument_ref_message(&sent, wire, 0) == 56);
+  assert(decode_instrument_ref_message(&got, wire, 0) == 56);
   equal_instrument_ref_message(&got, &sent);
 
-  for (size_t i = 0; i < 48; i++) { wire[i] = arbitrary(); }
-  assert(decode_instrument_ref_message(&got, wire, 0) == 48);
-  assert(encode_instrument_ref_message(&got, again, 0) == 48);
-  for (size_t i = 0; i < 48; i++) { assert(again[i] == wire[i]); }
+  for (size_t i = 0; i < 56; i++) { wire[i] = arbitrary(); }
+  assert(decode_instrument_ref_message(&got, wire, 0) == 56);
+  assert(encode_instrument_ref_message(&got, again, 0) == 56);
+  for (size_t i = 0; i < 56; i++) { assert(again[i] == wire[i]); }
 }
 
 /* ---- Instrument Status Update Message: 9 bytes ------------------------------- */
@@ -1017,6 +1071,7 @@ static void check_retransmit_reject_message(void) {
 static void checks(void) {
   check_group_size_encoding();
   check_index_definition_message();
+  check_index_info_message();
   check_instrument_info_message();
   check_instrument_ref_message();
   check_instrument_status_update_message();

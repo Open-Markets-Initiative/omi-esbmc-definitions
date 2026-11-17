@@ -360,17 +360,17 @@ static void check_trading_schedule_message(void) {
 
 /* Tick Size Table. */
 typedef struct {
-  uint8_t timestamp[4];            /* bytes 0 to 3 */
-  uint8_t tick_size_table_id[4];   /* bytes 4 to 7 */
-  uint8_t tick_size_integer_4[4];  /* bytes 8 to 11 */
-  uint8_t price_start[4];          /* bytes 12 to 15 */
+  uint8_t timestamp[4];           /* bytes 0 to 3 */
+  uint8_t tick_size_table_id[4];  /* bytes 4 to 7 */
+  uint8_t price_tick_size[4];     /* bytes 8 to 11 */
+  uint8_t price_start[4];         /* bytes 12 to 15 */
 } PriceTickSizeMessage;
 
 /* any Price Tick Size Message at all: every byte one the checker chooses */
 static void any_price_tick_size_message(PriceTickSizeMessage *record) {
   for (size_t i = 0; i < 4; i++) { record->timestamp[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->tick_size_table_id[i] = arbitrary(); }
-  for (size_t i = 0; i < 4; i++) { record->tick_size_integer_4[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->price_tick_size[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->price_start[i] = arbitrary(); }
 }
 
@@ -378,7 +378,7 @@ static void any_price_tick_size_message(PriceTickSizeMessage *record) {
 static size_t encode_price_tick_size_message(const PriceTickSizeMessage *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->timestamp[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->tick_size_table_id[i]; }
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->tick_size_integer_4[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->price_tick_size[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->price_start[i]; }
 
   return at;
@@ -388,7 +388,7 @@ static size_t encode_price_tick_size_message(const PriceTickSizeMessage *record,
 static size_t decode_price_tick_size_message(PriceTickSizeMessage *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 4; i++) { record->timestamp[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->tick_size_table_id[i] = wire[at++]; }
-  for (size_t i = 0; i < 4; i++) { record->tick_size_integer_4[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->price_tick_size[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->price_start[i] = wire[at++]; }
 
   return at;
@@ -398,7 +398,7 @@ static size_t decode_price_tick_size_message(PriceTickSizeMessage *record, const
 static void equal_price_tick_size_message(const PriceTickSizeMessage *read, const PriceTickSizeMessage *written) {
   for (size_t i = 0; i < 4; i++) { assert(read->timestamp[i] == written->timestamp[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->tick_size_table_id[i] == written->tick_size_table_id[i]); }
-  for (size_t i = 0; i < 4; i++) { assert(read->tick_size_integer_4[i] == written->tick_size_integer_4[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->price_tick_size[i] == written->price_tick_size[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->price_start[i] == written->price_start[i]); }
 }
 
@@ -424,17 +424,17 @@ static void check_price_tick_size_message(void) {
 
 /* Tick Size Table. */
 typedef struct {
-  uint8_t timestamp[4];            /* bytes 0 to 3 */
-  uint8_t tick_size_table_id[4];   /* bytes 4 to 7 */
-  uint8_t tick_size_integer_8[8];  /* bytes 8 to 15 */
-  uint8_t quantity_start[8];       /* bytes 16 to 23 */
+  uint8_t timestamp[4];           /* bytes 0 to 3 */
+  uint8_t tick_size_table_id[4];  /* bytes 4 to 7 */
+  uint8_t quantity_tick_size[8];  /* bytes 8 to 15 */
+  uint8_t quantity_start[8];      /* bytes 16 to 23 */
 } QuantityTickSizeMessage;
 
 /* any Quantity Tick Size Message at all: every byte one the checker chooses */
 static void any_quantity_tick_size_message(QuantityTickSizeMessage *record) {
   for (size_t i = 0; i < 4; i++) { record->timestamp[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->tick_size_table_id[i] = arbitrary(); }
-  for (size_t i = 0; i < 8; i++) { record->tick_size_integer_8[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->quantity_tick_size[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->quantity_start[i] = arbitrary(); }
 }
 
@@ -442,7 +442,7 @@ static void any_quantity_tick_size_message(QuantityTickSizeMessage *record) {
 static size_t encode_quantity_tick_size_message(const QuantityTickSizeMessage *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->timestamp[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->tick_size_table_id[i]; }
-  for (size_t i = 0; i < 8; i++) { wire[at++] = record->tick_size_integer_8[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->quantity_tick_size[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->quantity_start[i]; }
 
   return at;
@@ -452,7 +452,7 @@ static size_t encode_quantity_tick_size_message(const QuantityTickSizeMessage *r
 static size_t decode_quantity_tick_size_message(QuantityTickSizeMessage *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 4; i++) { record->timestamp[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->tick_size_table_id[i] = wire[at++]; }
-  for (size_t i = 0; i < 8; i++) { record->tick_size_integer_8[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->quantity_tick_size[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->quantity_start[i] = wire[at++]; }
 
   return at;
@@ -462,7 +462,7 @@ static size_t decode_quantity_tick_size_message(QuantityTickSizeMessage *record,
 static void equal_quantity_tick_size_message(const QuantityTickSizeMessage *read, const QuantityTickSizeMessage *written) {
   for (size_t i = 0; i < 4; i++) { assert(read->timestamp[i] == written->timestamp[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->tick_size_table_id[i] == written->tick_size_table_id[i]); }
-  for (size_t i = 0; i < 8; i++) { assert(read->tick_size_integer_8[i] == written->tick_size_integer_8[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->quantity_tick_size[i] == written->quantity_tick_size[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->quantity_start[i] == written->quantity_start[i]); }
 }
 

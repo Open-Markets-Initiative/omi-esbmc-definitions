@@ -754,6 +754,95 @@ static void check_inner_header(void) {
   for (size_t i = 0; i < 40; i++) { assert(again[i] == wire[i]); }
 }
 
+/* ---- Download Header: 40 bytes ----------------------------------------------- */
+
+/* MESSAGE_HEADER of the downloaded message */
+typedef struct {
+  uint8_t inner_transaction_code[2];  /* bytes 0 to 1 */
+  uint8_t inner_log_time[4];          /* bytes 2 to 5 */
+  uint8_t inner_alpha_char[2];        /* bytes 6 to 7 */
+  uint8_t inner_trader_id[4];         /* bytes 8 to 11 */
+  uint8_t inner_error_code[2];        /* bytes 12 to 13 */
+  uint8_t inner_timestamp[8];         /* bytes 14 to 21 */
+  uint8_t inner_time_stamp_1[8];      /* bytes 22 to 29 */
+  uint8_t inner_time_stamp_2[8];      /* bytes 30 to 37 */
+  uint8_t inner_message_length[2];    /* bytes 38 to 39 */
+} DownloadHeader;
+
+/* any Download Header at all: every byte one the checker chooses */
+static void any_download_header(DownloadHeader *record) {
+  for (size_t i = 0; i < 2; i++) { record->inner_transaction_code[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->inner_log_time[i] = arbitrary(); }
+  for (size_t i = 0; i < 2; i++) { record->inner_alpha_char[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->inner_trader_id[i] = arbitrary(); }
+  for (size_t i = 0; i < 2; i++) { record->inner_error_code[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->inner_timestamp[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->inner_time_stamp_1[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->inner_time_stamp_2[i] = arbitrary(); }
+  for (size_t i = 0; i < 2; i++) { record->inner_message_length[i] = arbitrary(); }
+}
+
+/* Download Header to the wire: 40 bytes from at, returning where the next byte goes */
+static size_t encode_download_header(const DownloadHeader *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->inner_transaction_code[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->inner_log_time[i]; }
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->inner_alpha_char[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->inner_trader_id[i]; }
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->inner_error_code[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->inner_timestamp[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->inner_time_stamp_1[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->inner_time_stamp_2[i]; }
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->inner_message_length[i]; }
+
+  return at;
+}
+
+/* Download Header off the wire: 40 bytes from at, returning where the next byte lies */
+static size_t decode_download_header(DownloadHeader *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 2; i++) { record->inner_transaction_code[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->inner_log_time[i] = wire[at++]; }
+  for (size_t i = 0; i < 2; i++) { record->inner_alpha_char[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->inner_trader_id[i] = wire[at++]; }
+  for (size_t i = 0; i < 2; i++) { record->inner_error_code[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->inner_timestamp[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->inner_time_stamp_1[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->inner_time_stamp_2[i] = wire[at++]; }
+  for (size_t i = 0; i < 2; i++) { record->inner_message_length[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Download Header is what was written, byte for byte */
+static void equal_download_header(const DownloadHeader *read, const DownloadHeader *written) {
+  for (size_t i = 0; i < 2; i++) { assert(read->inner_transaction_code[i] == written->inner_transaction_code[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->inner_log_time[i] == written->inner_log_time[i]); }
+  for (size_t i = 0; i < 2; i++) { assert(read->inner_alpha_char[i] == written->inner_alpha_char[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->inner_trader_id[i] == written->inner_trader_id[i]); }
+  for (size_t i = 0; i < 2; i++) { assert(read->inner_error_code[i] == written->inner_error_code[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->inner_timestamp[i] == written->inner_timestamp[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->inner_time_stamp_1[i] == written->inner_time_stamp_1[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->inner_time_stamp_2[i] == written->inner_time_stamp_2[i]); }
+  for (size_t i = 0; i < 2; i++) { assert(read->inner_message_length[i] == written->inner_message_length[i]); }
+}
+
+/* Download Header: written and read back, then read and written back */
+static void check_download_header(void) {
+  DownloadHeader sent;
+  DownloadHeader got;
+  uint8_t wire[40];
+  uint8_t again[40];
+
+  any_download_header(&sent);
+  assert(encode_download_header(&sent, wire, 0) == 40);
+  assert(decode_download_header(&got, wire, 0) == 40);
+  equal_download_header(&got, &sent);
+
+  for (size_t i = 0; i < 40; i++) { wire[i] = arbitrary(); }
+  assert(decode_download_header(&got, wire, 0) == 40);
+  assert(encode_download_header(&got, again, 0) == 40);
+  for (size_t i = 0; i < 40; i++) { assert(again[i] == wire[i]); }
+}
+
 /* ---- Contract Desc: 28 bytes ------------------------------------------------- */
 
 /* CONTRACT_DESC */
@@ -1749,6 +1838,7 @@ static void checks(void) {
   check_update_local_database_header_message();
   check_update_local_database_trailer_message();
   check_inner_header();
+  check_download_header();
   check_contract_desc();
   check_control_message_to_trader_message();
   check_report_header_body();

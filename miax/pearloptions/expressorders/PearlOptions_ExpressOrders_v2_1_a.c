@@ -440,7 +440,7 @@ typedef struct {
   uint8_t mpid[4];                             /* bytes 8 to 11 */
   uint8_t underlying_symbol[11];               /* bytes 12 to 22 */
   uint8_t allowable_engagement_percentage[4];  /* bytes 23 to 26 */
-  uint8_t counting_period_binary_u_2[2];       /* bytes 27 to 28 */
+  uint8_t counting_period[2];                  /* bytes 27 to 28 */
   uint8_t action;                              /* byte 29 */
   uint8_t source;                              /* byte 30 */
 } ArmProtectionSettingsNotification;
@@ -451,7 +451,7 @@ static void any_arm_protection_settings_notification(ArmProtectionSettingsNotifi
   for (size_t i = 0; i < 4; i++) { record->mpid[i] = arbitrary(); }
   for (size_t i = 0; i < 11; i++) { record->underlying_symbol[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->allowable_engagement_percentage[i] = arbitrary(); }
-  for (size_t i = 0; i < 2; i++) { record->counting_period_binary_u_2[i] = arbitrary(); }
+  for (size_t i = 0; i < 2; i++) { record->counting_period[i] = arbitrary(); }
   record->action = arbitrary();
   record->source = arbitrary();
 }
@@ -462,7 +462,7 @@ static size_t encode_arm_protection_settings_notification(const ArmProtectionSet
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->mpid[i]; }
   for (size_t i = 0; i < 11; i++) { wire[at++] = record->underlying_symbol[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->allowable_engagement_percentage[i]; }
-  for (size_t i = 0; i < 2; i++) { wire[at++] = record->counting_period_binary_u_2[i]; }
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->counting_period[i]; }
   wire[at++] = record->action;
   wire[at++] = record->source;
 
@@ -475,7 +475,7 @@ static size_t decode_arm_protection_settings_notification(ArmProtectionSettingsN
   for (size_t i = 0; i < 4; i++) { record->mpid[i] = wire[at++]; }
   for (size_t i = 0; i < 11; i++) { record->underlying_symbol[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->allowable_engagement_percentage[i] = wire[at++]; }
-  for (size_t i = 0; i < 2; i++) { record->counting_period_binary_u_2[i] = wire[at++]; }
+  for (size_t i = 0; i < 2; i++) { record->counting_period[i] = wire[at++]; }
   record->action = wire[at++];
   record->source = wire[at++];
 
@@ -488,7 +488,7 @@ static void equal_arm_protection_settings_notification(const ArmProtectionSettin
   for (size_t i = 0; i < 4; i++) { assert(read->mpid[i] == written->mpid[i]); }
   for (size_t i = 0; i < 11; i++) { assert(read->underlying_symbol[i] == written->underlying_symbol[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->allowable_engagement_percentage[i] == written->allowable_engagement_percentage[i]); }
-  for (size_t i = 0; i < 2; i++) { assert(read->counting_period_binary_u_2[i] == written->counting_period_binary_u_2[i]); }
+  for (size_t i = 0; i < 2; i++) { assert(read->counting_period[i] == written->counting_period[i]); }
   assert(read->action == written->action);
   assert(read->source == written->source);
 }
@@ -515,13 +515,13 @@ static void check_arm_protection_settings_notification(void) {
 
 /* This message format will be used to notify firms of their ARM2 Underlying Level protection settings */
 typedef struct {
-  uint8_t notification_time[8];               /* bytes 0 to 7 */
-  uint8_t mpid[4];                            /* bytes 8 to 11 */
-  uint8_t action;                             /* byte 12 */
-  uint8_t underlying_symbol[11];              /* bytes 13 to 23 */
-  uint8_t arm_threshold_count_binary_u_4[4];  /* bytes 24 to 27 */
-  uint8_t counting_period_binary_u_4[4];      /* bytes 28 to 31 */
-  uint8_t reserved_16[16];                    /* bytes 32 to 47 */
+  uint8_t notification_time[8];      /* bytes 0 to 7 */
+  uint8_t mpid[4];                   /* bytes 8 to 11 */
+  uint8_t action;                    /* byte 12 */
+  uint8_t underlying_symbol[11];     /* bytes 13 to 23 */
+  uint8_t arm_threshold_count[4];    /* bytes 24 to 27 */
+  uint8_t arm_2_counting_period[4];  /* bytes 28 to 31 */
+  uint8_t reserved_16[16];           /* bytes 32 to 47 */
 } Arm2UnderlyingLevelProtectionSettingsNotification;
 
 /* any Arm 2 Underlying Level Protection Settings Notification at all: every byte one the checker chooses */
@@ -530,8 +530,8 @@ static void any_arm2_underlying_level_protection_settings_notification(Arm2Under
   for (size_t i = 0; i < 4; i++) { record->mpid[i] = arbitrary(); }
   record->action = arbitrary();
   for (size_t i = 0; i < 11; i++) { record->underlying_symbol[i] = arbitrary(); }
-  for (size_t i = 0; i < 4; i++) { record->arm_threshold_count_binary_u_4[i] = arbitrary(); }
-  for (size_t i = 0; i < 4; i++) { record->counting_period_binary_u_4[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->arm_threshold_count[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->arm_2_counting_period[i] = arbitrary(); }
   for (size_t i = 0; i < 16; i++) { record->reserved_16[i] = arbitrary(); }
 }
 
@@ -541,8 +541,8 @@ static size_t encode_arm2_underlying_level_protection_settings_notification(cons
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->mpid[i]; }
   wire[at++] = record->action;
   for (size_t i = 0; i < 11; i++) { wire[at++] = record->underlying_symbol[i]; }
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->arm_threshold_count_binary_u_4[i]; }
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->counting_period_binary_u_4[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->arm_threshold_count[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->arm_2_counting_period[i]; }
   for (size_t i = 0; i < 16; i++) { wire[at++] = record->reserved_16[i]; }
 
   return at;
@@ -554,8 +554,8 @@ static size_t decode_arm2_underlying_level_protection_settings_notification(Arm2
   for (size_t i = 0; i < 4; i++) { record->mpid[i] = wire[at++]; }
   record->action = wire[at++];
   for (size_t i = 0; i < 11; i++) { record->underlying_symbol[i] = wire[at++]; }
-  for (size_t i = 0; i < 4; i++) { record->arm_threshold_count_binary_u_4[i] = wire[at++]; }
-  for (size_t i = 0; i < 4; i++) { record->counting_period_binary_u_4[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->arm_threshold_count[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->arm_2_counting_period[i] = wire[at++]; }
   for (size_t i = 0; i < 16; i++) { record->reserved_16[i] = wire[at++]; }
 
   return at;
@@ -567,8 +567,8 @@ static void equal_arm2_underlying_level_protection_settings_notification(const A
   for (size_t i = 0; i < 4; i++) { assert(read->mpid[i] == written->mpid[i]); }
   assert(read->action == written->action);
   for (size_t i = 0; i < 11; i++) { assert(read->underlying_symbol[i] == written->underlying_symbol[i]); }
-  for (size_t i = 0; i < 4; i++) { assert(read->arm_threshold_count_binary_u_4[i] == written->arm_threshold_count_binary_u_4[i]); }
-  for (size_t i = 0; i < 4; i++) { assert(read->counting_period_binary_u_4[i] == written->counting_period_binary_u_4[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->arm_threshold_count[i] == written->arm_threshold_count[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->arm_2_counting_period[i] == written->arm_2_counting_period[i]); }
   for (size_t i = 0; i < 16; i++) { assert(read->reserved_16[i] == written->reserved_16[i]); }
 }
 
@@ -673,13 +673,13 @@ static void check_single_side_liquidity_protection_trigger_notification(void) {
 
 /* This message format will be used to notify firms about ARM2 Underlying Level protection events */
 typedef struct {
-  uint8_t notification_time[8];               /* bytes 0 to 7 */
-  uint8_t mpid[4];                            /* bytes 8 to 11 */
-  uint8_t underlying_symbol[11];              /* bytes 12 to 22 */
-  uint8_t notification_type;                  /* byte 23 */
-  uint8_t arm_threshold_count_binary_u_4[4];  /* bytes 24 to 27 */
-  uint8_t counting_period_binary_u_4[4];      /* bytes 28 to 31 */
-  uint8_t reserved_16[16];                    /* bytes 32 to 47 */
+  uint8_t notification_time[8];      /* bytes 0 to 7 */
+  uint8_t mpid[4];                   /* bytes 8 to 11 */
+  uint8_t underlying_symbol[11];     /* bytes 12 to 22 */
+  uint8_t notification_type;         /* byte 23 */
+  uint8_t arm_threshold_count[4];    /* bytes 24 to 27 */
+  uint8_t arm_2_counting_period[4];  /* bytes 28 to 31 */
+  uint8_t reserved_16[16];           /* bytes 32 to 47 */
 } Arm2UnderlyingLevelProtectionNotification;
 
 /* any Arm 2 Underlying Level Protection Notification at all: every byte one the checker chooses */
@@ -688,8 +688,8 @@ static void any_arm2_underlying_level_protection_notification(Arm2UnderlyingLeve
   for (size_t i = 0; i < 4; i++) { record->mpid[i] = arbitrary(); }
   for (size_t i = 0; i < 11; i++) { record->underlying_symbol[i] = arbitrary(); }
   record->notification_type = arbitrary();
-  for (size_t i = 0; i < 4; i++) { record->arm_threshold_count_binary_u_4[i] = arbitrary(); }
-  for (size_t i = 0; i < 4; i++) { record->counting_period_binary_u_4[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->arm_threshold_count[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->arm_2_counting_period[i] = arbitrary(); }
   for (size_t i = 0; i < 16; i++) { record->reserved_16[i] = arbitrary(); }
 }
 
@@ -699,8 +699,8 @@ static size_t encode_arm2_underlying_level_protection_notification(const Arm2Und
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->mpid[i]; }
   for (size_t i = 0; i < 11; i++) { wire[at++] = record->underlying_symbol[i]; }
   wire[at++] = record->notification_type;
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->arm_threshold_count_binary_u_4[i]; }
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->counting_period_binary_u_4[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->arm_threshold_count[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->arm_2_counting_period[i]; }
   for (size_t i = 0; i < 16; i++) { wire[at++] = record->reserved_16[i]; }
 
   return at;
@@ -712,8 +712,8 @@ static size_t decode_arm2_underlying_level_protection_notification(Arm2Underlyin
   for (size_t i = 0; i < 4; i++) { record->mpid[i] = wire[at++]; }
   for (size_t i = 0; i < 11; i++) { record->underlying_symbol[i] = wire[at++]; }
   record->notification_type = wire[at++];
-  for (size_t i = 0; i < 4; i++) { record->arm_threshold_count_binary_u_4[i] = wire[at++]; }
-  for (size_t i = 0; i < 4; i++) { record->counting_period_binary_u_4[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->arm_threshold_count[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->arm_2_counting_period[i] = wire[at++]; }
   for (size_t i = 0; i < 16; i++) { record->reserved_16[i] = wire[at++]; }
 
   return at;
@@ -725,8 +725,8 @@ static void equal_arm2_underlying_level_protection_notification(const Arm2Underl
   for (size_t i = 0; i < 4; i++) { assert(read->mpid[i] == written->mpid[i]); }
   for (size_t i = 0; i < 11; i++) { assert(read->underlying_symbol[i] == written->underlying_symbol[i]); }
   assert(read->notification_type == written->notification_type);
-  for (size_t i = 0; i < 4; i++) { assert(read->arm_threshold_count_binary_u_4[i] == written->arm_threshold_count_binary_u_4[i]); }
-  for (size_t i = 0; i < 4; i++) { assert(read->counting_period_binary_u_4[i] == written->counting_period_binary_u_4[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->arm_threshold_count[i] == written->arm_threshold_count[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->arm_2_counting_period[i] == written->arm_2_counting_period[i]); }
   for (size_t i = 0; i < 16; i++) { assert(read->reserved_16[i] == written->reserved_16[i]); }
 }
 
@@ -752,18 +752,18 @@ static void check_arm2_underlying_level_protection_notification(void) {
 
 /* This message format will be used to notify firms about ARM2 Firm Level protection events */
 typedef struct {
-  uint8_t notification_time[8];                /* bytes 0 to 7 */
-  uint8_t arm_threshold_count_binary_4u_4[4];  /* bytes 8 to 11 */
-  uint8_t counting_period_binary_4u_4[4];      /* bytes 12 to 15 */
-  uint8_t notification_type;                   /* byte 16 */
-  uint8_t reserved_16[16];                     /* bytes 17 to 32 */
+  uint8_t notification_time[8];      /* bytes 0 to 7 */
+  uint8_t arm_threshold_count[4];    /* bytes 8 to 11 */
+  uint8_t arm_2_counting_period[4];  /* bytes 12 to 15 */
+  uint8_t notification_type;         /* byte 16 */
+  uint8_t reserved_16[16];           /* bytes 17 to 32 */
 } Arm2FirmLevelProtectionNotification;
 
 /* any Arm 2 Firm Level Protection Notification at all: every byte one the checker chooses */
 static void any_arm2_firm_level_protection_notification(Arm2FirmLevelProtectionNotification *record) {
   for (size_t i = 0; i < 8; i++) { record->notification_time[i] = arbitrary(); }
-  for (size_t i = 0; i < 4; i++) { record->arm_threshold_count_binary_4u_4[i] = arbitrary(); }
-  for (size_t i = 0; i < 4; i++) { record->counting_period_binary_4u_4[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->arm_threshold_count[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->arm_2_counting_period[i] = arbitrary(); }
   record->notification_type = arbitrary();
   for (size_t i = 0; i < 16; i++) { record->reserved_16[i] = arbitrary(); }
 }
@@ -771,8 +771,8 @@ static void any_arm2_firm_level_protection_notification(Arm2FirmLevelProtectionN
 /* Arm 2 Firm Level Protection Notification to the wire: 33 bytes from at, returning where the next byte goes */
 static size_t encode_arm2_firm_level_protection_notification(const Arm2FirmLevelProtectionNotification *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->notification_time[i]; }
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->arm_threshold_count_binary_4u_4[i]; }
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->counting_period_binary_4u_4[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->arm_threshold_count[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->arm_2_counting_period[i]; }
   wire[at++] = record->notification_type;
   for (size_t i = 0; i < 16; i++) { wire[at++] = record->reserved_16[i]; }
 
@@ -782,8 +782,8 @@ static size_t encode_arm2_firm_level_protection_notification(const Arm2FirmLevel
 /* Arm 2 Firm Level Protection Notification off the wire: 33 bytes from at, returning where the next byte lies */
 static size_t decode_arm2_firm_level_protection_notification(Arm2FirmLevelProtectionNotification *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 8; i++) { record->notification_time[i] = wire[at++]; }
-  for (size_t i = 0; i < 4; i++) { record->arm_threshold_count_binary_4u_4[i] = wire[at++]; }
-  for (size_t i = 0; i < 4; i++) { record->counting_period_binary_4u_4[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->arm_threshold_count[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->arm_2_counting_period[i] = wire[at++]; }
   record->notification_type = wire[at++];
   for (size_t i = 0; i < 16; i++) { record->reserved_16[i] = wire[at++]; }
 
@@ -793,8 +793,8 @@ static size_t decode_arm2_firm_level_protection_notification(Arm2FirmLevelProtec
 /* what was read of Arm 2 Firm Level Protection Notification is what was written, byte for byte */
 static void equal_arm2_firm_level_protection_notification(const Arm2FirmLevelProtectionNotification *read, const Arm2FirmLevelProtectionNotification *written) {
   for (size_t i = 0; i < 8; i++) { assert(read->notification_time[i] == written->notification_time[i]); }
-  for (size_t i = 0; i < 4; i++) { assert(read->arm_threshold_count_binary_4u_4[i] == written->arm_threshold_count_binary_4u_4[i]); }
-  for (size_t i = 0; i < 4; i++) { assert(read->counting_period_binary_4u_4[i] == written->counting_period_binary_4u_4[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->arm_threshold_count[i] == written->arm_threshold_count[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->arm_2_counting_period[i] == written->arm_2_counting_period[i]); }
   assert(read->notification_type == written->notification_type);
   for (size_t i = 0; i < 16; i++) { assert(read->reserved_16[i] == written->reserved_16[i]); }
 }
@@ -1044,7 +1044,7 @@ typedef struct {
   uint8_t action;                              /* byte 8 */
   uint8_t underlying_symbol[11];               /* bytes 9 to 19 */
   uint8_t allowable_engagement_percentage[4];  /* bytes 20 to 23 */
-  uint8_t counting_period_binary_u_2[2];       /* bytes 24 to 25 */
+  uint8_t counting_period[2];                  /* bytes 24 to 25 */
 } ArmSettingsUpdateRequest;
 
 /* any Arm Settings Update Request at all: every byte one the checker chooses */
@@ -1054,7 +1054,7 @@ static void any_arm_settings_update_request(ArmSettingsUpdateRequest *record) {
   record->action = arbitrary();
   for (size_t i = 0; i < 11; i++) { record->underlying_symbol[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->allowable_engagement_percentage[i] = arbitrary(); }
-  for (size_t i = 0; i < 2; i++) { record->counting_period_binary_u_2[i] = arbitrary(); }
+  for (size_t i = 0; i < 2; i++) { record->counting_period[i] = arbitrary(); }
 }
 
 /* Arm Settings Update Request to the wire: 26 bytes from at, returning where the next byte goes */
@@ -1064,7 +1064,7 @@ static size_t encode_arm_settings_update_request(const ArmSettingsUpdateRequest 
   wire[at++] = record->action;
   for (size_t i = 0; i < 11; i++) { wire[at++] = record->underlying_symbol[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->allowable_engagement_percentage[i]; }
-  for (size_t i = 0; i < 2; i++) { wire[at++] = record->counting_period_binary_u_2[i]; }
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->counting_period[i]; }
 
   return at;
 }
@@ -1076,7 +1076,7 @@ static size_t decode_arm_settings_update_request(ArmSettingsUpdateRequest *recor
   record->action = wire[at++];
   for (size_t i = 0; i < 11; i++) { record->underlying_symbol[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->allowable_engagement_percentage[i] = wire[at++]; }
-  for (size_t i = 0; i < 2; i++) { record->counting_period_binary_u_2[i] = wire[at++]; }
+  for (size_t i = 0; i < 2; i++) { record->counting_period[i] = wire[at++]; }
 
   return at;
 }
@@ -1088,7 +1088,7 @@ static void equal_arm_settings_update_request(const ArmSettingsUpdateRequest *re
   assert(read->action == written->action);
   for (size_t i = 0; i < 11; i++) { assert(read->underlying_symbol[i] == written->underlying_symbol[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->allowable_engagement_percentage[i] == written->allowable_engagement_percentage[i]); }
-  for (size_t i = 0; i < 2; i++) { assert(read->counting_period_binary_u_2[i] == written->counting_period_binary_u_2[i]); }
+  for (size_t i = 0; i < 2; i++) { assert(read->counting_period[i] == written->counting_period[i]); }
 }
 
 /* Arm Settings Update Request: written and read back, then read and written back */
@@ -1177,12 +1177,12 @@ static void check_arm_settings_update_response(void) {
 
 /* Firms can use this message format to set up their ARM2 Underlying Level protection settings for each session. Changes to these settings can be made throughout the day */
 typedef struct {
-  uint8_t client_message_id[4];               /* bytes 0 to 3 */
-  uint8_t mpid[4];                            /* bytes 4 to 7 */
-  uint8_t action;                             /* byte 8 */
-  uint8_t underlying_symbol[11];              /* bytes 9 to 19 */
-  uint8_t arm_threshold_count_binary_u_4[4];  /* bytes 20 to 23 */
-  uint8_t counting_period_binary_u_4[4];      /* bytes 24 to 27 */
+  uint8_t client_message_id[4];      /* bytes 0 to 3 */
+  uint8_t mpid[4];                   /* bytes 4 to 7 */
+  uint8_t action;                    /* byte 8 */
+  uint8_t underlying_symbol[11];     /* bytes 9 to 19 */
+  uint8_t arm_threshold_count[4];    /* bytes 20 to 23 */
+  uint8_t arm_2_counting_period[4];  /* bytes 24 to 27 */
 } Arm2UnderlyingLevelProtectionSettingsUpdateRequest;
 
 /* any Arm 2 Underlying Level Protection Settings Update Request at all: every byte one the checker chooses */
@@ -1191,8 +1191,8 @@ static void any_arm2_underlying_level_protection_settings_update_request(Arm2Und
   for (size_t i = 0; i < 4; i++) { record->mpid[i] = arbitrary(); }
   record->action = arbitrary();
   for (size_t i = 0; i < 11; i++) { record->underlying_symbol[i] = arbitrary(); }
-  for (size_t i = 0; i < 4; i++) { record->arm_threshold_count_binary_u_4[i] = arbitrary(); }
-  for (size_t i = 0; i < 4; i++) { record->counting_period_binary_u_4[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->arm_threshold_count[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->arm_2_counting_period[i] = arbitrary(); }
 }
 
 /* Arm 2 Underlying Level Protection Settings Update Request to the wire: 28 bytes from at, returning where the next byte goes */
@@ -1201,8 +1201,8 @@ static size_t encode_arm2_underlying_level_protection_settings_update_request(co
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->mpid[i]; }
   wire[at++] = record->action;
   for (size_t i = 0; i < 11; i++) { wire[at++] = record->underlying_symbol[i]; }
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->arm_threshold_count_binary_u_4[i]; }
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->counting_period_binary_u_4[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->arm_threshold_count[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->arm_2_counting_period[i]; }
 
   return at;
 }
@@ -1213,8 +1213,8 @@ static size_t decode_arm2_underlying_level_protection_settings_update_request(Ar
   for (size_t i = 0; i < 4; i++) { record->mpid[i] = wire[at++]; }
   record->action = wire[at++];
   for (size_t i = 0; i < 11; i++) { record->underlying_symbol[i] = wire[at++]; }
-  for (size_t i = 0; i < 4; i++) { record->arm_threshold_count_binary_u_4[i] = wire[at++]; }
-  for (size_t i = 0; i < 4; i++) { record->counting_period_binary_u_4[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->arm_threshold_count[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->arm_2_counting_period[i] = wire[at++]; }
 
   return at;
 }
@@ -1225,8 +1225,8 @@ static void equal_arm2_underlying_level_protection_settings_update_request(const
   for (size_t i = 0; i < 4; i++) { assert(read->mpid[i] == written->mpid[i]); }
   assert(read->action == written->action);
   for (size_t i = 0; i < 11; i++) { assert(read->underlying_symbol[i] == written->underlying_symbol[i]); }
-  for (size_t i = 0; i < 4; i++) { assert(read->arm_threshold_count_binary_u_4[i] == written->arm_threshold_count_binary_u_4[i]); }
-  for (size_t i = 0; i < 4; i++) { assert(read->counting_period_binary_u_4[i] == written->counting_period_binary_u_4[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->arm_threshold_count[i] == written->arm_threshold_count[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->arm_2_counting_period[i] == written->arm_2_counting_period[i]); }
 }
 
 /* Arm 2 Underlying Level Protection Settings Update Request: written and read back, then read and written back */

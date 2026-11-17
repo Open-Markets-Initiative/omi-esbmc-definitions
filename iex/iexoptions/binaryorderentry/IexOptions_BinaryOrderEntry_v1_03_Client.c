@@ -373,7 +373,7 @@ typedef struct {
   uint8_t aiq[3];                             /* bytes 76 to 78 */
   uint8_t side;                               /* byte 79 */
   uint8_t price_price_8_optional[8];          /* bytes 80 to 87 */
-  uint8_t order_qty_quantity_non_zero[4];     /* bytes 88 to 91 */
+  uint8_t order_qty[4];                       /* bytes 88 to 91 */
 } NewOrderSingleMessage;
 
 /* any New Order Single Message at all: every byte one the checker chooses */
@@ -399,7 +399,7 @@ static void any_new_order_single_message(NewOrderSingleMessage *record) {
   for (size_t i = 0; i < 3; i++) { record->aiq[i] = arbitrary(); }
   record->side = arbitrary();
   for (size_t i = 0; i < 8; i++) { record->price_price_8_optional[i] = arbitrary(); }
-  for (size_t i = 0; i < 4; i++) { record->order_qty_quantity_non_zero[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->order_qty[i] = arbitrary(); }
 }
 
 /* New Order Single Message to the wire: 92 bytes from at, returning where the next byte goes */
@@ -425,7 +425,7 @@ static size_t encode_new_order_single_message(const NewOrderSingleMessage *recor
   for (size_t i = 0; i < 3; i++) { wire[at++] = record->aiq[i]; }
   wire[at++] = record->side;
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->price_price_8_optional[i]; }
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->order_qty_quantity_non_zero[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->order_qty[i]; }
 
   return at;
 }
@@ -453,7 +453,7 @@ static size_t decode_new_order_single_message(NewOrderSingleMessage *record, con
   for (size_t i = 0; i < 3; i++) { record->aiq[i] = wire[at++]; }
   record->side = wire[at++];
   for (size_t i = 0; i < 8; i++) { record->price_price_8_optional[i] = wire[at++]; }
-  for (size_t i = 0; i < 4; i++) { record->order_qty_quantity_non_zero[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->order_qty[i] = wire[at++]; }
 
   return at;
 }
@@ -481,7 +481,7 @@ static void equal_new_order_single_message(const NewOrderSingleMessage *read, co
   for (size_t i = 0; i < 3; i++) { assert(read->aiq[i] == written->aiq[i]); }
   assert(read->side == written->side);
   for (size_t i = 0; i < 8; i++) { assert(read->price_price_8_optional[i] == written->price_price_8_optional[i]); }
-  for (size_t i = 0; i < 4; i++) { assert(read->order_qty_quantity_non_zero[i] == written->order_qty_quantity_non_zero[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->order_qty[i] == written->order_qty[i]); }
 }
 
 /* New Order Single Message: written and read back, then read and written back */
@@ -528,7 +528,7 @@ typedef struct {
   uint8_t aiq[3];                             /* bytes 84 to 86 */
   uint8_t side_optional;                      /* byte 87 */
   uint8_t price_price_8_optional[8];          /* bytes 88 to 95 */
-  uint8_t order_qty_quantity_non_zero[4];     /* bytes 96 to 99 */
+  uint8_t order_qty[4];                       /* bytes 96 to 99 */
 } OrderCancelReplaceRequestMessage;
 
 /* any Order Cancel Replace Request Message at all: every byte one the checker chooses */
@@ -555,7 +555,7 @@ static void any_order_cancel_replace_request_message(OrderCancelReplaceRequestMe
   for (size_t i = 0; i < 3; i++) { record->aiq[i] = arbitrary(); }
   record->side_optional = arbitrary();
   for (size_t i = 0; i < 8; i++) { record->price_price_8_optional[i] = arbitrary(); }
-  for (size_t i = 0; i < 4; i++) { record->order_qty_quantity_non_zero[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->order_qty[i] = arbitrary(); }
 }
 
 /* Order Cancel Replace Request Message to the wire: 100 bytes from at, returning where the next byte goes */
@@ -582,7 +582,7 @@ static size_t encode_order_cancel_replace_request_message(const OrderCancelRepla
   for (size_t i = 0; i < 3; i++) { wire[at++] = record->aiq[i]; }
   wire[at++] = record->side_optional;
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->price_price_8_optional[i]; }
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->order_qty_quantity_non_zero[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->order_qty[i]; }
 
   return at;
 }
@@ -611,7 +611,7 @@ static size_t decode_order_cancel_replace_request_message(OrderCancelReplaceRequ
   for (size_t i = 0; i < 3; i++) { record->aiq[i] = wire[at++]; }
   record->side_optional = wire[at++];
   for (size_t i = 0; i < 8; i++) { record->price_price_8_optional[i] = wire[at++]; }
-  for (size_t i = 0; i < 4; i++) { record->order_qty_quantity_non_zero[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->order_qty[i] = wire[at++]; }
 
   return at;
 }
@@ -640,7 +640,7 @@ static void equal_order_cancel_replace_request_message(const OrderCancelReplaceR
   for (size_t i = 0; i < 3; i++) { assert(read->aiq[i] == written->aiq[i]); }
   assert(read->side_optional == written->side_optional);
   for (size_t i = 0; i < 8; i++) { assert(read->price_price_8_optional[i] == written->price_price_8_optional[i]); }
-  for (size_t i = 0; i < 4; i++) { assert(read->order_qty_quantity_non_zero[i] == written->order_qty_quantity_non_zero[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->order_qty[i] == written->order_qty[i]); }
 }
 
 /* Order Cancel Replace Request Message: written and read back, then read and written back */

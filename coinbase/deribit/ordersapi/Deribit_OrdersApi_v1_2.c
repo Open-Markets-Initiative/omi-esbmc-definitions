@@ -431,19 +431,19 @@ static void check_quantity(void) {
 
 /* NewOrderRequestMessage */
 typedef struct {
-  uint8_t mantissa[8];  /* bytes 0 to 7 */
-  uint8_t exponent;     /* byte 8 */
+  uint8_t mantissa_optional[8];  /* bytes 0 to 7 */
+  uint8_t exponent;              /* byte 8 */
 } ShowQty;
 
 /* any Show Qty at all: every byte one the checker chooses */
 static void any_show_qty(ShowQty *record) {
-  for (size_t i = 0; i < 8; i++) { record->mantissa[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->mantissa_optional[i] = arbitrary(); }
   record->exponent = arbitrary();
 }
 
 /* Show Qty to the wire: 9 bytes from at, returning where the next byte goes */
 static size_t encode_show_qty(const ShowQty *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 8; i++) { wire[at++] = record->mantissa[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->mantissa_optional[i]; }
   wire[at++] = record->exponent;
 
   return at;
@@ -451,7 +451,7 @@ static size_t encode_show_qty(const ShowQty *record, uint8_t *wire, size_t at) {
 
 /* Show Qty off the wire: 9 bytes from at, returning where the next byte lies */
 static size_t decode_show_qty(ShowQty *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 8; i++) { record->mantissa[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->mantissa_optional[i] = wire[at++]; }
   record->exponent = wire[at++];
 
   return at;
@@ -459,7 +459,7 @@ static size_t decode_show_qty(ShowQty *record, const uint8_t *wire, size_t at) {
 
 /* what was read of Show Qty is what was written, byte for byte */
 static void equal_show_qty(const ShowQty *read, const ShowQty *written) {
-  for (size_t i = 0; i < 8; i++) { assert(read->mantissa[i] == written->mantissa[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->mantissa_optional[i] == written->mantissa_optional[i]); }
   assert(read->exponent == written->exponent);
 }
 

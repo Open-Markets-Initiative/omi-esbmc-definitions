@@ -174,31 +174,31 @@ static void check_logon_conf_message(void) {
 
 /* LogoutMessage */
 typedef struct {
-  uint8_t reason_string_64[64];  /* bytes 0 to 63 */
+  uint8_t logout_reason[64];  /* bytes 0 to 63 */
 } LogoutMessage;
 
 /* any Logout Message at all: every byte one the checker chooses */
 static void any_logout_message(LogoutMessage *record) {
-  for (size_t i = 0; i < 64; i++) { record->reason_string_64[i] = arbitrary(); }
+  for (size_t i = 0; i < 64; i++) { record->logout_reason[i] = arbitrary(); }
 }
 
 /* Logout Message to the wire: 64 bytes from at, returning where the next byte goes */
 static size_t encode_logout_message(const LogoutMessage *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 64; i++) { wire[at++] = record->reason_string_64[i]; }
+  for (size_t i = 0; i < 64; i++) { wire[at++] = record->logout_reason[i]; }
 
   return at;
 }
 
 /* Logout Message off the wire: 64 bytes from at, returning where the next byte lies */
 static size_t decode_logout_message(LogoutMessage *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 64; i++) { record->reason_string_64[i] = wire[at++]; }
+  for (size_t i = 0; i < 64; i++) { record->logout_reason[i] = wire[at++]; }
 
   return at;
 }
 
 /* what was read of Logout Message is what was written, byte for byte */
 static void equal_logout_message(const LogoutMessage *read, const LogoutMessage *written) {
-  for (size_t i = 0; i < 64; i++) { assert(read->reason_string_64[i] == written->reason_string_64[i]); }
+  for (size_t i = 0; i < 64; i++) { assert(read->logout_reason[i] == written->logout_reason[i]); }
 }
 
 /* Logout Message: written and read back, then read and written back */
@@ -223,31 +223,31 @@ static void check_logout_message(void) {
 
 /* LoggedOutMessage */
 typedef struct {
-  uint8_t reason_string_64[64];  /* bytes 0 to 63 */
+  uint8_t logout_reason[64];  /* bytes 0 to 63 */
 } LoggedOutMessage;
 
 /* any Logged Out Message at all: every byte one the checker chooses */
 static void any_logged_out_message(LoggedOutMessage *record) {
-  for (size_t i = 0; i < 64; i++) { record->reason_string_64[i] = arbitrary(); }
+  for (size_t i = 0; i < 64; i++) { record->logout_reason[i] = arbitrary(); }
 }
 
 /* Logged Out Message to the wire: 64 bytes from at, returning where the next byte goes */
 static size_t encode_logged_out_message(const LoggedOutMessage *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 64; i++) { wire[at++] = record->reason_string_64[i]; }
+  for (size_t i = 0; i < 64; i++) { wire[at++] = record->logout_reason[i]; }
 
   return at;
 }
 
 /* Logged Out Message off the wire: 64 bytes from at, returning where the next byte lies */
 static size_t decode_logged_out_message(LoggedOutMessage *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 64; i++) { record->reason_string_64[i] = wire[at++]; }
+  for (size_t i = 0; i < 64; i++) { record->logout_reason[i] = wire[at++]; }
 
   return at;
 }
 
 /* what was read of Logged Out Message is what was written, byte for byte */
 static void equal_logged_out_message(const LoggedOutMessage *read, const LoggedOutMessage *written) {
-  for (size_t i = 0; i < 64; i++) { assert(read->reason_string_64[i] == written->reason_string_64[i]); }
+  for (size_t i = 0; i < 64; i++) { assert(read->logout_reason[i] == written->logout_reason[i]); }
 }
 
 /* Logged Out Message: written and read back, then read and written back */
@@ -478,22 +478,22 @@ static void check_gap_fill_message(void) {
 
 /* RejectMessage */
 typedef struct {
-  uint8_t ref_sequence_number[4];   /* bytes 0 to 3 */
-  uint8_t reason_reject_reason[4];  /* bytes 4 to 7 */
-  uint8_t details[64];              /* bytes 8 to 71 */
+  uint8_t ref_sequence_number[4];  /* bytes 0 to 3 */
+  uint8_t reject_reason[4];        /* bytes 4 to 7 */
+  uint8_t details[64];             /* bytes 8 to 71 */
 } RejectMessage;
 
 /* any Reject Message at all: every byte one the checker chooses */
 static void any_reject_message(RejectMessage *record) {
   for (size_t i = 0; i < 4; i++) { record->ref_sequence_number[i] = arbitrary(); }
-  for (size_t i = 0; i < 4; i++) { record->reason_reject_reason[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->reject_reason[i] = arbitrary(); }
   for (size_t i = 0; i < 64; i++) { record->details[i] = arbitrary(); }
 }
 
 /* Reject Message to the wire: 72 bytes from at, returning where the next byte goes */
 static size_t encode_reject_message(const RejectMessage *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->ref_sequence_number[i]; }
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->reason_reject_reason[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->reject_reason[i]; }
   for (size_t i = 0; i < 64; i++) { wire[at++] = record->details[i]; }
 
   return at;
@@ -502,7 +502,7 @@ static size_t encode_reject_message(const RejectMessage *record, uint8_t *wire, 
 /* Reject Message off the wire: 72 bytes from at, returning where the next byte lies */
 static size_t decode_reject_message(RejectMessage *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 4; i++) { record->ref_sequence_number[i] = wire[at++]; }
-  for (size_t i = 0; i < 4; i++) { record->reason_reject_reason[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->reject_reason[i] = wire[at++]; }
   for (size_t i = 0; i < 64; i++) { record->details[i] = wire[at++]; }
 
   return at;
@@ -511,7 +511,7 @@ static size_t decode_reject_message(RejectMessage *record, const uint8_t *wire, 
 /* what was read of Reject Message is what was written, byte for byte */
 static void equal_reject_message(const RejectMessage *read, const RejectMessage *written) {
   for (size_t i = 0; i < 4; i++) { assert(read->ref_sequence_number[i] == written->ref_sequence_number[i]); }
-  for (size_t i = 0; i < 4; i++) { assert(read->reason_reject_reason[i] == written->reason_reject_reason[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->reject_reason[i] == written->reject_reason[i]); }
   for (size_t i = 0; i < 64; i++) { assert(read->details[i] == written->details[i]); }
 }
 
