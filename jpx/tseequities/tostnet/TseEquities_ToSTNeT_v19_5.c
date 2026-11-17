@@ -297,19 +297,19 @@ static void check_c_b_issue_code(void) {
 /* Trading Halt */
 typedef struct {
   uint8_t state_flag[2];  /* bytes 0 to 1 */
-  uint8_t time_c_6[6];    /* bytes 2 to 7 */
+  uint8_t time[6];        /* bytes 2 to 7 */
 } TradingHalt;
 
 /* any Trading Halt at all: every byte one the checker chooses */
 static void any_trading_halt(TradingHalt *record) {
   for (size_t i = 0; i < 2; i++) { record->state_flag[i] = arbitrary(); }
-  for (size_t i = 0; i < 6; i++) { record->time_c_6[i] = arbitrary(); }
+  for (size_t i = 0; i < 6; i++) { record->time[i] = arbitrary(); }
 }
 
 /* Trading Halt to the wire: 8 bytes from at, returning where the next byte goes */
 static size_t encode_trading_halt(const TradingHalt *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 2; i++) { wire[at++] = record->state_flag[i]; }
-  for (size_t i = 0; i < 6; i++) { wire[at++] = record->time_c_6[i]; }
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->time[i]; }
 
   return at;
 }
@@ -317,7 +317,7 @@ static size_t encode_trading_halt(const TradingHalt *record, uint8_t *wire, size
 /* Trading Halt off the wire: 8 bytes from at, returning where the next byte lies */
 static size_t decode_trading_halt(TradingHalt *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 2; i++) { record->state_flag[i] = wire[at++]; }
-  for (size_t i = 0; i < 6; i++) { record->time_c_6[i] = wire[at++]; }
+  for (size_t i = 0; i < 6; i++) { record->time[i] = wire[at++]; }
 
   return at;
 }
@@ -325,7 +325,7 @@ static size_t decode_trading_halt(TradingHalt *record, const uint8_t *wire, size
 /* what was read of Trading Halt is what was written, byte for byte */
 static void equal_trading_halt(const TradingHalt *read, const TradingHalt *written) {
   for (size_t i = 0; i < 2; i++) { assert(read->state_flag[i] == written->state_flag[i]); }
-  for (size_t i = 0; i < 6; i++) { assert(read->time_c_6[i] == written->time_c_6[i]); }
+  for (size_t i = 0; i < 6; i++) { assert(read->time[i] == written->time[i]); }
 }
 
 /* Trading Halt: written and read back, then read and written back */
@@ -352,27 +352,27 @@ static void check_trading_halt(void) {
 typedef struct {
   uint8_t price_code[2];       /* bytes 0 to 1 */
   uint8_t lot_size_unit_flag;  /* byte 2 */
-  uint8_t price_c_14[14];      /* bytes 3 to 16 */
+  uint8_t price_value[14];     /* bytes 3 to 16 */
   uint8_t sign;                /* byte 17 */
-  uint8_t time_c_12[12];       /* bytes 18 to 29 */
+  uint8_t precise_time[12];    /* bytes 18 to 29 */
 } Price;
 
 /* any Price at all: every byte one the checker chooses */
 static void any_price(Price *record) {
   for (size_t i = 0; i < 2; i++) { record->price_code[i] = arbitrary(); }
   record->lot_size_unit_flag = arbitrary();
-  for (size_t i = 0; i < 14; i++) { record->price_c_14[i] = arbitrary(); }
+  for (size_t i = 0; i < 14; i++) { record->price_value[i] = arbitrary(); }
   record->sign = arbitrary();
-  for (size_t i = 0; i < 12; i++) { record->time_c_12[i] = arbitrary(); }
+  for (size_t i = 0; i < 12; i++) { record->precise_time[i] = arbitrary(); }
 }
 
 /* Price to the wire: 30 bytes from at, returning where the next byte goes */
 static size_t encode_price(const Price *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 2; i++) { wire[at++] = record->price_code[i]; }
   wire[at++] = record->lot_size_unit_flag;
-  for (size_t i = 0; i < 14; i++) { wire[at++] = record->price_c_14[i]; }
+  for (size_t i = 0; i < 14; i++) { wire[at++] = record->price_value[i]; }
   wire[at++] = record->sign;
-  for (size_t i = 0; i < 12; i++) { wire[at++] = record->time_c_12[i]; }
+  for (size_t i = 0; i < 12; i++) { wire[at++] = record->precise_time[i]; }
 
   return at;
 }
@@ -381,9 +381,9 @@ static size_t encode_price(const Price *record, uint8_t *wire, size_t at) {
 static size_t decode_price(Price *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 2; i++) { record->price_code[i] = wire[at++]; }
   record->lot_size_unit_flag = wire[at++];
-  for (size_t i = 0; i < 14; i++) { record->price_c_14[i] = wire[at++]; }
+  for (size_t i = 0; i < 14; i++) { record->price_value[i] = wire[at++]; }
   record->sign = wire[at++];
-  for (size_t i = 0; i < 12; i++) { record->time_c_12[i] = wire[at++]; }
+  for (size_t i = 0; i < 12; i++) { record->precise_time[i] = wire[at++]; }
 
   return at;
 }
@@ -392,9 +392,9 @@ static size_t decode_price(Price *record, const uint8_t *wire, size_t at) {
 static void equal_price(const Price *read, const Price *written) {
   for (size_t i = 0; i < 2; i++) { assert(read->price_code[i] == written->price_code[i]); }
   assert(read->lot_size_unit_flag == written->lot_size_unit_flag);
-  for (size_t i = 0; i < 14; i++) { assert(read->price_c_14[i] == written->price_c_14[i]); }
+  for (size_t i = 0; i < 14; i++) { assert(read->price_value[i] == written->price_value[i]); }
   assert(read->sign == written->sign);
-  for (size_t i = 0; i < 12; i++) { assert(read->time_c_12[i] == written->time_c_12[i]); }
+  for (size_t i = 0; i < 12; i++) { assert(read->precise_time[i] == written->precise_time[i]); }
 }
 
 /* Price: written and read back, then read and written back */
@@ -420,19 +420,19 @@ static void check_price(void) {
 /* Trading Volume */
 typedef struct {
   uint8_t trading_volume_turnover_unit_flag;  /* byte 0 */
-  uint8_t trading_volume_c_14[14];            /* bytes 1 to 14 */
+  uint8_t trading_volume_value[14];           /* bytes 1 to 14 */
 } TradingVolume;
 
 /* any Trading Volume at all: every byte one the checker chooses */
 static void any_trading_volume(TradingVolume *record) {
   record->trading_volume_turnover_unit_flag = arbitrary();
-  for (size_t i = 0; i < 14; i++) { record->trading_volume_c_14[i] = arbitrary(); }
+  for (size_t i = 0; i < 14; i++) { record->trading_volume_value[i] = arbitrary(); }
 }
 
 /* Trading Volume to the wire: 15 bytes from at, returning where the next byte goes */
 static size_t encode_trading_volume(const TradingVolume *record, uint8_t *wire, size_t at) {
   wire[at++] = record->trading_volume_turnover_unit_flag;
-  for (size_t i = 0; i < 14; i++) { wire[at++] = record->trading_volume_c_14[i]; }
+  for (size_t i = 0; i < 14; i++) { wire[at++] = record->trading_volume_value[i]; }
 
   return at;
 }
@@ -440,7 +440,7 @@ static size_t encode_trading_volume(const TradingVolume *record, uint8_t *wire, 
 /* Trading Volume off the wire: 15 bytes from at, returning where the next byte lies */
 static size_t decode_trading_volume(TradingVolume *record, const uint8_t *wire, size_t at) {
   record->trading_volume_turnover_unit_flag = wire[at++];
-  for (size_t i = 0; i < 14; i++) { record->trading_volume_c_14[i] = wire[at++]; }
+  for (size_t i = 0; i < 14; i++) { record->trading_volume_value[i] = wire[at++]; }
 
   return at;
 }
@@ -448,7 +448,7 @@ static size_t decode_trading_volume(TradingVolume *record, const uint8_t *wire, 
 /* what was read of Trading Volume is what was written, byte for byte */
 static void equal_trading_volume(const TradingVolume *read, const TradingVolume *written) {
   assert(read->trading_volume_turnover_unit_flag == written->trading_volume_turnover_unit_flag);
-  for (size_t i = 0; i < 14; i++) { assert(read->trading_volume_c_14[i] == written->trading_volume_c_14[i]); }
+  for (size_t i = 0; i < 14; i++) { assert(read->trading_volume_value[i] == written->trading_volume_value[i]); }
 }
 
 /* Trading Volume: written and read back, then read and written back */
@@ -474,19 +474,19 @@ static void check_trading_volume(void) {
 /* Turnover */
 typedef struct {
   uint8_t trading_volume_turnover_unit_flag;  /* byte 0 */
-  uint8_t turnover_c_14[14];                  /* bytes 1 to 14 */
+  uint8_t turnover_value[14];                 /* bytes 1 to 14 */
 } Turnover;
 
 /* any Turnover at all: every byte one the checker chooses */
 static void any_turnover(Turnover *record) {
   record->trading_volume_turnover_unit_flag = arbitrary();
-  for (size_t i = 0; i < 14; i++) { record->turnover_c_14[i] = arbitrary(); }
+  for (size_t i = 0; i < 14; i++) { record->turnover_value[i] = arbitrary(); }
 }
 
 /* Turnover to the wire: 15 bytes from at, returning where the next byte goes */
 static size_t encode_turnover(const Turnover *record, uint8_t *wire, size_t at) {
   wire[at++] = record->trading_volume_turnover_unit_flag;
-  for (size_t i = 0; i < 14; i++) { wire[at++] = record->turnover_c_14[i]; }
+  for (size_t i = 0; i < 14; i++) { wire[at++] = record->turnover_value[i]; }
 
   return at;
 }
@@ -494,7 +494,7 @@ static size_t encode_turnover(const Turnover *record, uint8_t *wire, size_t at) 
 /* Turnover off the wire: 15 bytes from at, returning where the next byte lies */
 static size_t decode_turnover(Turnover *record, const uint8_t *wire, size_t at) {
   record->trading_volume_turnover_unit_flag = wire[at++];
-  for (size_t i = 0; i < 14; i++) { record->turnover_c_14[i] = wire[at++]; }
+  for (size_t i = 0; i < 14; i++) { record->turnover_value[i] = wire[at++]; }
 
   return at;
 }
@@ -502,7 +502,7 @@ static size_t decode_turnover(Turnover *record, const uint8_t *wire, size_t at) 
 /* what was read of Turnover is what was written, byte for byte */
 static void equal_turnover(const Turnover *read, const Turnover *written) {
   assert(read->trading_volume_turnover_unit_flag == written->trading_volume_turnover_unit_flag);
-  for (size_t i = 0; i < 14; i++) { assert(read->turnover_c_14[i] == written->turnover_c_14[i]); }
+  for (size_t i = 0; i < 14; i++) { assert(read->turnover_value[i] == written->turnover_value[i]); }
 }
 
 /* Turnover: written and read back, then read and written back */
@@ -607,19 +607,19 @@ static void check_to_s_t_ne_t_by_issue_information_message(void) {
 /* State */
 typedef struct {
   uint8_t market_state_flag[2];  /* bytes 0 to 1 */
-  uint8_t time_c_6[6];           /* bytes 2 to 7 */
+  uint8_t time[6];               /* bytes 2 to 7 */
 } State;
 
 /* any State at all: every byte one the checker chooses */
 static void any_state(State *record) {
   for (size_t i = 0; i < 2; i++) { record->market_state_flag[i] = arbitrary(); }
-  for (size_t i = 0; i < 6; i++) { record->time_c_6[i] = arbitrary(); }
+  for (size_t i = 0; i < 6; i++) { record->time[i] = arbitrary(); }
 }
 
 /* State to the wire: 8 bytes from at, returning where the next byte goes */
 static size_t encode_state(const State *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 2; i++) { wire[at++] = record->market_state_flag[i]; }
-  for (size_t i = 0; i < 6; i++) { wire[at++] = record->time_c_6[i]; }
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->time[i]; }
 
   return at;
 }
@@ -627,7 +627,7 @@ static size_t encode_state(const State *record, uint8_t *wire, size_t at) {
 /* State off the wire: 8 bytes from at, returning where the next byte lies */
 static size_t decode_state(State *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 2; i++) { record->market_state_flag[i] = wire[at++]; }
-  for (size_t i = 0; i < 6; i++) { record->time_c_6[i] = wire[at++]; }
+  for (size_t i = 0; i < 6; i++) { record->time[i] = wire[at++]; }
 
   return at;
 }
@@ -635,7 +635,7 @@ static size_t decode_state(State *record, const uint8_t *wire, size_t at) {
 /* what was read of State is what was written, byte for byte */
 static void equal_state(const State *read, const State *written) {
   for (size_t i = 0; i < 2; i++) { assert(read->market_state_flag[i] == written->market_state_flag[i]); }
-  for (size_t i = 0; i < 6; i++) { assert(read->time_c_6[i] == written->time_c_6[i]); }
+  for (size_t i = 0; i < 6; i++) { assert(read->time[i] == written->time[i]); }
 }
 
 /* State: written and read back, then read and written back */
@@ -722,7 +722,7 @@ typedef struct {
   uint8_t reserved_2[2];   /* bytes 0 to 1 */
   uint8_t test_mode_flag;  /* byte 2 */
   uint8_t start_end_flag;  /* byte 3 */
-  uint8_t time_c_6[6];     /* bytes 4 to 9 */
+  uint8_t time[6];         /* bytes 4 to 9 */
 } ControlMessage;
 
 /* any Control Message at all: every byte one the checker chooses */
@@ -730,7 +730,7 @@ static void any_control_message(ControlMessage *record) {
   for (size_t i = 0; i < 2; i++) { record->reserved_2[i] = arbitrary(); }
   record->test_mode_flag = arbitrary();
   record->start_end_flag = arbitrary();
-  for (size_t i = 0; i < 6; i++) { record->time_c_6[i] = arbitrary(); }
+  for (size_t i = 0; i < 6; i++) { record->time[i] = arbitrary(); }
 }
 
 /* Control Message to the wire: 10 bytes from at, returning where the next byte goes */
@@ -738,7 +738,7 @@ static size_t encode_control_message(const ControlMessage *record, uint8_t *wire
   for (size_t i = 0; i < 2; i++) { wire[at++] = record->reserved_2[i]; }
   wire[at++] = record->test_mode_flag;
   wire[at++] = record->start_end_flag;
-  for (size_t i = 0; i < 6; i++) { wire[at++] = record->time_c_6[i]; }
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->time[i]; }
 
   return at;
 }
@@ -748,7 +748,7 @@ static size_t decode_control_message(ControlMessage *record, const uint8_t *wire
   for (size_t i = 0; i < 2; i++) { record->reserved_2[i] = wire[at++]; }
   record->test_mode_flag = wire[at++];
   record->start_end_flag = wire[at++];
-  for (size_t i = 0; i < 6; i++) { record->time_c_6[i] = wire[at++]; }
+  for (size_t i = 0; i < 6; i++) { record->time[i] = wire[at++]; }
 
   return at;
 }
@@ -758,7 +758,7 @@ static void equal_control_message(const ControlMessage *read, const ControlMessa
   for (size_t i = 0; i < 2; i++) { assert(read->reserved_2[i] == written->reserved_2[i]); }
   assert(read->test_mode_flag == written->test_mode_flag);
   assert(read->start_end_flag == written->start_end_flag);
-  for (size_t i = 0; i < 6; i++) { assert(read->time_c_6[i] == written->time_c_6[i]); }
+  for (size_t i = 0; i < 6; i++) { assert(read->time[i] == written->time[i]); }
 }
 
 /* Control Message: written and read back, then read and written back */

@@ -449,25 +449,25 @@ static void check_risk_settings_query_message(void) {
 
 /* ActiveRiskThresholdChangeRequestMessage */
 typedef struct {
-  uint8_t cl_ord_id_active_risk_threshold_change_request_cl_ord_id[20];          /* bytes 0 to 19 */
-  uint8_t underlier_active_risk_threshold_change_request_underlier_optional[6];  /* bytes 20 to 25 */
-  uint8_t efid_active_risk_threshold_change_request_efid_optional[4];            /* bytes 26 to 29 */
-  uint8_t threshold_quantity[4];                                                 /* bytes 30 to 33 */
+  uint8_t cl_ord_id[20];          /* bytes 0 to 19 */
+  uint8_t underlier_optional[6];  /* bytes 20 to 25 */
+  uint8_t efid_optional[4];       /* bytes 26 to 29 */
+  uint8_t threshold_quantity[4];  /* bytes 30 to 33 */
 } ActiveRiskThresholdChangeRequestMessage;
 
 /* any Active Risk Threshold Change Request Message at all: every byte one the checker chooses */
 static void any_active_risk_threshold_change_request_message(ActiveRiskThresholdChangeRequestMessage *record) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_active_risk_threshold_change_request_cl_ord_id[i] = arbitrary(); }
-  for (size_t i = 0; i < 6; i++) { record->underlier_active_risk_threshold_change_request_underlier_optional[i] = arbitrary(); }
-  for (size_t i = 0; i < 4; i++) { record->efid_active_risk_threshold_change_request_efid_optional[i] = arbitrary(); }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = arbitrary(); }
+  for (size_t i = 0; i < 6; i++) { record->underlier_optional[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->efid_optional[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->threshold_quantity[i] = arbitrary(); }
 }
 
 /* Active Risk Threshold Change Request Message to the wire: 34 bytes from at, returning where the next byte goes */
 static size_t encode_active_risk_threshold_change_request_message(const ActiveRiskThresholdChangeRequestMessage *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id_active_risk_threshold_change_request_cl_ord_id[i]; }
-  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier_active_risk_threshold_change_request_underlier_optional[i]; }
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid_active_risk_threshold_change_request_efid_optional[i]; }
+  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id[i]; }
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier_optional[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid_optional[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->threshold_quantity[i]; }
 
   return at;
@@ -475,9 +475,9 @@ static size_t encode_active_risk_threshold_change_request_message(const ActiveRi
 
 /* Active Risk Threshold Change Request Message off the wire: 34 bytes from at, returning where the next byte lies */
 static size_t decode_active_risk_threshold_change_request_message(ActiveRiskThresholdChangeRequestMessage *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_active_risk_threshold_change_request_cl_ord_id[i] = wire[at++]; }
-  for (size_t i = 0; i < 6; i++) { record->underlier_active_risk_threshold_change_request_underlier_optional[i] = wire[at++]; }
-  for (size_t i = 0; i < 4; i++) { record->efid_active_risk_threshold_change_request_efid_optional[i] = wire[at++]; }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = wire[at++]; }
+  for (size_t i = 0; i < 6; i++) { record->underlier_optional[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->efid_optional[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->threshold_quantity[i] = wire[at++]; }
 
   return at;
@@ -485,9 +485,9 @@ static size_t decode_active_risk_threshold_change_request_message(ActiveRiskThre
 
 /* what was read of Active Risk Threshold Change Request Message is what was written, byte for byte */
 static void equal_active_risk_threshold_change_request_message(const ActiveRiskThresholdChangeRequestMessage *read, const ActiveRiskThresholdChangeRequestMessage *written) {
-  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id_active_risk_threshold_change_request_cl_ord_id[i] == written->cl_ord_id_active_risk_threshold_change_request_cl_ord_id[i]); }
-  for (size_t i = 0; i < 6; i++) { assert(read->underlier_active_risk_threshold_change_request_underlier_optional[i] == written->underlier_active_risk_threshold_change_request_underlier_optional[i]); }
-  for (size_t i = 0; i < 4; i++) { assert(read->efid_active_risk_threshold_change_request_efid_optional[i] == written->efid_active_risk_threshold_change_request_efid_optional[i]); }
+  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id[i] == written->cl_ord_id[i]); }
+  for (size_t i = 0; i < 6; i++) { assert(read->underlier_optional[i] == written->underlier_optional[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->efid_optional[i] == written->efid_optional[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->threshold_quantity[i] == written->threshold_quantity[i]); }
 }
 
@@ -513,25 +513,25 @@ static void check_active_risk_threshold_change_request_message(void) {
 
 /* ActiveRiskAcknowledgementRequestMessage */
 typedef struct {
-  uint8_t cl_ord_id_active_risk_acknowledgement_request_cl_ord_id[20];  /* bytes 0 to 19 */
-  uint8_t underlier_active_risk_acknowledgement_request_underlier[6];   /* bytes 20 to 25 */
-  uint8_t efid_active_risk_acknowledgement_request_efid[4];             /* bytes 26 to 29 */
-  uint8_t quantity[4];                                                  /* bytes 30 to 33 */
+  uint8_t cl_ord_id[20];  /* bytes 0 to 19 */
+  uint8_t underlier[6];   /* bytes 20 to 25 */
+  uint8_t efid[4];        /* bytes 26 to 29 */
+  uint8_t quantity[4];    /* bytes 30 to 33 */
 } ActiveRiskAcknowledgementRequestMessage;
 
 /* any Active Risk Acknowledgement Request Message at all: every byte one the checker chooses */
 static void any_active_risk_acknowledgement_request_message(ActiveRiskAcknowledgementRequestMessage *record) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_active_risk_acknowledgement_request_cl_ord_id[i] = arbitrary(); }
-  for (size_t i = 0; i < 6; i++) { record->underlier_active_risk_acknowledgement_request_underlier[i] = arbitrary(); }
-  for (size_t i = 0; i < 4; i++) { record->efid_active_risk_acknowledgement_request_efid[i] = arbitrary(); }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = arbitrary(); }
+  for (size_t i = 0; i < 6; i++) { record->underlier[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->efid[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->quantity[i] = arbitrary(); }
 }
 
 /* Active Risk Acknowledgement Request Message to the wire: 34 bytes from at, returning where the next byte goes */
 static size_t encode_active_risk_acknowledgement_request_message(const ActiveRiskAcknowledgementRequestMessage *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id_active_risk_acknowledgement_request_cl_ord_id[i]; }
-  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier_active_risk_acknowledgement_request_underlier[i]; }
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid_active_risk_acknowledgement_request_efid[i]; }
+  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id[i]; }
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->quantity[i]; }
 
   return at;
@@ -539,9 +539,9 @@ static size_t encode_active_risk_acknowledgement_request_message(const ActiveRis
 
 /* Active Risk Acknowledgement Request Message off the wire: 34 bytes from at, returning where the next byte lies */
 static size_t decode_active_risk_acknowledgement_request_message(ActiveRiskAcknowledgementRequestMessage *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_active_risk_acknowledgement_request_cl_ord_id[i] = wire[at++]; }
-  for (size_t i = 0; i < 6; i++) { record->underlier_active_risk_acknowledgement_request_underlier[i] = wire[at++]; }
-  for (size_t i = 0; i < 4; i++) { record->efid_active_risk_acknowledgement_request_efid[i] = wire[at++]; }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = wire[at++]; }
+  for (size_t i = 0; i < 6; i++) { record->underlier[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->efid[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->quantity[i] = wire[at++]; }
 
   return at;
@@ -549,9 +549,9 @@ static size_t decode_active_risk_acknowledgement_request_message(ActiveRiskAckno
 
 /* what was read of Active Risk Acknowledgement Request Message is what was written, byte for byte */
 static void equal_active_risk_acknowledgement_request_message(const ActiveRiskAcknowledgementRequestMessage *read, const ActiveRiskAcknowledgementRequestMessage *written) {
-  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id_active_risk_acknowledgement_request_cl_ord_id[i] == written->cl_ord_id_active_risk_acknowledgement_request_cl_ord_id[i]); }
-  for (size_t i = 0; i < 6; i++) { assert(read->underlier_active_risk_acknowledgement_request_underlier[i] == written->underlier_active_risk_acknowledgement_request_underlier[i]); }
-  for (size_t i = 0; i < 4; i++) { assert(read->efid_active_risk_acknowledgement_request_efid[i] == written->efid_active_risk_acknowledgement_request_efid[i]); }
+  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id[i] == written->cl_ord_id[i]); }
+  for (size_t i = 0; i < 6; i++) { assert(read->underlier[i] == written->underlier[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->efid[i] == written->efid[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->quantity[i] == written->quantity[i]); }
 }
 
@@ -577,19 +577,19 @@ static void check_active_risk_acknowledgement_request_message(void) {
 
 /* CPVolumeThresholdChangeRequestMessage */
 typedef struct {
-  uint8_t cl_ord_id_cp_volume_threshold_change_request_cl_ord_id[20];          /* bytes 0 to 19 */
-  uint8_t underlier_cp_volume_threshold_change_request_underlier_optional[6];  /* bytes 20 to 25 */
-  uint8_t efid_cp_volume_threshold_change_request_efid_optional[4];            /* bytes 26 to 29 */
-  uint8_t risk_group_id[2];                                                    /* bytes 30 to 31 */
-  uint8_t volume[8];                                                           /* bytes 32 to 39 */
-  uint8_t period_in_milli_seconds[4];                                          /* bytes 40 to 43 */
+  uint8_t cl_ord_id[20];               /* bytes 0 to 19 */
+  uint8_t underlier_optional[6];       /* bytes 20 to 25 */
+  uint8_t efid_optional[4];            /* bytes 26 to 29 */
+  uint8_t risk_group_id[2];            /* bytes 30 to 31 */
+  uint8_t volume[8];                   /* bytes 32 to 39 */
+  uint8_t period_in_milli_seconds[4];  /* bytes 40 to 43 */
 } CpVolumeThresholdChangeRequestMessage;
 
 /* any Cp Volume Threshold Change Request Message at all: every byte one the checker chooses */
 static void any_cp_volume_threshold_change_request_message(CpVolumeThresholdChangeRequestMessage *record) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_cp_volume_threshold_change_request_cl_ord_id[i] = arbitrary(); }
-  for (size_t i = 0; i < 6; i++) { record->underlier_cp_volume_threshold_change_request_underlier_optional[i] = arbitrary(); }
-  for (size_t i = 0; i < 4; i++) { record->efid_cp_volume_threshold_change_request_efid_optional[i] = arbitrary(); }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = arbitrary(); }
+  for (size_t i = 0; i < 6; i++) { record->underlier_optional[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->efid_optional[i] = arbitrary(); }
   for (size_t i = 0; i < 2; i++) { record->risk_group_id[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->volume[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->period_in_milli_seconds[i] = arbitrary(); }
@@ -597,9 +597,9 @@ static void any_cp_volume_threshold_change_request_message(CpVolumeThresholdChan
 
 /* Cp Volume Threshold Change Request Message to the wire: 44 bytes from at, returning where the next byte goes */
 static size_t encode_cp_volume_threshold_change_request_message(const CpVolumeThresholdChangeRequestMessage *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id_cp_volume_threshold_change_request_cl_ord_id[i]; }
-  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier_cp_volume_threshold_change_request_underlier_optional[i]; }
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid_cp_volume_threshold_change_request_efid_optional[i]; }
+  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id[i]; }
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier_optional[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid_optional[i]; }
   for (size_t i = 0; i < 2; i++) { wire[at++] = record->risk_group_id[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->volume[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->period_in_milli_seconds[i]; }
@@ -609,9 +609,9 @@ static size_t encode_cp_volume_threshold_change_request_message(const CpVolumeTh
 
 /* Cp Volume Threshold Change Request Message off the wire: 44 bytes from at, returning where the next byte lies */
 static size_t decode_cp_volume_threshold_change_request_message(CpVolumeThresholdChangeRequestMessage *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_cp_volume_threshold_change_request_cl_ord_id[i] = wire[at++]; }
-  for (size_t i = 0; i < 6; i++) { record->underlier_cp_volume_threshold_change_request_underlier_optional[i] = wire[at++]; }
-  for (size_t i = 0; i < 4; i++) { record->efid_cp_volume_threshold_change_request_efid_optional[i] = wire[at++]; }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = wire[at++]; }
+  for (size_t i = 0; i < 6; i++) { record->underlier_optional[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->efid_optional[i] = wire[at++]; }
   for (size_t i = 0; i < 2; i++) { record->risk_group_id[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->volume[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->period_in_milli_seconds[i] = wire[at++]; }
@@ -621,9 +621,9 @@ static size_t decode_cp_volume_threshold_change_request_message(CpVolumeThreshol
 
 /* what was read of Cp Volume Threshold Change Request Message is what was written, byte for byte */
 static void equal_cp_volume_threshold_change_request_message(const CpVolumeThresholdChangeRequestMessage *read, const CpVolumeThresholdChangeRequestMessage *written) {
-  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id_cp_volume_threshold_change_request_cl_ord_id[i] == written->cl_ord_id_cp_volume_threshold_change_request_cl_ord_id[i]); }
-  for (size_t i = 0; i < 6; i++) { assert(read->underlier_cp_volume_threshold_change_request_underlier_optional[i] == written->underlier_cp_volume_threshold_change_request_underlier_optional[i]); }
-  for (size_t i = 0; i < 4; i++) { assert(read->efid_cp_volume_threshold_change_request_efid_optional[i] == written->efid_cp_volume_threshold_change_request_efid_optional[i]); }
+  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id[i] == written->cl_ord_id[i]); }
+  for (size_t i = 0; i < 6; i++) { assert(read->underlier_optional[i] == written->underlier_optional[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->efid_optional[i] == written->efid_optional[i]); }
   for (size_t i = 0; i < 2; i++) { assert(read->risk_group_id[i] == written->risk_group_id[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->volume[i] == written->volume[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->period_in_milli_seconds[i] == written->period_in_milli_seconds[i]); }
@@ -651,19 +651,19 @@ static void check_cp_volume_threshold_change_request_message(void) {
 
 /* CPExecutedNotionalThresholdChangeRequestMessage */
 typedef struct {
-  uint8_t cl_ord_id_cp_executed_notional_threshold_change_request_cl_ord_id[20];          /* bytes 0 to 19 */
-  uint8_t underlier_cp_executed_notional_threshold_change_request_underlier_optional[6];  /* bytes 20 to 25 */
-  uint8_t efid_cp_executed_notional_threshold_change_request_efid_optional[4];            /* bytes 26 to 29 */
-  uint8_t risk_group_id[2];                                                               /* bytes 30 to 31 */
-  uint8_t price_in_dollars[8];                                                            /* bytes 32 to 39 */
-  uint8_t period_in_milli_seconds[4];                                                     /* bytes 40 to 43 */
+  uint8_t cl_ord_id[20];               /* bytes 0 to 19 */
+  uint8_t underlier_optional[6];       /* bytes 20 to 25 */
+  uint8_t efid_optional[4];            /* bytes 26 to 29 */
+  uint8_t risk_group_id[2];            /* bytes 30 to 31 */
+  uint8_t price_in_dollars[8];         /* bytes 32 to 39 */
+  uint8_t period_in_milli_seconds[4];  /* bytes 40 to 43 */
 } CpExecutedNotionalThresholdChangeRequestMessage;
 
 /* any Cp Executed Notional Threshold Change Request Message at all: every byte one the checker chooses */
 static void any_cp_executed_notional_threshold_change_request_message(CpExecutedNotionalThresholdChangeRequestMessage *record) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_cp_executed_notional_threshold_change_request_cl_ord_id[i] = arbitrary(); }
-  for (size_t i = 0; i < 6; i++) { record->underlier_cp_executed_notional_threshold_change_request_underlier_optional[i] = arbitrary(); }
-  for (size_t i = 0; i < 4; i++) { record->efid_cp_executed_notional_threshold_change_request_efid_optional[i] = arbitrary(); }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = arbitrary(); }
+  for (size_t i = 0; i < 6; i++) { record->underlier_optional[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->efid_optional[i] = arbitrary(); }
   for (size_t i = 0; i < 2; i++) { record->risk_group_id[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->price_in_dollars[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->period_in_milli_seconds[i] = arbitrary(); }
@@ -671,9 +671,9 @@ static void any_cp_executed_notional_threshold_change_request_message(CpExecuted
 
 /* Cp Executed Notional Threshold Change Request Message to the wire: 44 bytes from at, returning where the next byte goes */
 static size_t encode_cp_executed_notional_threshold_change_request_message(const CpExecutedNotionalThresholdChangeRequestMessage *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id_cp_executed_notional_threshold_change_request_cl_ord_id[i]; }
-  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier_cp_executed_notional_threshold_change_request_underlier_optional[i]; }
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid_cp_executed_notional_threshold_change_request_efid_optional[i]; }
+  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id[i]; }
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier_optional[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid_optional[i]; }
   for (size_t i = 0; i < 2; i++) { wire[at++] = record->risk_group_id[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->price_in_dollars[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->period_in_milli_seconds[i]; }
@@ -683,9 +683,9 @@ static size_t encode_cp_executed_notional_threshold_change_request_message(const
 
 /* Cp Executed Notional Threshold Change Request Message off the wire: 44 bytes from at, returning where the next byte lies */
 static size_t decode_cp_executed_notional_threshold_change_request_message(CpExecutedNotionalThresholdChangeRequestMessage *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_cp_executed_notional_threshold_change_request_cl_ord_id[i] = wire[at++]; }
-  for (size_t i = 0; i < 6; i++) { record->underlier_cp_executed_notional_threshold_change_request_underlier_optional[i] = wire[at++]; }
-  for (size_t i = 0; i < 4; i++) { record->efid_cp_executed_notional_threshold_change_request_efid_optional[i] = wire[at++]; }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = wire[at++]; }
+  for (size_t i = 0; i < 6; i++) { record->underlier_optional[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->efid_optional[i] = wire[at++]; }
   for (size_t i = 0; i < 2; i++) { record->risk_group_id[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->price_in_dollars[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->period_in_milli_seconds[i] = wire[at++]; }
@@ -695,9 +695,9 @@ static size_t decode_cp_executed_notional_threshold_change_request_message(CpExe
 
 /* what was read of Cp Executed Notional Threshold Change Request Message is what was written, byte for byte */
 static void equal_cp_executed_notional_threshold_change_request_message(const CpExecutedNotionalThresholdChangeRequestMessage *read, const CpExecutedNotionalThresholdChangeRequestMessage *written) {
-  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id_cp_executed_notional_threshold_change_request_cl_ord_id[i] == written->cl_ord_id_cp_executed_notional_threshold_change_request_cl_ord_id[i]); }
-  for (size_t i = 0; i < 6; i++) { assert(read->underlier_cp_executed_notional_threshold_change_request_underlier_optional[i] == written->underlier_cp_executed_notional_threshold_change_request_underlier_optional[i]); }
-  for (size_t i = 0; i < 4; i++) { assert(read->efid_cp_executed_notional_threshold_change_request_efid_optional[i] == written->efid_cp_executed_notional_threshold_change_request_efid_optional[i]); }
+  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id[i] == written->cl_ord_id[i]); }
+  for (size_t i = 0; i < 6; i++) { assert(read->underlier_optional[i] == written->underlier_optional[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->efid_optional[i] == written->efid_optional[i]); }
   for (size_t i = 0; i < 2; i++) { assert(read->risk_group_id[i] == written->risk_group_id[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->price_in_dollars[i] == written->price_in_dollars[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->period_in_milli_seconds[i] == written->period_in_milli_seconds[i]); }
@@ -725,19 +725,19 @@ static void check_cp_executed_notional_threshold_change_request_message(void) {
 
 /* CPTotalExecutionsThresholdChangeRequestMessage */
 typedef struct {
-  uint8_t cl_ord_id_cp_total_executions_threshold_change_request_cl_ord_id[20];          /* bytes 0 to 19 */
-  uint8_t underlier_cp_total_executions_threshold_change_request_underlier_optional[6];  /* bytes 20 to 25 */
-  uint8_t efid_cp_total_executions_threshold_change_request_efid_optional[4];            /* bytes 26 to 29 */
-  uint8_t risk_group_id[2];                                                              /* bytes 30 to 31 */
-  uint8_t total_executions[4];                                                           /* bytes 32 to 35 */
-  uint8_t period_in_milli_seconds[4];                                                    /* bytes 36 to 39 */
+  uint8_t cl_ord_id[20];               /* bytes 0 to 19 */
+  uint8_t underlier_optional[6];       /* bytes 20 to 25 */
+  uint8_t efid_optional[4];            /* bytes 26 to 29 */
+  uint8_t risk_group_id[2];            /* bytes 30 to 31 */
+  uint8_t total_executions[4];         /* bytes 32 to 35 */
+  uint8_t period_in_milli_seconds[4];  /* bytes 36 to 39 */
 } CpTotalExecutionsThresholdChangeRequestMessage;
 
 /* any Cp Total Executions Threshold Change Request Message at all: every byte one the checker chooses */
 static void any_cp_total_executions_threshold_change_request_message(CpTotalExecutionsThresholdChangeRequestMessage *record) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_cp_total_executions_threshold_change_request_cl_ord_id[i] = arbitrary(); }
-  for (size_t i = 0; i < 6; i++) { record->underlier_cp_total_executions_threshold_change_request_underlier_optional[i] = arbitrary(); }
-  for (size_t i = 0; i < 4; i++) { record->efid_cp_total_executions_threshold_change_request_efid_optional[i] = arbitrary(); }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = arbitrary(); }
+  for (size_t i = 0; i < 6; i++) { record->underlier_optional[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->efid_optional[i] = arbitrary(); }
   for (size_t i = 0; i < 2; i++) { record->risk_group_id[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->total_executions[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->period_in_milli_seconds[i] = arbitrary(); }
@@ -745,9 +745,9 @@ static void any_cp_total_executions_threshold_change_request_message(CpTotalExec
 
 /* Cp Total Executions Threshold Change Request Message to the wire: 40 bytes from at, returning where the next byte goes */
 static size_t encode_cp_total_executions_threshold_change_request_message(const CpTotalExecutionsThresholdChangeRequestMessage *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id_cp_total_executions_threshold_change_request_cl_ord_id[i]; }
-  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier_cp_total_executions_threshold_change_request_underlier_optional[i]; }
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid_cp_total_executions_threshold_change_request_efid_optional[i]; }
+  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id[i]; }
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier_optional[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid_optional[i]; }
   for (size_t i = 0; i < 2; i++) { wire[at++] = record->risk_group_id[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->total_executions[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->period_in_milli_seconds[i]; }
@@ -757,9 +757,9 @@ static size_t encode_cp_total_executions_threshold_change_request_message(const 
 
 /* Cp Total Executions Threshold Change Request Message off the wire: 40 bytes from at, returning where the next byte lies */
 static size_t decode_cp_total_executions_threshold_change_request_message(CpTotalExecutionsThresholdChangeRequestMessage *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_cp_total_executions_threshold_change_request_cl_ord_id[i] = wire[at++]; }
-  for (size_t i = 0; i < 6; i++) { record->underlier_cp_total_executions_threshold_change_request_underlier_optional[i] = wire[at++]; }
-  for (size_t i = 0; i < 4; i++) { record->efid_cp_total_executions_threshold_change_request_efid_optional[i] = wire[at++]; }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = wire[at++]; }
+  for (size_t i = 0; i < 6; i++) { record->underlier_optional[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->efid_optional[i] = wire[at++]; }
   for (size_t i = 0; i < 2; i++) { record->risk_group_id[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->total_executions[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->period_in_milli_seconds[i] = wire[at++]; }
@@ -769,9 +769,9 @@ static size_t decode_cp_total_executions_threshold_change_request_message(CpTota
 
 /* what was read of Cp Total Executions Threshold Change Request Message is what was written, byte for byte */
 static void equal_cp_total_executions_threshold_change_request_message(const CpTotalExecutionsThresholdChangeRequestMessage *read, const CpTotalExecutionsThresholdChangeRequestMessage *written) {
-  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id_cp_total_executions_threshold_change_request_cl_ord_id[i] == written->cl_ord_id_cp_total_executions_threshold_change_request_cl_ord_id[i]); }
-  for (size_t i = 0; i < 6; i++) { assert(read->underlier_cp_total_executions_threshold_change_request_underlier_optional[i] == written->underlier_cp_total_executions_threshold_change_request_underlier_optional[i]); }
-  for (size_t i = 0; i < 4; i++) { assert(read->efid_cp_total_executions_threshold_change_request_efid_optional[i] == written->efid_cp_total_executions_threshold_change_request_efid_optional[i]); }
+  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id[i] == written->cl_ord_id[i]); }
+  for (size_t i = 0; i < 6; i++) { assert(read->underlier_optional[i] == written->underlier_optional[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->efid_optional[i] == written->efid_optional[i]); }
   for (size_t i = 0; i < 2; i++) { assert(read->risk_group_id[i] == written->risk_group_id[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->total_executions[i] == written->total_executions[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->period_in_milli_seconds[i] == written->period_in_milli_seconds[i]); }
@@ -799,27 +799,27 @@ static void check_cp_total_executions_threshold_change_request_message(void) {
 
 /* CPPercentOutstandingContractsThresholdChangeRequestMessage */
 typedef struct {
-  uint8_t cl_ord_id_cp_percent_outstanding_contracts_threshold_change_request_cl_ord_id[20];    /* bytes 0 to 19 */
-  uint8_t underlier_cp_percent_outstanding_contracts_threshold_change_request_under_50hxp3[6];  /* bytes 20 to 25 */
-  uint8_t efid_cp_percent_outstanding_contracts_threshold_change_request_efid_optional[4];      /* bytes 26 to 29 */
-  uint8_t percent[4];                                                                           /* bytes 30 to 33 */
-  uint8_t period_in_milli_seconds[4];                                                           /* bytes 34 to 37 */
+  uint8_t cl_ord_id[20];               /* bytes 0 to 19 */
+  uint8_t underlier_optional[6];       /* bytes 20 to 25 */
+  uint8_t efid_optional[4];            /* bytes 26 to 29 */
+  uint8_t percent[4];                  /* bytes 30 to 33 */
+  uint8_t period_in_milli_seconds[4];  /* bytes 34 to 37 */
 } CpPercentOutstandingContractsThresholdChangeRequestMessage;
 
 /* any Cp Percent Outstanding Contracts Threshold Change Request Message at all: every byte one the checker chooses */
 static void any_cp_percent_outstanding_contracts_threshold_change_request_message(CpPercentOutstandingContractsThresholdChangeRequestMessage *record) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_cp_percent_outstanding_contracts_threshold_change_request_cl_ord_id[i] = arbitrary(); }
-  for (size_t i = 0; i < 6; i++) { record->underlier_cp_percent_outstanding_contracts_threshold_change_request_under_50hxp3[i] = arbitrary(); }
-  for (size_t i = 0; i < 4; i++) { record->efid_cp_percent_outstanding_contracts_threshold_change_request_efid_optional[i] = arbitrary(); }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = arbitrary(); }
+  for (size_t i = 0; i < 6; i++) { record->underlier_optional[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->efid_optional[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->percent[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->period_in_milli_seconds[i] = arbitrary(); }
 }
 
 /* Cp Percent Outstanding Contracts Threshold Change Request Message to the wire: 38 bytes from at, returning where the next byte goes */
 static size_t encode_cp_percent_outstanding_contracts_threshold_change_request_message(const CpPercentOutstandingContractsThresholdChangeRequestMessage *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id_cp_percent_outstanding_contracts_threshold_change_request_cl_ord_id[i]; }
-  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier_cp_percent_outstanding_contracts_threshold_change_request_under_50hxp3[i]; }
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid_cp_percent_outstanding_contracts_threshold_change_request_efid_optional[i]; }
+  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id[i]; }
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier_optional[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid_optional[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->percent[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->period_in_milli_seconds[i]; }
 
@@ -828,9 +828,9 @@ static size_t encode_cp_percent_outstanding_contracts_threshold_change_request_m
 
 /* Cp Percent Outstanding Contracts Threshold Change Request Message off the wire: 38 bytes from at, returning where the next byte lies */
 static size_t decode_cp_percent_outstanding_contracts_threshold_change_request_message(CpPercentOutstandingContractsThresholdChangeRequestMessage *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_cp_percent_outstanding_contracts_threshold_change_request_cl_ord_id[i] = wire[at++]; }
-  for (size_t i = 0; i < 6; i++) { record->underlier_cp_percent_outstanding_contracts_threshold_change_request_under_50hxp3[i] = wire[at++]; }
-  for (size_t i = 0; i < 4; i++) { record->efid_cp_percent_outstanding_contracts_threshold_change_request_efid_optional[i] = wire[at++]; }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = wire[at++]; }
+  for (size_t i = 0; i < 6; i++) { record->underlier_optional[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->efid_optional[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->percent[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->period_in_milli_seconds[i] = wire[at++]; }
 
@@ -839,9 +839,9 @@ static size_t decode_cp_percent_outstanding_contracts_threshold_change_request_m
 
 /* what was read of Cp Percent Outstanding Contracts Threshold Change Request Message is what was written, byte for byte */
 static void equal_cp_percent_outstanding_contracts_threshold_change_request_message(const CpPercentOutstandingContractsThresholdChangeRequestMessage *read, const CpPercentOutstandingContractsThresholdChangeRequestMessage *written) {
-  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id_cp_percent_outstanding_contracts_threshold_change_request_cl_ord_id[i] == written->cl_ord_id_cp_percent_outstanding_contracts_threshold_change_request_cl_ord_id[i]); }
-  for (size_t i = 0; i < 6; i++) { assert(read->underlier_cp_percent_outstanding_contracts_threshold_change_request_under_50hxp3[i] == written->underlier_cp_percent_outstanding_contracts_threshold_change_request_under_50hxp3[i]); }
-  for (size_t i = 0; i < 4; i++) { assert(read->efid_cp_percent_outstanding_contracts_threshold_change_request_efid_optional[i] == written->efid_cp_percent_outstanding_contracts_threshold_change_request_efid_optional[i]); }
+  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id[i] == written->cl_ord_id[i]); }
+  for (size_t i = 0; i < 6; i++) { assert(read->underlier_optional[i] == written->underlier_optional[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->efid_optional[i] == written->efid_optional[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->percent[i] == written->percent[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->period_in_milli_seconds[i] == written->period_in_milli_seconds[i]); }
 }
@@ -868,19 +868,19 @@ static void check_cp_percent_outstanding_contracts_threshold_change_request_mess
 
 /* CPBreachCountThresholdChangeRequestMessage */
 typedef struct {
-  uint8_t cl_ord_id_cp_breach_count_threshold_change_request_cl_ord_id[20];          /* bytes 0 to 19 */
-  uint8_t underlier_cp_breach_count_threshold_change_request_underlier_optional[6];  /* bytes 20 to 25 */
-  uint8_t efid_cp_breach_count_threshold_change_request_efid_optional[4];            /* bytes 26 to 29 */
-  uint8_t risk_group_id[2];                                                          /* bytes 30 to 31 */
-  uint8_t count[4];                                                                  /* bytes 32 to 35 */
-  uint8_t period_in_milli_seconds[4];                                                /* bytes 36 to 39 */
+  uint8_t cl_ord_id[20];               /* bytes 0 to 19 */
+  uint8_t underlier_optional[6];       /* bytes 20 to 25 */
+  uint8_t efid_optional[4];            /* bytes 26 to 29 */
+  uint8_t risk_group_id[2];            /* bytes 30 to 31 */
+  uint8_t count[4];                    /* bytes 32 to 35 */
+  uint8_t period_in_milli_seconds[4];  /* bytes 36 to 39 */
 } CpBreachCountThresholdChangeRequestMessage;
 
 /* any Cp Breach Count Threshold Change Request Message at all: every byte one the checker chooses */
 static void any_cp_breach_count_threshold_change_request_message(CpBreachCountThresholdChangeRequestMessage *record) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_cp_breach_count_threshold_change_request_cl_ord_id[i] = arbitrary(); }
-  for (size_t i = 0; i < 6; i++) { record->underlier_cp_breach_count_threshold_change_request_underlier_optional[i] = arbitrary(); }
-  for (size_t i = 0; i < 4; i++) { record->efid_cp_breach_count_threshold_change_request_efid_optional[i] = arbitrary(); }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = arbitrary(); }
+  for (size_t i = 0; i < 6; i++) { record->underlier_optional[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->efid_optional[i] = arbitrary(); }
   for (size_t i = 0; i < 2; i++) { record->risk_group_id[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->count[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->period_in_milli_seconds[i] = arbitrary(); }
@@ -888,9 +888,9 @@ static void any_cp_breach_count_threshold_change_request_message(CpBreachCountTh
 
 /* Cp Breach Count Threshold Change Request Message to the wire: 40 bytes from at, returning where the next byte goes */
 static size_t encode_cp_breach_count_threshold_change_request_message(const CpBreachCountThresholdChangeRequestMessage *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id_cp_breach_count_threshold_change_request_cl_ord_id[i]; }
-  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier_cp_breach_count_threshold_change_request_underlier_optional[i]; }
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid_cp_breach_count_threshold_change_request_efid_optional[i]; }
+  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id[i]; }
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier_optional[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid_optional[i]; }
   for (size_t i = 0; i < 2; i++) { wire[at++] = record->risk_group_id[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->count[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->period_in_milli_seconds[i]; }
@@ -900,9 +900,9 @@ static size_t encode_cp_breach_count_threshold_change_request_message(const CpBr
 
 /* Cp Breach Count Threshold Change Request Message off the wire: 40 bytes from at, returning where the next byte lies */
 static size_t decode_cp_breach_count_threshold_change_request_message(CpBreachCountThresholdChangeRequestMessage *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_cp_breach_count_threshold_change_request_cl_ord_id[i] = wire[at++]; }
-  for (size_t i = 0; i < 6; i++) { record->underlier_cp_breach_count_threshold_change_request_underlier_optional[i] = wire[at++]; }
-  for (size_t i = 0; i < 4; i++) { record->efid_cp_breach_count_threshold_change_request_efid_optional[i] = wire[at++]; }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = wire[at++]; }
+  for (size_t i = 0; i < 6; i++) { record->underlier_optional[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->efid_optional[i] = wire[at++]; }
   for (size_t i = 0; i < 2; i++) { record->risk_group_id[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->count[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->period_in_milli_seconds[i] = wire[at++]; }
@@ -912,9 +912,9 @@ static size_t decode_cp_breach_count_threshold_change_request_message(CpBreachCo
 
 /* what was read of Cp Breach Count Threshold Change Request Message is what was written, byte for byte */
 static void equal_cp_breach_count_threshold_change_request_message(const CpBreachCountThresholdChangeRequestMessage *read, const CpBreachCountThresholdChangeRequestMessage *written) {
-  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id_cp_breach_count_threshold_change_request_cl_ord_id[i] == written->cl_ord_id_cp_breach_count_threshold_change_request_cl_ord_id[i]); }
-  for (size_t i = 0; i < 6; i++) { assert(read->underlier_cp_breach_count_threshold_change_request_underlier_optional[i] == written->underlier_cp_breach_count_threshold_change_request_underlier_optional[i]); }
-  for (size_t i = 0; i < 4; i++) { assert(read->efid_cp_breach_count_threshold_change_request_efid_optional[i] == written->efid_cp_breach_count_threshold_change_request_efid_optional[i]); }
+  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id[i] == written->cl_ord_id[i]); }
+  for (size_t i = 0; i < 6; i++) { assert(read->underlier_optional[i] == written->underlier_optional[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->efid_optional[i] == written->efid_optional[i]); }
   for (size_t i = 0; i < 2; i++) { assert(read->risk_group_id[i] == written->risk_group_id[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->count[i] == written->count[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->period_in_milli_seconds[i] == written->period_in_milli_seconds[i]); }
@@ -942,27 +942,27 @@ static void check_cp_breach_count_threshold_change_request_message(void) {
 
 /* ManualCPBreachTriggerRequestMessage */
 typedef struct {
-  uint8_t cl_ord_id_manual_cp_breach_trigger_request_cl_ord_id[20];          /* bytes 0 to 19 */
-  uint8_t underlier_manual_cp_breach_trigger_request_underlier_optional[6];  /* bytes 20 to 25 */
-  uint8_t efid_manual_cp_breach_trigger_request_efid_optional[4];            /* bytes 26 to 29 */
-  uint8_t risk_group_id[2];                                                  /* bytes 30 to 31 */
-  uint8_t send_cancels;                                                      /* byte 32 */
+  uint8_t cl_ord_id[20];          /* bytes 0 to 19 */
+  uint8_t underlier_optional[6];  /* bytes 20 to 25 */
+  uint8_t efid_optional[4];       /* bytes 26 to 29 */
+  uint8_t risk_group_id[2];       /* bytes 30 to 31 */
+  uint8_t send_cancels;           /* byte 32 */
 } ManualCpBreachTriggerRequestMessage;
 
 /* any Manual Cp Breach Trigger Request Message at all: every byte one the checker chooses */
 static void any_manual_cp_breach_trigger_request_message(ManualCpBreachTriggerRequestMessage *record) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_manual_cp_breach_trigger_request_cl_ord_id[i] = arbitrary(); }
-  for (size_t i = 0; i < 6; i++) { record->underlier_manual_cp_breach_trigger_request_underlier_optional[i] = arbitrary(); }
-  for (size_t i = 0; i < 4; i++) { record->efid_manual_cp_breach_trigger_request_efid_optional[i] = arbitrary(); }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = arbitrary(); }
+  for (size_t i = 0; i < 6; i++) { record->underlier_optional[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->efid_optional[i] = arbitrary(); }
   for (size_t i = 0; i < 2; i++) { record->risk_group_id[i] = arbitrary(); }
   record->send_cancels = arbitrary();
 }
 
 /* Manual Cp Breach Trigger Request Message to the wire: 33 bytes from at, returning where the next byte goes */
 static size_t encode_manual_cp_breach_trigger_request_message(const ManualCpBreachTriggerRequestMessage *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id_manual_cp_breach_trigger_request_cl_ord_id[i]; }
-  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier_manual_cp_breach_trigger_request_underlier_optional[i]; }
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid_manual_cp_breach_trigger_request_efid_optional[i]; }
+  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id[i]; }
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier_optional[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid_optional[i]; }
   for (size_t i = 0; i < 2; i++) { wire[at++] = record->risk_group_id[i]; }
   wire[at++] = record->send_cancels;
 
@@ -971,9 +971,9 @@ static size_t encode_manual_cp_breach_trigger_request_message(const ManualCpBrea
 
 /* Manual Cp Breach Trigger Request Message off the wire: 33 bytes from at, returning where the next byte lies */
 static size_t decode_manual_cp_breach_trigger_request_message(ManualCpBreachTriggerRequestMessage *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_manual_cp_breach_trigger_request_cl_ord_id[i] = wire[at++]; }
-  for (size_t i = 0; i < 6; i++) { record->underlier_manual_cp_breach_trigger_request_underlier_optional[i] = wire[at++]; }
-  for (size_t i = 0; i < 4; i++) { record->efid_manual_cp_breach_trigger_request_efid_optional[i] = wire[at++]; }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = wire[at++]; }
+  for (size_t i = 0; i < 6; i++) { record->underlier_optional[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->efid_optional[i] = wire[at++]; }
   for (size_t i = 0; i < 2; i++) { record->risk_group_id[i] = wire[at++]; }
   record->send_cancels = wire[at++];
 
@@ -982,9 +982,9 @@ static size_t decode_manual_cp_breach_trigger_request_message(ManualCpBreachTrig
 
 /* what was read of Manual Cp Breach Trigger Request Message is what was written, byte for byte */
 static void equal_manual_cp_breach_trigger_request_message(const ManualCpBreachTriggerRequestMessage *read, const ManualCpBreachTriggerRequestMessage *written) {
-  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id_manual_cp_breach_trigger_request_cl_ord_id[i] == written->cl_ord_id_manual_cp_breach_trigger_request_cl_ord_id[i]); }
-  for (size_t i = 0; i < 6; i++) { assert(read->underlier_manual_cp_breach_trigger_request_underlier_optional[i] == written->underlier_manual_cp_breach_trigger_request_underlier_optional[i]); }
-  for (size_t i = 0; i < 4; i++) { assert(read->efid_manual_cp_breach_trigger_request_efid_optional[i] == written->efid_manual_cp_breach_trigger_request_efid_optional[i]); }
+  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id[i] == written->cl_ord_id[i]); }
+  for (size_t i = 0; i < 6; i++) { assert(read->underlier_optional[i] == written->underlier_optional[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->efid_optional[i] == written->efid_optional[i]); }
   for (size_t i = 0; i < 2; i++) { assert(read->risk_group_id[i] == written->risk_group_id[i]); }
   assert(read->send_cancels == written->send_cancels);
 }
@@ -1011,19 +1011,19 @@ static void check_manual_cp_breach_trigger_request_message(void) {
 
 /* CPClearBreachRequestMessage */
 typedef struct {
-  uint8_t cl_ord_id_cp_clear_breach_request_cl_ord_id[20];  /* bytes 0 to 19 */
-  uint8_t breach_id[8];                                     /* bytes 20 to 27 */
+  uint8_t cl_ord_id[20];  /* bytes 0 to 19 */
+  uint8_t breach_id[8];   /* bytes 20 to 27 */
 } CpClearBreachRequestMessage;
 
 /* any Cp Clear Breach Request Message at all: every byte one the checker chooses */
 static void any_cp_clear_breach_request_message(CpClearBreachRequestMessage *record) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_cp_clear_breach_request_cl_ord_id[i] = arbitrary(); }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->breach_id[i] = arbitrary(); }
 }
 
 /* Cp Clear Breach Request Message to the wire: 28 bytes from at, returning where the next byte goes */
 static size_t encode_cp_clear_breach_request_message(const CpClearBreachRequestMessage *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id_cp_clear_breach_request_cl_ord_id[i]; }
+  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->breach_id[i]; }
 
   return at;
@@ -1031,7 +1031,7 @@ static size_t encode_cp_clear_breach_request_message(const CpClearBreachRequestM
 
 /* Cp Clear Breach Request Message off the wire: 28 bytes from at, returning where the next byte lies */
 static size_t decode_cp_clear_breach_request_message(CpClearBreachRequestMessage *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_cp_clear_breach_request_cl_ord_id[i] = wire[at++]; }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->breach_id[i] = wire[at++]; }
 
   return at;
@@ -1039,7 +1039,7 @@ static size_t decode_cp_clear_breach_request_message(CpClearBreachRequestMessage
 
 /* what was read of Cp Clear Breach Request Message is what was written, byte for byte */
 static void equal_cp_clear_breach_request_message(const CpClearBreachRequestMessage *read, const CpClearBreachRequestMessage *written) {
-  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id_cp_clear_breach_request_cl_ord_id[i] == written->cl_ord_id_cp_clear_breach_request_cl_ord_id[i]); }
+  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id[i] == written->cl_ord_id[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->breach_id[i] == written->breach_id[i]); }
 }
 
@@ -1065,27 +1065,27 @@ static void check_cp_clear_breach_request_message(void) {
 
 /* SingleOrderAllowISOOrdersChangeRequestMessage */
 typedef struct {
-  uint8_t cl_ord_id_single_order_allow_iso_orders_change_request_cl_ord_id[20];          /* bytes 0 to 19 */
-  uint8_t underlier_single_order_allow_iso_orders_change_request_underlier_optional[6];  /* bytes 20 to 25 */
-  uint8_t efid_single_order_allow_iso_orders_change_request_efid_optional[4];            /* bytes 26 to 29 */
-  uint8_t risk_group_id[2];                                                              /* bytes 30 to 31 */
-  uint8_t allow_iso_orders;                                                              /* byte 32 */
+  uint8_t cl_ord_id[20];          /* bytes 0 to 19 */
+  uint8_t underlier_optional[6];  /* bytes 20 to 25 */
+  uint8_t efid_optional[4];       /* bytes 26 to 29 */
+  uint8_t risk_group_id[2];       /* bytes 30 to 31 */
+  uint8_t allow_iso_orders;       /* byte 32 */
 } SingleOrderAllowIsoOrdersChangeRequestMessage;
 
 /* any Single Order Allow Iso Orders Change Request Message at all: every byte one the checker chooses */
 static void any_single_order_allow_iso_orders_change_request_message(SingleOrderAllowIsoOrdersChangeRequestMessage *record) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_single_order_allow_iso_orders_change_request_cl_ord_id[i] = arbitrary(); }
-  for (size_t i = 0; i < 6; i++) { record->underlier_single_order_allow_iso_orders_change_request_underlier_optional[i] = arbitrary(); }
-  for (size_t i = 0; i < 4; i++) { record->efid_single_order_allow_iso_orders_change_request_efid_optional[i] = arbitrary(); }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = arbitrary(); }
+  for (size_t i = 0; i < 6; i++) { record->underlier_optional[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->efid_optional[i] = arbitrary(); }
   for (size_t i = 0; i < 2; i++) { record->risk_group_id[i] = arbitrary(); }
   record->allow_iso_orders = arbitrary();
 }
 
 /* Single Order Allow Iso Orders Change Request Message to the wire: 33 bytes from at, returning where the next byte goes */
 static size_t encode_single_order_allow_iso_orders_change_request_message(const SingleOrderAllowIsoOrdersChangeRequestMessage *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id_single_order_allow_iso_orders_change_request_cl_ord_id[i]; }
-  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier_single_order_allow_iso_orders_change_request_underlier_optional[i]; }
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid_single_order_allow_iso_orders_change_request_efid_optional[i]; }
+  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id[i]; }
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier_optional[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid_optional[i]; }
   for (size_t i = 0; i < 2; i++) { wire[at++] = record->risk_group_id[i]; }
   wire[at++] = record->allow_iso_orders;
 
@@ -1094,9 +1094,9 @@ static size_t encode_single_order_allow_iso_orders_change_request_message(const 
 
 /* Single Order Allow Iso Orders Change Request Message off the wire: 33 bytes from at, returning where the next byte lies */
 static size_t decode_single_order_allow_iso_orders_change_request_message(SingleOrderAllowIsoOrdersChangeRequestMessage *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_single_order_allow_iso_orders_change_request_cl_ord_id[i] = wire[at++]; }
-  for (size_t i = 0; i < 6; i++) { record->underlier_single_order_allow_iso_orders_change_request_underlier_optional[i] = wire[at++]; }
-  for (size_t i = 0; i < 4; i++) { record->efid_single_order_allow_iso_orders_change_request_efid_optional[i] = wire[at++]; }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = wire[at++]; }
+  for (size_t i = 0; i < 6; i++) { record->underlier_optional[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->efid_optional[i] = wire[at++]; }
   for (size_t i = 0; i < 2; i++) { record->risk_group_id[i] = wire[at++]; }
   record->allow_iso_orders = wire[at++];
 
@@ -1105,9 +1105,9 @@ static size_t decode_single_order_allow_iso_orders_change_request_message(Single
 
 /* what was read of Single Order Allow Iso Orders Change Request Message is what was written, byte for byte */
 static void equal_single_order_allow_iso_orders_change_request_message(const SingleOrderAllowIsoOrdersChangeRequestMessage *read, const SingleOrderAllowIsoOrdersChangeRequestMessage *written) {
-  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id_single_order_allow_iso_orders_change_request_cl_ord_id[i] == written->cl_ord_id_single_order_allow_iso_orders_change_request_cl_ord_id[i]); }
-  for (size_t i = 0; i < 6; i++) { assert(read->underlier_single_order_allow_iso_orders_change_request_underlier_optional[i] == written->underlier_single_order_allow_iso_orders_change_request_underlier_optional[i]); }
-  for (size_t i = 0; i < 4; i++) { assert(read->efid_single_order_allow_iso_orders_change_request_efid_optional[i] == written->efid_single_order_allow_iso_orders_change_request_efid_optional[i]); }
+  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id[i] == written->cl_ord_id[i]); }
+  for (size_t i = 0; i < 6; i++) { assert(read->underlier_optional[i] == written->underlier_optional[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->efid_optional[i] == written->efid_optional[i]); }
   for (size_t i = 0; i < 2; i++) { assert(read->risk_group_id[i] == written->risk_group_id[i]); }
   assert(read->allow_iso_orders == written->allow_iso_orders);
 }
@@ -1134,27 +1134,27 @@ static void check_single_order_allow_iso_orders_change_request_message(void) {
 
 /* SingleOrderAllowOrdersInCrossedMarketChangeRequestMessage */
 typedef struct {
-  uint8_t cl_ord_id_single_order_allow_orders_in_crossed_market_change_request_cl_ord_id[20];   /* bytes 0 to 19 */
-  uint8_t underlier_single_order_allow_orders_in_crossed_market_change_request_unde_rbzy27[6];  /* bytes 20 to 25 */
-  uint8_t efid_single_order_allow_orders_in_crossed_market_change_request_efid_optional[4];     /* bytes 26 to 29 */
-  uint8_t risk_group_id[2];                                                                     /* bytes 30 to 31 */
-  uint8_t allow_orders;                                                                         /* byte 32 */
+  uint8_t cl_ord_id[20];          /* bytes 0 to 19 */
+  uint8_t underlier_optional[6];  /* bytes 20 to 25 */
+  uint8_t efid_optional[4];       /* bytes 26 to 29 */
+  uint8_t risk_group_id[2];       /* bytes 30 to 31 */
+  uint8_t allow_orders;           /* byte 32 */
 } SingleOrderAllowOrdersInCrossedMarketChangeRequestMessage;
 
 /* any Single Order Allow Orders In Crossed Market Change Request Message at all: every byte one the checker chooses */
 static void any_single_order_allow_orders_in_crossed_market_change_request_message(SingleOrderAllowOrdersInCrossedMarketChangeRequestMessage *record) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_single_order_allow_orders_in_crossed_market_change_request_cl_ord_id[i] = arbitrary(); }
-  for (size_t i = 0; i < 6; i++) { record->underlier_single_order_allow_orders_in_crossed_market_change_request_unde_rbzy27[i] = arbitrary(); }
-  for (size_t i = 0; i < 4; i++) { record->efid_single_order_allow_orders_in_crossed_market_change_request_efid_optional[i] = arbitrary(); }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = arbitrary(); }
+  for (size_t i = 0; i < 6; i++) { record->underlier_optional[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->efid_optional[i] = arbitrary(); }
   for (size_t i = 0; i < 2; i++) { record->risk_group_id[i] = arbitrary(); }
   record->allow_orders = arbitrary();
 }
 
 /* Single Order Allow Orders In Crossed Market Change Request Message to the wire: 33 bytes from at, returning where the next byte goes */
 static size_t encode_single_order_allow_orders_in_crossed_market_change_request_message(const SingleOrderAllowOrdersInCrossedMarketChangeRequestMessage *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id_single_order_allow_orders_in_crossed_market_change_request_cl_ord_id[i]; }
-  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier_single_order_allow_orders_in_crossed_market_change_request_unde_rbzy27[i]; }
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid_single_order_allow_orders_in_crossed_market_change_request_efid_optional[i]; }
+  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id[i]; }
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier_optional[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid_optional[i]; }
   for (size_t i = 0; i < 2; i++) { wire[at++] = record->risk_group_id[i]; }
   wire[at++] = record->allow_orders;
 
@@ -1163,9 +1163,9 @@ static size_t encode_single_order_allow_orders_in_crossed_market_change_request_
 
 /* Single Order Allow Orders In Crossed Market Change Request Message off the wire: 33 bytes from at, returning where the next byte lies */
 static size_t decode_single_order_allow_orders_in_crossed_market_change_request_message(SingleOrderAllowOrdersInCrossedMarketChangeRequestMessage *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_single_order_allow_orders_in_crossed_market_change_request_cl_ord_id[i] = wire[at++]; }
-  for (size_t i = 0; i < 6; i++) { record->underlier_single_order_allow_orders_in_crossed_market_change_request_unde_rbzy27[i] = wire[at++]; }
-  for (size_t i = 0; i < 4; i++) { record->efid_single_order_allow_orders_in_crossed_market_change_request_efid_optional[i] = wire[at++]; }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = wire[at++]; }
+  for (size_t i = 0; i < 6; i++) { record->underlier_optional[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->efid_optional[i] = wire[at++]; }
   for (size_t i = 0; i < 2; i++) { record->risk_group_id[i] = wire[at++]; }
   record->allow_orders = wire[at++];
 
@@ -1174,9 +1174,9 @@ static size_t decode_single_order_allow_orders_in_crossed_market_change_request_
 
 /* what was read of Single Order Allow Orders In Crossed Market Change Request Message is what was written, byte for byte */
 static void equal_single_order_allow_orders_in_crossed_market_change_request_message(const SingleOrderAllowOrdersInCrossedMarketChangeRequestMessage *read, const SingleOrderAllowOrdersInCrossedMarketChangeRequestMessage *written) {
-  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id_single_order_allow_orders_in_crossed_market_change_request_cl_ord_id[i] == written->cl_ord_id_single_order_allow_orders_in_crossed_market_change_request_cl_ord_id[i]); }
-  for (size_t i = 0; i < 6; i++) { assert(read->underlier_single_order_allow_orders_in_crossed_market_change_request_unde_rbzy27[i] == written->underlier_single_order_allow_orders_in_crossed_market_change_request_unde_rbzy27[i]); }
-  for (size_t i = 0; i < 4; i++) { assert(read->efid_single_order_allow_orders_in_crossed_market_change_request_efid_optional[i] == written->efid_single_order_allow_orders_in_crossed_market_change_request_efid_optional[i]); }
+  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id[i] == written->cl_ord_id[i]); }
+  for (size_t i = 0; i < 6; i++) { assert(read->underlier_optional[i] == written->underlier_optional[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->efid_optional[i] == written->efid_optional[i]); }
   for (size_t i = 0; i < 2; i++) { assert(read->risk_group_id[i] == written->risk_group_id[i]); }
   assert(read->allow_orders == written->allow_orders);
 }
@@ -1203,27 +1203,27 @@ static void check_single_order_allow_orders_in_crossed_market_change_request_mes
 
 /* SingleOrderMaxNotionalChangeRequestMessage */
 typedef struct {
-  uint8_t cl_ord_id_single_order_max_notional_change_request_cl_ord_id[20];          /* bytes 0 to 19 */
-  uint8_t underlier_single_order_max_notional_change_request_underlier_optional[6];  /* bytes 20 to 25 */
-  uint8_t efid_single_order_max_notional_change_request_efid_optional[4];            /* bytes 26 to 29 */
-  uint8_t risk_group_id[2];                                                          /* bytes 30 to 31 */
-  uint8_t max_notional_in_dollars[8];                                                /* bytes 32 to 39 */
+  uint8_t cl_ord_id[20];               /* bytes 0 to 19 */
+  uint8_t underlier_optional[6];       /* bytes 20 to 25 */
+  uint8_t efid_optional[4];            /* bytes 26 to 29 */
+  uint8_t risk_group_id[2];            /* bytes 30 to 31 */
+  uint8_t max_notional_in_dollars[8];  /* bytes 32 to 39 */
 } SingleOrderMaxNotionalChangeRequestMessage;
 
 /* any Single Order Max Notional Change Request Message at all: every byte one the checker chooses */
 static void any_single_order_max_notional_change_request_message(SingleOrderMaxNotionalChangeRequestMessage *record) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_single_order_max_notional_change_request_cl_ord_id[i] = arbitrary(); }
-  for (size_t i = 0; i < 6; i++) { record->underlier_single_order_max_notional_change_request_underlier_optional[i] = arbitrary(); }
-  for (size_t i = 0; i < 4; i++) { record->efid_single_order_max_notional_change_request_efid_optional[i] = arbitrary(); }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = arbitrary(); }
+  for (size_t i = 0; i < 6; i++) { record->underlier_optional[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->efid_optional[i] = arbitrary(); }
   for (size_t i = 0; i < 2; i++) { record->risk_group_id[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->max_notional_in_dollars[i] = arbitrary(); }
 }
 
 /* Single Order Max Notional Change Request Message to the wire: 40 bytes from at, returning where the next byte goes */
 static size_t encode_single_order_max_notional_change_request_message(const SingleOrderMaxNotionalChangeRequestMessage *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id_single_order_max_notional_change_request_cl_ord_id[i]; }
-  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier_single_order_max_notional_change_request_underlier_optional[i]; }
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid_single_order_max_notional_change_request_efid_optional[i]; }
+  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id[i]; }
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier_optional[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid_optional[i]; }
   for (size_t i = 0; i < 2; i++) { wire[at++] = record->risk_group_id[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->max_notional_in_dollars[i]; }
 
@@ -1232,9 +1232,9 @@ static size_t encode_single_order_max_notional_change_request_message(const Sing
 
 /* Single Order Max Notional Change Request Message off the wire: 40 bytes from at, returning where the next byte lies */
 static size_t decode_single_order_max_notional_change_request_message(SingleOrderMaxNotionalChangeRequestMessage *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_single_order_max_notional_change_request_cl_ord_id[i] = wire[at++]; }
-  for (size_t i = 0; i < 6; i++) { record->underlier_single_order_max_notional_change_request_underlier_optional[i] = wire[at++]; }
-  for (size_t i = 0; i < 4; i++) { record->efid_single_order_max_notional_change_request_efid_optional[i] = wire[at++]; }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = wire[at++]; }
+  for (size_t i = 0; i < 6; i++) { record->underlier_optional[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->efid_optional[i] = wire[at++]; }
   for (size_t i = 0; i < 2; i++) { record->risk_group_id[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->max_notional_in_dollars[i] = wire[at++]; }
 
@@ -1243,9 +1243,9 @@ static size_t decode_single_order_max_notional_change_request_message(SingleOrde
 
 /* what was read of Single Order Max Notional Change Request Message is what was written, byte for byte */
 static void equal_single_order_max_notional_change_request_message(const SingleOrderMaxNotionalChangeRequestMessage *read, const SingleOrderMaxNotionalChangeRequestMessage *written) {
-  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id_single_order_max_notional_change_request_cl_ord_id[i] == written->cl_ord_id_single_order_max_notional_change_request_cl_ord_id[i]); }
-  for (size_t i = 0; i < 6; i++) { assert(read->underlier_single_order_max_notional_change_request_underlier_optional[i] == written->underlier_single_order_max_notional_change_request_underlier_optional[i]); }
-  for (size_t i = 0; i < 4; i++) { assert(read->efid_single_order_max_notional_change_request_efid_optional[i] == written->efid_single_order_max_notional_change_request_efid_optional[i]); }
+  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id[i] == written->cl_ord_id[i]); }
+  for (size_t i = 0; i < 6; i++) { assert(read->underlier_optional[i] == written->underlier_optional[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->efid_optional[i] == written->efid_optional[i]); }
   for (size_t i = 0; i < 2; i++) { assert(read->risk_group_id[i] == written->risk_group_id[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->max_notional_in_dollars[i] == written->max_notional_in_dollars[i]); }
 }
@@ -1272,27 +1272,27 @@ static void check_single_order_max_notional_change_request_message(void) {
 
 /* SingleOrderMaxContractsChangeRequestMessage */
 typedef struct {
-  uint8_t cl_ord_id_single_order_max_contracts_change_request_cl_ord_id[20];          /* bytes 0 to 19 */
-  uint8_t underlier_single_order_max_contracts_change_request_underlier_optional[6];  /* bytes 20 to 25 */
-  uint8_t efid_single_order_max_contracts_change_request_efid_optional[4];            /* bytes 26 to 29 */
-  uint8_t risk_group_id[2];                                                           /* bytes 30 to 31 */
-  uint8_t max_contracts[4];                                                           /* bytes 32 to 35 */
+  uint8_t cl_ord_id[20];          /* bytes 0 to 19 */
+  uint8_t underlier_optional[6];  /* bytes 20 to 25 */
+  uint8_t efid_optional[4];       /* bytes 26 to 29 */
+  uint8_t risk_group_id[2];       /* bytes 30 to 31 */
+  uint8_t max_contracts[4];       /* bytes 32 to 35 */
 } SingleOrderMaxContractsChangeRequestMessage;
 
 /* any Single Order Max Contracts Change Request Message at all: every byte one the checker chooses */
 static void any_single_order_max_contracts_change_request_message(SingleOrderMaxContractsChangeRequestMessage *record) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_single_order_max_contracts_change_request_cl_ord_id[i] = arbitrary(); }
-  for (size_t i = 0; i < 6; i++) { record->underlier_single_order_max_contracts_change_request_underlier_optional[i] = arbitrary(); }
-  for (size_t i = 0; i < 4; i++) { record->efid_single_order_max_contracts_change_request_efid_optional[i] = arbitrary(); }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = arbitrary(); }
+  for (size_t i = 0; i < 6; i++) { record->underlier_optional[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->efid_optional[i] = arbitrary(); }
   for (size_t i = 0; i < 2; i++) { record->risk_group_id[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->max_contracts[i] = arbitrary(); }
 }
 
 /* Single Order Max Contracts Change Request Message to the wire: 36 bytes from at, returning where the next byte goes */
 static size_t encode_single_order_max_contracts_change_request_message(const SingleOrderMaxContractsChangeRequestMessage *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id_single_order_max_contracts_change_request_cl_ord_id[i]; }
-  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier_single_order_max_contracts_change_request_underlier_optional[i]; }
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid_single_order_max_contracts_change_request_efid_optional[i]; }
+  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id[i]; }
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier_optional[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid_optional[i]; }
   for (size_t i = 0; i < 2; i++) { wire[at++] = record->risk_group_id[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->max_contracts[i]; }
 
@@ -1301,9 +1301,9 @@ static size_t encode_single_order_max_contracts_change_request_message(const Sin
 
 /* Single Order Max Contracts Change Request Message off the wire: 36 bytes from at, returning where the next byte lies */
 static size_t decode_single_order_max_contracts_change_request_message(SingleOrderMaxContractsChangeRequestMessage *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_single_order_max_contracts_change_request_cl_ord_id[i] = wire[at++]; }
-  for (size_t i = 0; i < 6; i++) { record->underlier_single_order_max_contracts_change_request_underlier_optional[i] = wire[at++]; }
-  for (size_t i = 0; i < 4; i++) { record->efid_single_order_max_contracts_change_request_efid_optional[i] = wire[at++]; }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = wire[at++]; }
+  for (size_t i = 0; i < 6; i++) { record->underlier_optional[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->efid_optional[i] = wire[at++]; }
   for (size_t i = 0; i < 2; i++) { record->risk_group_id[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->max_contracts[i] = wire[at++]; }
 
@@ -1312,9 +1312,9 @@ static size_t decode_single_order_max_contracts_change_request_message(SingleOrd
 
 /* what was read of Single Order Max Contracts Change Request Message is what was written, byte for byte */
 static void equal_single_order_max_contracts_change_request_message(const SingleOrderMaxContractsChangeRequestMessage *read, const SingleOrderMaxContractsChangeRequestMessage *written) {
-  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id_single_order_max_contracts_change_request_cl_ord_id[i] == written->cl_ord_id_single_order_max_contracts_change_request_cl_ord_id[i]); }
-  for (size_t i = 0; i < 6; i++) { assert(read->underlier_single_order_max_contracts_change_request_underlier_optional[i] == written->underlier_single_order_max_contracts_change_request_underlier_optional[i]); }
-  for (size_t i = 0; i < 4; i++) { assert(read->efid_single_order_max_contracts_change_request_efid_optional[i] == written->efid_single_order_max_contracts_change_request_efid_optional[i]); }
+  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id[i] == written->cl_ord_id[i]); }
+  for (size_t i = 0; i < 6; i++) { assert(read->underlier_optional[i] == written->underlier_optional[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->efid_optional[i] == written->efid_optional[i]); }
   for (size_t i = 0; i < 2; i++) { assert(read->risk_group_id[i] == written->risk_group_id[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->max_contracts[i] == written->max_contracts[i]); }
 }
@@ -1341,27 +1341,27 @@ static void check_single_order_max_contracts_change_request_message(void) {
 
 /* SingleOrderAllowMarketOrdersChangeRequestMessage */
 typedef struct {
-  uint8_t cl_ord_id_single_order_allow_market_orders_change_request_cl_ord_id[20];          /* bytes 0 to 19 */
-  uint8_t underlier_single_order_allow_market_orders_change_request_underlier_optional[6];  /* bytes 20 to 25 */
-  uint8_t efid_single_order_allow_market_orders_change_request_efid_optional[4];            /* bytes 26 to 29 */
-  uint8_t risk_group_id[2];                                                                 /* bytes 30 to 31 */
-  uint8_t allow_market_orders;                                                              /* byte 32 */
+  uint8_t cl_ord_id[20];          /* bytes 0 to 19 */
+  uint8_t underlier_optional[6];  /* bytes 20 to 25 */
+  uint8_t efid_optional[4];       /* bytes 26 to 29 */
+  uint8_t risk_group_id[2];       /* bytes 30 to 31 */
+  uint8_t allow_market_orders;    /* byte 32 */
 } SingleOrderAllowMarketOrdersChangeRequestMessage;
 
 /* any Single Order Allow Market Orders Change Request Message at all: every byte one the checker chooses */
 static void any_single_order_allow_market_orders_change_request_message(SingleOrderAllowMarketOrdersChangeRequestMessage *record) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_single_order_allow_market_orders_change_request_cl_ord_id[i] = arbitrary(); }
-  for (size_t i = 0; i < 6; i++) { record->underlier_single_order_allow_market_orders_change_request_underlier_optional[i] = arbitrary(); }
-  for (size_t i = 0; i < 4; i++) { record->efid_single_order_allow_market_orders_change_request_efid_optional[i] = arbitrary(); }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = arbitrary(); }
+  for (size_t i = 0; i < 6; i++) { record->underlier_optional[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->efid_optional[i] = arbitrary(); }
   for (size_t i = 0; i < 2; i++) { record->risk_group_id[i] = arbitrary(); }
   record->allow_market_orders = arbitrary();
 }
 
 /* Single Order Allow Market Orders Change Request Message to the wire: 33 bytes from at, returning where the next byte goes */
 static size_t encode_single_order_allow_market_orders_change_request_message(const SingleOrderAllowMarketOrdersChangeRequestMessage *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id_single_order_allow_market_orders_change_request_cl_ord_id[i]; }
-  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier_single_order_allow_market_orders_change_request_underlier_optional[i]; }
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid_single_order_allow_market_orders_change_request_efid_optional[i]; }
+  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id[i]; }
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier_optional[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid_optional[i]; }
   for (size_t i = 0; i < 2; i++) { wire[at++] = record->risk_group_id[i]; }
   wire[at++] = record->allow_market_orders;
 
@@ -1370,9 +1370,9 @@ static size_t encode_single_order_allow_market_orders_change_request_message(con
 
 /* Single Order Allow Market Orders Change Request Message off the wire: 33 bytes from at, returning where the next byte lies */
 static size_t decode_single_order_allow_market_orders_change_request_message(SingleOrderAllowMarketOrdersChangeRequestMessage *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_single_order_allow_market_orders_change_request_cl_ord_id[i] = wire[at++]; }
-  for (size_t i = 0; i < 6; i++) { record->underlier_single_order_allow_market_orders_change_request_underlier_optional[i] = wire[at++]; }
-  for (size_t i = 0; i < 4; i++) { record->efid_single_order_allow_market_orders_change_request_efid_optional[i] = wire[at++]; }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = wire[at++]; }
+  for (size_t i = 0; i < 6; i++) { record->underlier_optional[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->efid_optional[i] = wire[at++]; }
   for (size_t i = 0; i < 2; i++) { record->risk_group_id[i] = wire[at++]; }
   record->allow_market_orders = wire[at++];
 
@@ -1381,9 +1381,9 @@ static size_t decode_single_order_allow_market_orders_change_request_message(Sin
 
 /* what was read of Single Order Allow Market Orders Change Request Message is what was written, byte for byte */
 static void equal_single_order_allow_market_orders_change_request_message(const SingleOrderAllowMarketOrdersChangeRequestMessage *read, const SingleOrderAllowMarketOrdersChangeRequestMessage *written) {
-  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id_single_order_allow_market_orders_change_request_cl_ord_id[i] == written->cl_ord_id_single_order_allow_market_orders_change_request_cl_ord_id[i]); }
-  for (size_t i = 0; i < 6; i++) { assert(read->underlier_single_order_allow_market_orders_change_request_underlier_optional[i] == written->underlier_single_order_allow_market_orders_change_request_underlier_optional[i]); }
-  for (size_t i = 0; i < 4; i++) { assert(read->efid_single_order_allow_market_orders_change_request_efid_optional[i] == written->efid_single_order_allow_market_orders_change_request_efid_optional[i]); }
+  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id[i] == written->cl_ord_id[i]); }
+  for (size_t i = 0; i < 6; i++) { assert(read->underlier_optional[i] == written->underlier_optional[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->efid_optional[i] == written->efid_optional[i]); }
   for (size_t i = 0; i < 2; i++) { assert(read->risk_group_id[i] == written->risk_group_id[i]); }
   assert(read->allow_market_orders == written->allow_market_orders);
 }
@@ -1410,27 +1410,27 @@ static void check_single_order_allow_market_orders_change_request_message(void) 
 
 /* SingleOrderRestrictedUnderlierChangeRequestMessage */
 typedef struct {
-  uint8_t cl_ord_id_single_order_restricted_underlier_change_request_cl_ord_id[20];  /* bytes 0 to 19 */
-  uint8_t underlier_single_order_restricted_underlier_change_request_underlier[6];   /* bytes 20 to 25 */
-  uint8_t efid_single_order_restricted_underlier_change_request_efid_optional[4];    /* bytes 26 to 29 */
-  uint8_t risk_group_id[2];                                                          /* bytes 30 to 31 */
-  uint8_t restricted;                                                                /* byte 32 */
+  uint8_t cl_ord_id[20];     /* bytes 0 to 19 */
+  uint8_t underlier[6];      /* bytes 20 to 25 */
+  uint8_t efid_optional[4];  /* bytes 26 to 29 */
+  uint8_t risk_group_id[2];  /* bytes 30 to 31 */
+  uint8_t restricted;        /* byte 32 */
 } SingleOrderRestrictedUnderlierChangeRequestMessage;
 
 /* any Single Order Restricted Underlier Change Request Message at all: every byte one the checker chooses */
 static void any_single_order_restricted_underlier_change_request_message(SingleOrderRestrictedUnderlierChangeRequestMessage *record) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_single_order_restricted_underlier_change_request_cl_ord_id[i] = arbitrary(); }
-  for (size_t i = 0; i < 6; i++) { record->underlier_single_order_restricted_underlier_change_request_underlier[i] = arbitrary(); }
-  for (size_t i = 0; i < 4; i++) { record->efid_single_order_restricted_underlier_change_request_efid_optional[i] = arbitrary(); }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = arbitrary(); }
+  for (size_t i = 0; i < 6; i++) { record->underlier[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->efid_optional[i] = arbitrary(); }
   for (size_t i = 0; i < 2; i++) { record->risk_group_id[i] = arbitrary(); }
   record->restricted = arbitrary();
 }
 
 /* Single Order Restricted Underlier Change Request Message to the wire: 33 bytes from at, returning where the next byte goes */
 static size_t encode_single_order_restricted_underlier_change_request_message(const SingleOrderRestrictedUnderlierChangeRequestMessage *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id_single_order_restricted_underlier_change_request_cl_ord_id[i]; }
-  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier_single_order_restricted_underlier_change_request_underlier[i]; }
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid_single_order_restricted_underlier_change_request_efid_optional[i]; }
+  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id[i]; }
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid_optional[i]; }
   for (size_t i = 0; i < 2; i++) { wire[at++] = record->risk_group_id[i]; }
   wire[at++] = record->restricted;
 
@@ -1439,9 +1439,9 @@ static size_t encode_single_order_restricted_underlier_change_request_message(co
 
 /* Single Order Restricted Underlier Change Request Message off the wire: 33 bytes from at, returning where the next byte lies */
 static size_t decode_single_order_restricted_underlier_change_request_message(SingleOrderRestrictedUnderlierChangeRequestMessage *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_single_order_restricted_underlier_change_request_cl_ord_id[i] = wire[at++]; }
-  for (size_t i = 0; i < 6; i++) { record->underlier_single_order_restricted_underlier_change_request_underlier[i] = wire[at++]; }
-  for (size_t i = 0; i < 4; i++) { record->efid_single_order_restricted_underlier_change_request_efid_optional[i] = wire[at++]; }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = wire[at++]; }
+  for (size_t i = 0; i < 6; i++) { record->underlier[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->efid_optional[i] = wire[at++]; }
   for (size_t i = 0; i < 2; i++) { record->risk_group_id[i] = wire[at++]; }
   record->restricted = wire[at++];
 
@@ -1450,9 +1450,9 @@ static size_t decode_single_order_restricted_underlier_change_request_message(Si
 
 /* what was read of Single Order Restricted Underlier Change Request Message is what was written, byte for byte */
 static void equal_single_order_restricted_underlier_change_request_message(const SingleOrderRestrictedUnderlierChangeRequestMessage *read, const SingleOrderRestrictedUnderlierChangeRequestMessage *written) {
-  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id_single_order_restricted_underlier_change_request_cl_ord_id[i] == written->cl_ord_id_single_order_restricted_underlier_change_request_cl_ord_id[i]); }
-  for (size_t i = 0; i < 6; i++) { assert(read->underlier_single_order_restricted_underlier_change_request_underlier[i] == written->underlier_single_order_restricted_underlier_change_request_underlier[i]); }
-  for (size_t i = 0; i < 4; i++) { assert(read->efid_single_order_restricted_underlier_change_request_efid_optional[i] == written->efid_single_order_restricted_underlier_change_request_efid_optional[i]); }
+  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id[i] == written->cl_ord_id[i]); }
+  for (size_t i = 0; i < 6; i++) { assert(read->underlier[i] == written->underlier[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->efid_optional[i] == written->efid_optional[i]); }
   for (size_t i = 0; i < 2; i++) { assert(read->risk_group_id[i] == written->risk_group_id[i]); }
   assert(read->restricted == written->restricted);
 }
@@ -1479,27 +1479,27 @@ static void check_single_order_restricted_underlier_change_request_message(void)
 
 /* CPGrossNotionalThresholdChangeRequestMessage */
 typedef struct {
-  uint8_t cl_ord_id_cp_gross_notional_threshold_change_request_cl_ord_id[20];          /* bytes 0 to 19 */
-  uint8_t underlier_cp_gross_notional_threshold_change_request_underlier_optional[6];  /* bytes 20 to 25 */
-  uint8_t efid_cp_gross_notional_threshold_change_request_efid_optional[4];            /* bytes 26 to 29 */
-  uint8_t risk_group_id[2];                                                            /* bytes 30 to 31 */
-  uint8_t price_in_dollars[8];                                                         /* bytes 32 to 39 */
+  uint8_t cl_ord_id[20];          /* bytes 0 to 19 */
+  uint8_t underlier_optional[6];  /* bytes 20 to 25 */
+  uint8_t efid_optional[4];       /* bytes 26 to 29 */
+  uint8_t risk_group_id[2];       /* bytes 30 to 31 */
+  uint8_t price_in_dollars[8];    /* bytes 32 to 39 */
 } CpGrossNotionalThresholdChangeRequestMessage;
 
 /* any Cp Gross Notional Threshold Change Request Message at all: every byte one the checker chooses */
 static void any_cp_gross_notional_threshold_change_request_message(CpGrossNotionalThresholdChangeRequestMessage *record) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_cp_gross_notional_threshold_change_request_cl_ord_id[i] = arbitrary(); }
-  for (size_t i = 0; i < 6; i++) { record->underlier_cp_gross_notional_threshold_change_request_underlier_optional[i] = arbitrary(); }
-  for (size_t i = 0; i < 4; i++) { record->efid_cp_gross_notional_threshold_change_request_efid_optional[i] = arbitrary(); }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = arbitrary(); }
+  for (size_t i = 0; i < 6; i++) { record->underlier_optional[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->efid_optional[i] = arbitrary(); }
   for (size_t i = 0; i < 2; i++) { record->risk_group_id[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->price_in_dollars[i] = arbitrary(); }
 }
 
 /* Cp Gross Notional Threshold Change Request Message to the wire: 40 bytes from at, returning where the next byte goes */
 static size_t encode_cp_gross_notional_threshold_change_request_message(const CpGrossNotionalThresholdChangeRequestMessage *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id_cp_gross_notional_threshold_change_request_cl_ord_id[i]; }
-  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier_cp_gross_notional_threshold_change_request_underlier_optional[i]; }
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid_cp_gross_notional_threshold_change_request_efid_optional[i]; }
+  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id[i]; }
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier_optional[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid_optional[i]; }
   for (size_t i = 0; i < 2; i++) { wire[at++] = record->risk_group_id[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->price_in_dollars[i]; }
 
@@ -1508,9 +1508,9 @@ static size_t encode_cp_gross_notional_threshold_change_request_message(const Cp
 
 /* Cp Gross Notional Threshold Change Request Message off the wire: 40 bytes from at, returning where the next byte lies */
 static size_t decode_cp_gross_notional_threshold_change_request_message(CpGrossNotionalThresholdChangeRequestMessage *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_cp_gross_notional_threshold_change_request_cl_ord_id[i] = wire[at++]; }
-  for (size_t i = 0; i < 6; i++) { record->underlier_cp_gross_notional_threshold_change_request_underlier_optional[i] = wire[at++]; }
-  for (size_t i = 0; i < 4; i++) { record->efid_cp_gross_notional_threshold_change_request_efid_optional[i] = wire[at++]; }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = wire[at++]; }
+  for (size_t i = 0; i < 6; i++) { record->underlier_optional[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->efid_optional[i] = wire[at++]; }
   for (size_t i = 0; i < 2; i++) { record->risk_group_id[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->price_in_dollars[i] = wire[at++]; }
 
@@ -1519,9 +1519,9 @@ static size_t decode_cp_gross_notional_threshold_change_request_message(CpGrossN
 
 /* what was read of Cp Gross Notional Threshold Change Request Message is what was written, byte for byte */
 static void equal_cp_gross_notional_threshold_change_request_message(const CpGrossNotionalThresholdChangeRequestMessage *read, const CpGrossNotionalThresholdChangeRequestMessage *written) {
-  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id_cp_gross_notional_threshold_change_request_cl_ord_id[i] == written->cl_ord_id_cp_gross_notional_threshold_change_request_cl_ord_id[i]); }
-  for (size_t i = 0; i < 6; i++) { assert(read->underlier_cp_gross_notional_threshold_change_request_underlier_optional[i] == written->underlier_cp_gross_notional_threshold_change_request_underlier_optional[i]); }
-  for (size_t i = 0; i < 4; i++) { assert(read->efid_cp_gross_notional_threshold_change_request_efid_optional[i] == written->efid_cp_gross_notional_threshold_change_request_efid_optional[i]); }
+  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id[i] == written->cl_ord_id[i]); }
+  for (size_t i = 0; i < 6; i++) { assert(read->underlier_optional[i] == written->underlier_optional[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->efid_optional[i] == written->efid_optional[i]); }
   for (size_t i = 0; i < 2; i++) { assert(read->risk_group_id[i] == written->risk_group_id[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->price_in_dollars[i] == written->price_in_dollars[i]); }
 }
@@ -1548,27 +1548,27 @@ static void check_cp_gross_notional_threshold_change_request_message(void) {
 
 /* CPMarketOrderGrossNotionalThresholdChangeRequestMessage */
 typedef struct {
-  uint8_t cl_ord_id_cp_market_order_gross_notional_threshold_change_request_cl_ord_id[20];      /* bytes 0 to 19 */
-  uint8_t underlier_cp_market_order_gross_notional_threshold_change_request_underli_lkjc0k[6];  /* bytes 20 to 25 */
-  uint8_t efid_cp_market_order_gross_notional_threshold_change_request_efid_optional[4];        /* bytes 26 to 29 */
-  uint8_t risk_group_id[2];                                                                     /* bytes 30 to 31 */
-  uint8_t price_in_dollars[8];                                                                  /* bytes 32 to 39 */
+  uint8_t cl_ord_id[20];          /* bytes 0 to 19 */
+  uint8_t underlier_optional[6];  /* bytes 20 to 25 */
+  uint8_t efid_optional[4];       /* bytes 26 to 29 */
+  uint8_t risk_group_id[2];       /* bytes 30 to 31 */
+  uint8_t price_in_dollars[8];    /* bytes 32 to 39 */
 } CpMarketOrderGrossNotionalThresholdChangeRequestMessage;
 
 /* any Cp Market Order Gross Notional Threshold Change Request Message at all: every byte one the checker chooses */
 static void any_cp_market_order_gross_notional_threshold_change_request_message(CpMarketOrderGrossNotionalThresholdChangeRequestMessage *record) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_cp_market_order_gross_notional_threshold_change_request_cl_ord_id[i] = arbitrary(); }
-  for (size_t i = 0; i < 6; i++) { record->underlier_cp_market_order_gross_notional_threshold_change_request_underli_lkjc0k[i] = arbitrary(); }
-  for (size_t i = 0; i < 4; i++) { record->efid_cp_market_order_gross_notional_threshold_change_request_efid_optional[i] = arbitrary(); }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = arbitrary(); }
+  for (size_t i = 0; i < 6; i++) { record->underlier_optional[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->efid_optional[i] = arbitrary(); }
   for (size_t i = 0; i < 2; i++) { record->risk_group_id[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->price_in_dollars[i] = arbitrary(); }
 }
 
 /* Cp Market Order Gross Notional Threshold Change Request Message to the wire: 40 bytes from at, returning where the next byte goes */
 static size_t encode_cp_market_order_gross_notional_threshold_change_request_message(const CpMarketOrderGrossNotionalThresholdChangeRequestMessage *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id_cp_market_order_gross_notional_threshold_change_request_cl_ord_id[i]; }
-  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier_cp_market_order_gross_notional_threshold_change_request_underli_lkjc0k[i]; }
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid_cp_market_order_gross_notional_threshold_change_request_efid_optional[i]; }
+  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id[i]; }
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier_optional[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid_optional[i]; }
   for (size_t i = 0; i < 2; i++) { wire[at++] = record->risk_group_id[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->price_in_dollars[i]; }
 
@@ -1577,9 +1577,9 @@ static size_t encode_cp_market_order_gross_notional_threshold_change_request_mes
 
 /* Cp Market Order Gross Notional Threshold Change Request Message off the wire: 40 bytes from at, returning where the next byte lies */
 static size_t decode_cp_market_order_gross_notional_threshold_change_request_message(CpMarketOrderGrossNotionalThresholdChangeRequestMessage *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_cp_market_order_gross_notional_threshold_change_request_cl_ord_id[i] = wire[at++]; }
-  for (size_t i = 0; i < 6; i++) { record->underlier_cp_market_order_gross_notional_threshold_change_request_underli_lkjc0k[i] = wire[at++]; }
-  for (size_t i = 0; i < 4; i++) { record->efid_cp_market_order_gross_notional_threshold_change_request_efid_optional[i] = wire[at++]; }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = wire[at++]; }
+  for (size_t i = 0; i < 6; i++) { record->underlier_optional[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->efid_optional[i] = wire[at++]; }
   for (size_t i = 0; i < 2; i++) { record->risk_group_id[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->price_in_dollars[i] = wire[at++]; }
 
@@ -1588,9 +1588,9 @@ static size_t decode_cp_market_order_gross_notional_threshold_change_request_mes
 
 /* what was read of Cp Market Order Gross Notional Threshold Change Request Message is what was written, byte for byte */
 static void equal_cp_market_order_gross_notional_threshold_change_request_message(const CpMarketOrderGrossNotionalThresholdChangeRequestMessage *read, const CpMarketOrderGrossNotionalThresholdChangeRequestMessage *written) {
-  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id_cp_market_order_gross_notional_threshold_change_request_cl_ord_id[i] == written->cl_ord_id_cp_market_order_gross_notional_threshold_change_request_cl_ord_id[i]); }
-  for (size_t i = 0; i < 6; i++) { assert(read->underlier_cp_market_order_gross_notional_threshold_change_request_underli_lkjc0k[i] == written->underlier_cp_market_order_gross_notional_threshold_change_request_underli_lkjc0k[i]); }
-  for (size_t i = 0; i < 4; i++) { assert(read->efid_cp_market_order_gross_notional_threshold_change_request_efid_optional[i] == written->efid_cp_market_order_gross_notional_threshold_change_request_efid_optional[i]); }
+  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id[i] == written->cl_ord_id[i]); }
+  for (size_t i = 0; i < 6; i++) { assert(read->underlier_optional[i] == written->underlier_optional[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->efid_optional[i] == written->efid_optional[i]); }
   for (size_t i = 0; i < 2; i++) { assert(read->risk_group_id[i] == written->risk_group_id[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->price_in_dollars[i] == written->price_in_dollars[i]); }
 }
@@ -1617,27 +1617,27 @@ static void check_cp_market_order_gross_notional_threshold_change_request_messag
 
 /* CPNetNotionalThresholdChangeRequestMessage */
 typedef struct {
-  uint8_t cl_ord_id_cp_net_notional_threshold_change_request_cl_ord_id[20];          /* bytes 0 to 19 */
-  uint8_t underlier_cp_net_notional_threshold_change_request_underlier_optional[6];  /* bytes 20 to 25 */
-  uint8_t efid_cp_net_notional_threshold_change_request_efid_optional[4];            /* bytes 26 to 29 */
-  uint8_t risk_group_id[2];                                                          /* bytes 30 to 31 */
-  uint8_t price_in_dollars[8];                                                       /* bytes 32 to 39 */
+  uint8_t cl_ord_id[20];          /* bytes 0 to 19 */
+  uint8_t underlier_optional[6];  /* bytes 20 to 25 */
+  uint8_t efid_optional[4];       /* bytes 26 to 29 */
+  uint8_t risk_group_id[2];       /* bytes 30 to 31 */
+  uint8_t price_in_dollars[8];    /* bytes 32 to 39 */
 } CpNetNotionalThresholdChangeRequestMessage;
 
 /* any Cp Net Notional Threshold Change Request Message at all: every byte one the checker chooses */
 static void any_cp_net_notional_threshold_change_request_message(CpNetNotionalThresholdChangeRequestMessage *record) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_cp_net_notional_threshold_change_request_cl_ord_id[i] = arbitrary(); }
-  for (size_t i = 0; i < 6; i++) { record->underlier_cp_net_notional_threshold_change_request_underlier_optional[i] = arbitrary(); }
-  for (size_t i = 0; i < 4; i++) { record->efid_cp_net_notional_threshold_change_request_efid_optional[i] = arbitrary(); }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = arbitrary(); }
+  for (size_t i = 0; i < 6; i++) { record->underlier_optional[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->efid_optional[i] = arbitrary(); }
   for (size_t i = 0; i < 2; i++) { record->risk_group_id[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->price_in_dollars[i] = arbitrary(); }
 }
 
 /* Cp Net Notional Threshold Change Request Message to the wire: 40 bytes from at, returning where the next byte goes */
 static size_t encode_cp_net_notional_threshold_change_request_message(const CpNetNotionalThresholdChangeRequestMessage *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id_cp_net_notional_threshold_change_request_cl_ord_id[i]; }
-  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier_cp_net_notional_threshold_change_request_underlier_optional[i]; }
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid_cp_net_notional_threshold_change_request_efid_optional[i]; }
+  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id[i]; }
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier_optional[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid_optional[i]; }
   for (size_t i = 0; i < 2; i++) { wire[at++] = record->risk_group_id[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->price_in_dollars[i]; }
 
@@ -1646,9 +1646,9 @@ static size_t encode_cp_net_notional_threshold_change_request_message(const CpNe
 
 /* Cp Net Notional Threshold Change Request Message off the wire: 40 bytes from at, returning where the next byte lies */
 static size_t decode_cp_net_notional_threshold_change_request_message(CpNetNotionalThresholdChangeRequestMessage *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_cp_net_notional_threshold_change_request_cl_ord_id[i] = wire[at++]; }
-  for (size_t i = 0; i < 6; i++) { record->underlier_cp_net_notional_threshold_change_request_underlier_optional[i] = wire[at++]; }
-  for (size_t i = 0; i < 4; i++) { record->efid_cp_net_notional_threshold_change_request_efid_optional[i] = wire[at++]; }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = wire[at++]; }
+  for (size_t i = 0; i < 6; i++) { record->underlier_optional[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->efid_optional[i] = wire[at++]; }
   for (size_t i = 0; i < 2; i++) { record->risk_group_id[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->price_in_dollars[i] = wire[at++]; }
 
@@ -1657,9 +1657,9 @@ static size_t decode_cp_net_notional_threshold_change_request_message(CpNetNotio
 
 /* what was read of Cp Net Notional Threshold Change Request Message is what was written, byte for byte */
 static void equal_cp_net_notional_threshold_change_request_message(const CpNetNotionalThresholdChangeRequestMessage *read, const CpNetNotionalThresholdChangeRequestMessage *written) {
-  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id_cp_net_notional_threshold_change_request_cl_ord_id[i] == written->cl_ord_id_cp_net_notional_threshold_change_request_cl_ord_id[i]); }
-  for (size_t i = 0; i < 6; i++) { assert(read->underlier_cp_net_notional_threshold_change_request_underlier_optional[i] == written->underlier_cp_net_notional_threshold_change_request_underlier_optional[i]); }
-  for (size_t i = 0; i < 4; i++) { assert(read->efid_cp_net_notional_threshold_change_request_efid_optional[i] == written->efid_cp_net_notional_threshold_change_request_efid_optional[i]); }
+  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id[i] == written->cl_ord_id[i]); }
+  for (size_t i = 0; i < 6; i++) { assert(read->underlier_optional[i] == written->underlier_optional[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->efid_optional[i] == written->efid_optional[i]); }
   for (size_t i = 0; i < 2; i++) { assert(read->risk_group_id[i] == written->risk_group_id[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->price_in_dollars[i] == written->price_in_dollars[i]); }
 }
@@ -1686,27 +1686,27 @@ static void check_cp_net_notional_threshold_change_request_message(void) {
 
 /* CPMarketOrderNetNotionalThresholdChangeRequestMessage */
 typedef struct {
-  uint8_t cl_ord_id_cp_market_order_net_notional_threshold_change_request_cl_ord_id[20];        /* bytes 0 to 19 */
-  uint8_t underlier_cp_market_order_net_notional_threshold_change_request_underlier_rrqjwt[6];  /* bytes 20 to 25 */
-  uint8_t efid_cp_market_order_net_notional_threshold_change_request_efid_optional[4];          /* bytes 26 to 29 */
-  uint8_t risk_group_id[2];                                                                     /* bytes 30 to 31 */
-  uint8_t price_in_dollars[8];                                                                  /* bytes 32 to 39 */
+  uint8_t cl_ord_id[20];          /* bytes 0 to 19 */
+  uint8_t underlier_optional[6];  /* bytes 20 to 25 */
+  uint8_t efid_optional[4];       /* bytes 26 to 29 */
+  uint8_t risk_group_id[2];       /* bytes 30 to 31 */
+  uint8_t price_in_dollars[8];    /* bytes 32 to 39 */
 } CpMarketOrderNetNotionalThresholdChangeRequestMessage;
 
 /* any Cp Market Order Net Notional Threshold Change Request Message at all: every byte one the checker chooses */
 static void any_cp_market_order_net_notional_threshold_change_request_message(CpMarketOrderNetNotionalThresholdChangeRequestMessage *record) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_cp_market_order_net_notional_threshold_change_request_cl_ord_id[i] = arbitrary(); }
-  for (size_t i = 0; i < 6; i++) { record->underlier_cp_market_order_net_notional_threshold_change_request_underlier_rrqjwt[i] = arbitrary(); }
-  for (size_t i = 0; i < 4; i++) { record->efid_cp_market_order_net_notional_threshold_change_request_efid_optional[i] = arbitrary(); }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = arbitrary(); }
+  for (size_t i = 0; i < 6; i++) { record->underlier_optional[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->efid_optional[i] = arbitrary(); }
   for (size_t i = 0; i < 2; i++) { record->risk_group_id[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->price_in_dollars[i] = arbitrary(); }
 }
 
 /* Cp Market Order Net Notional Threshold Change Request Message to the wire: 40 bytes from at, returning where the next byte goes */
 static size_t encode_cp_market_order_net_notional_threshold_change_request_message(const CpMarketOrderNetNotionalThresholdChangeRequestMessage *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id_cp_market_order_net_notional_threshold_change_request_cl_ord_id[i]; }
-  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier_cp_market_order_net_notional_threshold_change_request_underlier_rrqjwt[i]; }
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid_cp_market_order_net_notional_threshold_change_request_efid_optional[i]; }
+  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id[i]; }
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier_optional[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid_optional[i]; }
   for (size_t i = 0; i < 2; i++) { wire[at++] = record->risk_group_id[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->price_in_dollars[i]; }
 
@@ -1715,9 +1715,9 @@ static size_t encode_cp_market_order_net_notional_threshold_change_request_messa
 
 /* Cp Market Order Net Notional Threshold Change Request Message off the wire: 40 bytes from at, returning where the next byte lies */
 static size_t decode_cp_market_order_net_notional_threshold_change_request_message(CpMarketOrderNetNotionalThresholdChangeRequestMessage *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_cp_market_order_net_notional_threshold_change_request_cl_ord_id[i] = wire[at++]; }
-  for (size_t i = 0; i < 6; i++) { record->underlier_cp_market_order_net_notional_threshold_change_request_underlier_rrqjwt[i] = wire[at++]; }
-  for (size_t i = 0; i < 4; i++) { record->efid_cp_market_order_net_notional_threshold_change_request_efid_optional[i] = wire[at++]; }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = wire[at++]; }
+  for (size_t i = 0; i < 6; i++) { record->underlier_optional[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->efid_optional[i] = wire[at++]; }
   for (size_t i = 0; i < 2; i++) { record->risk_group_id[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->price_in_dollars[i] = wire[at++]; }
 
@@ -1726,9 +1726,9 @@ static size_t decode_cp_market_order_net_notional_threshold_change_request_messa
 
 /* what was read of Cp Market Order Net Notional Threshold Change Request Message is what was written, byte for byte */
 static void equal_cp_market_order_net_notional_threshold_change_request_message(const CpMarketOrderNetNotionalThresholdChangeRequestMessage *read, const CpMarketOrderNetNotionalThresholdChangeRequestMessage *written) {
-  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id_cp_market_order_net_notional_threshold_change_request_cl_ord_id[i] == written->cl_ord_id_cp_market_order_net_notional_threshold_change_request_cl_ord_id[i]); }
-  for (size_t i = 0; i < 6; i++) { assert(read->underlier_cp_market_order_net_notional_threshold_change_request_underlier_rrqjwt[i] == written->underlier_cp_market_order_net_notional_threshold_change_request_underlier_rrqjwt[i]); }
-  for (size_t i = 0; i < 4; i++) { assert(read->efid_cp_market_order_net_notional_threshold_change_request_efid_optional[i] == written->efid_cp_market_order_net_notional_threshold_change_request_efid_optional[i]); }
+  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id[i] == written->cl_ord_id[i]); }
+  for (size_t i = 0; i < 6; i++) { assert(read->underlier_optional[i] == written->underlier_optional[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->efid_optional[i] == written->efid_optional[i]); }
   for (size_t i = 0; i < 2; i++) { assert(read->risk_group_id[i] == written->risk_group_id[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->price_in_dollars[i] == written->price_in_dollars[i]); }
 }
@@ -1755,20 +1755,20 @@ static void check_cp_market_order_net_notional_threshold_change_request_message(
 
 /* CPDuplicateOrderThresholdChangeRequestMessage */
 typedef struct {
-  uint8_t cl_ord_id_cp_duplicate_order_threshold_change_request_cl_ord_id[20];          /* bytes 0 to 19 */
-  uint8_t underlier_cp_duplicate_order_threshold_change_request_underlier_optional[6];  /* bytes 20 to 25 */
-  uint8_t efid_cp_duplicate_order_threshold_change_request_efid_optional[4];            /* bytes 26 to 29 */
-  uint8_t risk_group_id[2];                                                             /* bytes 30 to 31 */
-  uint8_t max_dup_orders[4];                                                            /* bytes 32 to 35 */
-  uint8_t use_order_price_in_dup_check_optional;                                        /* byte 36 */
-  uint8_t period_in_milli_seconds[4];                                                   /* bytes 37 to 40 */
+  uint8_t cl_ord_id[20];                          /* bytes 0 to 19 */
+  uint8_t underlier_optional[6];                  /* bytes 20 to 25 */
+  uint8_t efid_optional[4];                       /* bytes 26 to 29 */
+  uint8_t risk_group_id[2];                       /* bytes 30 to 31 */
+  uint8_t max_dup_orders[4];                      /* bytes 32 to 35 */
+  uint8_t use_order_price_in_dup_check_optional;  /* byte 36 */
+  uint8_t period_in_milli_seconds[4];             /* bytes 37 to 40 */
 } CpDuplicateOrderThresholdChangeRequestMessage;
 
 /* any Cp Duplicate Order Threshold Change Request Message at all: every byte one the checker chooses */
 static void any_cp_duplicate_order_threshold_change_request_message(CpDuplicateOrderThresholdChangeRequestMessage *record) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_cp_duplicate_order_threshold_change_request_cl_ord_id[i] = arbitrary(); }
-  for (size_t i = 0; i < 6; i++) { record->underlier_cp_duplicate_order_threshold_change_request_underlier_optional[i] = arbitrary(); }
-  for (size_t i = 0; i < 4; i++) { record->efid_cp_duplicate_order_threshold_change_request_efid_optional[i] = arbitrary(); }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = arbitrary(); }
+  for (size_t i = 0; i < 6; i++) { record->underlier_optional[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->efid_optional[i] = arbitrary(); }
   for (size_t i = 0; i < 2; i++) { record->risk_group_id[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->max_dup_orders[i] = arbitrary(); }
   record->use_order_price_in_dup_check_optional = arbitrary();
@@ -1777,9 +1777,9 @@ static void any_cp_duplicate_order_threshold_change_request_message(CpDuplicateO
 
 /* Cp Duplicate Order Threshold Change Request Message to the wire: 41 bytes from at, returning where the next byte goes */
 static size_t encode_cp_duplicate_order_threshold_change_request_message(const CpDuplicateOrderThresholdChangeRequestMessage *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id_cp_duplicate_order_threshold_change_request_cl_ord_id[i]; }
-  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier_cp_duplicate_order_threshold_change_request_underlier_optional[i]; }
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid_cp_duplicate_order_threshold_change_request_efid_optional[i]; }
+  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id[i]; }
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier_optional[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid_optional[i]; }
   for (size_t i = 0; i < 2; i++) { wire[at++] = record->risk_group_id[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->max_dup_orders[i]; }
   wire[at++] = record->use_order_price_in_dup_check_optional;
@@ -1790,9 +1790,9 @@ static size_t encode_cp_duplicate_order_threshold_change_request_message(const C
 
 /* Cp Duplicate Order Threshold Change Request Message off the wire: 41 bytes from at, returning where the next byte lies */
 static size_t decode_cp_duplicate_order_threshold_change_request_message(CpDuplicateOrderThresholdChangeRequestMessage *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_cp_duplicate_order_threshold_change_request_cl_ord_id[i] = wire[at++]; }
-  for (size_t i = 0; i < 6; i++) { record->underlier_cp_duplicate_order_threshold_change_request_underlier_optional[i] = wire[at++]; }
-  for (size_t i = 0; i < 4; i++) { record->efid_cp_duplicate_order_threshold_change_request_efid_optional[i] = wire[at++]; }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = wire[at++]; }
+  for (size_t i = 0; i < 6; i++) { record->underlier_optional[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->efid_optional[i] = wire[at++]; }
   for (size_t i = 0; i < 2; i++) { record->risk_group_id[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->max_dup_orders[i] = wire[at++]; }
   record->use_order_price_in_dup_check_optional = wire[at++];
@@ -1803,9 +1803,9 @@ static size_t decode_cp_duplicate_order_threshold_change_request_message(CpDupli
 
 /* what was read of Cp Duplicate Order Threshold Change Request Message is what was written, byte for byte */
 static void equal_cp_duplicate_order_threshold_change_request_message(const CpDuplicateOrderThresholdChangeRequestMessage *read, const CpDuplicateOrderThresholdChangeRequestMessage *written) {
-  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id_cp_duplicate_order_threshold_change_request_cl_ord_id[i] == written->cl_ord_id_cp_duplicate_order_threshold_change_request_cl_ord_id[i]); }
-  for (size_t i = 0; i < 6; i++) { assert(read->underlier_cp_duplicate_order_threshold_change_request_underlier_optional[i] == written->underlier_cp_duplicate_order_threshold_change_request_underlier_optional[i]); }
-  for (size_t i = 0; i < 4; i++) { assert(read->efid_cp_duplicate_order_threshold_change_request_efid_optional[i] == written->efid_cp_duplicate_order_threshold_change_request_efid_optional[i]); }
+  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id[i] == written->cl_ord_id[i]); }
+  for (size_t i = 0; i < 6; i++) { assert(read->underlier_optional[i] == written->underlier_optional[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->efid_optional[i] == written->efid_optional[i]); }
   for (size_t i = 0; i < 2; i++) { assert(read->risk_group_id[i] == written->risk_group_id[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->max_dup_orders[i] == written->max_dup_orders[i]); }
   assert(read->use_order_price_in_dup_check_optional == written->use_order_price_in_dup_check_optional);
@@ -1834,19 +1834,19 @@ static void check_cp_duplicate_order_threshold_change_request_message(void) {
 
 /* CPOrderRateThresholdChangeRequestMessage */
 typedef struct {
-  uint8_t cl_ord_id_cp_order_rate_threshold_change_request_cl_ord_id[20];          /* bytes 0 to 19 */
-  uint8_t underlier_cp_order_rate_threshold_change_request_underlier_optional[6];  /* bytes 20 to 25 */
-  uint8_t efid_cp_order_rate_threshold_change_request_efid_optional[4];            /* bytes 26 to 29 */
-  uint8_t risk_group_id[2];                                                        /* bytes 30 to 31 */
-  uint8_t max_order_msgs[4];                                                       /* bytes 32 to 35 */
-  uint8_t period_in_milli_seconds[4];                                              /* bytes 36 to 39 */
+  uint8_t cl_ord_id[20];               /* bytes 0 to 19 */
+  uint8_t underlier_optional[6];       /* bytes 20 to 25 */
+  uint8_t efid_optional[4];            /* bytes 26 to 29 */
+  uint8_t risk_group_id[2];            /* bytes 30 to 31 */
+  uint8_t max_order_msgs[4];           /* bytes 32 to 35 */
+  uint8_t period_in_milli_seconds[4];  /* bytes 36 to 39 */
 } CpOrderRateThresholdChangeRequestMessage;
 
 /* any Cp Order Rate Threshold Change Request Message at all: every byte one the checker chooses */
 static void any_cp_order_rate_threshold_change_request_message(CpOrderRateThresholdChangeRequestMessage *record) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_cp_order_rate_threshold_change_request_cl_ord_id[i] = arbitrary(); }
-  for (size_t i = 0; i < 6; i++) { record->underlier_cp_order_rate_threshold_change_request_underlier_optional[i] = arbitrary(); }
-  for (size_t i = 0; i < 4; i++) { record->efid_cp_order_rate_threshold_change_request_efid_optional[i] = arbitrary(); }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = arbitrary(); }
+  for (size_t i = 0; i < 6; i++) { record->underlier_optional[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->efid_optional[i] = arbitrary(); }
   for (size_t i = 0; i < 2; i++) { record->risk_group_id[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->max_order_msgs[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->period_in_milli_seconds[i] = arbitrary(); }
@@ -1854,9 +1854,9 @@ static void any_cp_order_rate_threshold_change_request_message(CpOrderRateThresh
 
 /* Cp Order Rate Threshold Change Request Message to the wire: 40 bytes from at, returning where the next byte goes */
 static size_t encode_cp_order_rate_threshold_change_request_message(const CpOrderRateThresholdChangeRequestMessage *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id_cp_order_rate_threshold_change_request_cl_ord_id[i]; }
-  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier_cp_order_rate_threshold_change_request_underlier_optional[i]; }
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid_cp_order_rate_threshold_change_request_efid_optional[i]; }
+  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id[i]; }
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier_optional[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid_optional[i]; }
   for (size_t i = 0; i < 2; i++) { wire[at++] = record->risk_group_id[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->max_order_msgs[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->period_in_milli_seconds[i]; }
@@ -1866,9 +1866,9 @@ static size_t encode_cp_order_rate_threshold_change_request_message(const CpOrde
 
 /* Cp Order Rate Threshold Change Request Message off the wire: 40 bytes from at, returning where the next byte lies */
 static size_t decode_cp_order_rate_threshold_change_request_message(CpOrderRateThresholdChangeRequestMessage *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_cp_order_rate_threshold_change_request_cl_ord_id[i] = wire[at++]; }
-  for (size_t i = 0; i < 6; i++) { record->underlier_cp_order_rate_threshold_change_request_underlier_optional[i] = wire[at++]; }
-  for (size_t i = 0; i < 4; i++) { record->efid_cp_order_rate_threshold_change_request_efid_optional[i] = wire[at++]; }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = wire[at++]; }
+  for (size_t i = 0; i < 6; i++) { record->underlier_optional[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->efid_optional[i] = wire[at++]; }
   for (size_t i = 0; i < 2; i++) { record->risk_group_id[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->max_order_msgs[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->period_in_milli_seconds[i] = wire[at++]; }
@@ -1878,9 +1878,9 @@ static size_t decode_cp_order_rate_threshold_change_request_message(CpOrderRateT
 
 /* what was read of Cp Order Rate Threshold Change Request Message is what was written, byte for byte */
 static void equal_cp_order_rate_threshold_change_request_message(const CpOrderRateThresholdChangeRequestMessage *read, const CpOrderRateThresholdChangeRequestMessage *written) {
-  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id_cp_order_rate_threshold_change_request_cl_ord_id[i] == written->cl_ord_id_cp_order_rate_threshold_change_request_cl_ord_id[i]); }
-  for (size_t i = 0; i < 6; i++) { assert(read->underlier_cp_order_rate_threshold_change_request_underlier_optional[i] == written->underlier_cp_order_rate_threshold_change_request_underlier_optional[i]); }
-  for (size_t i = 0; i < 4; i++) { assert(read->efid_cp_order_rate_threshold_change_request_efid_optional[i] == written->efid_cp_order_rate_threshold_change_request_efid_optional[i]); }
+  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id[i] == written->cl_ord_id[i]); }
+  for (size_t i = 0; i < 6; i++) { assert(read->underlier_optional[i] == written->underlier_optional[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->efid_optional[i] == written->efid_optional[i]); }
   for (size_t i = 0; i < 2; i++) { assert(read->risk_group_id[i] == written->risk_group_id[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->max_order_msgs[i] == written->max_order_msgs[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->period_in_milli_seconds[i] == written->period_in_milli_seconds[i]); }
@@ -1908,31 +1908,31 @@ static void check_cp_order_rate_threshold_change_request_message(void) {
 
 /* CPClearAllBreachesRequestMessage */
 typedef struct {
-  uint8_t cl_ord_id_cp_clear_all_breaches_request_cl_ord_id[20];  /* bytes 0 to 19 */
+  uint8_t cl_ord_id[20];  /* bytes 0 to 19 */
 } CpClearAllBreachesRequestMessage;
 
 /* any Cp Clear All Breaches Request Message at all: every byte one the checker chooses */
 static void any_cp_clear_all_breaches_request_message(CpClearAllBreachesRequestMessage *record) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_cp_clear_all_breaches_request_cl_ord_id[i] = arbitrary(); }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = arbitrary(); }
 }
 
 /* Cp Clear All Breaches Request Message to the wire: 20 bytes from at, returning where the next byte goes */
 static size_t encode_cp_clear_all_breaches_request_message(const CpClearAllBreachesRequestMessage *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id_cp_clear_all_breaches_request_cl_ord_id[i]; }
+  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id[i]; }
 
   return at;
 }
 
 /* Cp Clear All Breaches Request Message off the wire: 20 bytes from at, returning where the next byte lies */
 static size_t decode_cp_clear_all_breaches_request_message(CpClearAllBreachesRequestMessage *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_cp_clear_all_breaches_request_cl_ord_id[i] = wire[at++]; }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = wire[at++]; }
 
   return at;
 }
 
 /* what was read of Cp Clear All Breaches Request Message is what was written, byte for byte */
 static void equal_cp_clear_all_breaches_request_message(const CpClearAllBreachesRequestMessage *read, const CpClearAllBreachesRequestMessage *written) {
-  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id_cp_clear_all_breaches_request_cl_ord_id[i] == written->cl_ord_id_cp_clear_all_breaches_request_cl_ord_id[i]); }
+  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id[i] == written->cl_ord_id[i]); }
 }
 
 /* Cp Clear All Breaches Request Message: written and read back, then read and written back */
@@ -1957,41 +1957,41 @@ static void check_cp_clear_all_breaches_request_message(void) {
 
 /* CPClearAllBreachesByEFIDOrUnderlierRequestMessage */
 typedef struct {
-  uint8_t cl_ord_id_cp_clear_all_breaches_by_efid_or_underlier_request_cl_ord_id[20];          /* bytes 0 to 19 */
-  uint8_t underlier_cp_clear_all_breaches_by_efid_or_underlier_request_underlier_optional[6];  /* bytes 20 to 25 */
-  uint8_t efid_cp_clear_all_breaches_by_efid_or_underlier_request_efid_optional[4];            /* bytes 26 to 29 */
+  uint8_t cl_ord_id[20];          /* bytes 0 to 19 */
+  uint8_t underlier_optional[6];  /* bytes 20 to 25 */
+  uint8_t efid_optional[4];       /* bytes 26 to 29 */
 } CpClearAllBreachesByEfidOrUnderlierRequestMessage;
 
 /* any Cp Clear All Breaches By Efid Or Underlier Request Message at all: every byte one the checker chooses */
 static void any_cp_clear_all_breaches_by_efid_or_underlier_request_message(CpClearAllBreachesByEfidOrUnderlierRequestMessage *record) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_cp_clear_all_breaches_by_efid_or_underlier_request_cl_ord_id[i] = arbitrary(); }
-  for (size_t i = 0; i < 6; i++) { record->underlier_cp_clear_all_breaches_by_efid_or_underlier_request_underlier_optional[i] = arbitrary(); }
-  for (size_t i = 0; i < 4; i++) { record->efid_cp_clear_all_breaches_by_efid_or_underlier_request_efid_optional[i] = arbitrary(); }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = arbitrary(); }
+  for (size_t i = 0; i < 6; i++) { record->underlier_optional[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->efid_optional[i] = arbitrary(); }
 }
 
 /* Cp Clear All Breaches By Efid Or Underlier Request Message to the wire: 30 bytes from at, returning where the next byte goes */
 static size_t encode_cp_clear_all_breaches_by_efid_or_underlier_request_message(const CpClearAllBreachesByEfidOrUnderlierRequestMessage *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id_cp_clear_all_breaches_by_efid_or_underlier_request_cl_ord_id[i]; }
-  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier_cp_clear_all_breaches_by_efid_or_underlier_request_underlier_optional[i]; }
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid_cp_clear_all_breaches_by_efid_or_underlier_request_efid_optional[i]; }
+  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id[i]; }
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier_optional[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid_optional[i]; }
 
   return at;
 }
 
 /* Cp Clear All Breaches By Efid Or Underlier Request Message off the wire: 30 bytes from at, returning where the next byte lies */
 static size_t decode_cp_clear_all_breaches_by_efid_or_underlier_request_message(CpClearAllBreachesByEfidOrUnderlierRequestMessage *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_cp_clear_all_breaches_by_efid_or_underlier_request_cl_ord_id[i] = wire[at++]; }
-  for (size_t i = 0; i < 6; i++) { record->underlier_cp_clear_all_breaches_by_efid_or_underlier_request_underlier_optional[i] = wire[at++]; }
-  for (size_t i = 0; i < 4; i++) { record->efid_cp_clear_all_breaches_by_efid_or_underlier_request_efid_optional[i] = wire[at++]; }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = wire[at++]; }
+  for (size_t i = 0; i < 6; i++) { record->underlier_optional[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->efid_optional[i] = wire[at++]; }
 
   return at;
 }
 
 /* what was read of Cp Clear All Breaches By Efid Or Underlier Request Message is what was written, byte for byte */
 static void equal_cp_clear_all_breaches_by_efid_or_underlier_request_message(const CpClearAllBreachesByEfidOrUnderlierRequestMessage *read, const CpClearAllBreachesByEfidOrUnderlierRequestMessage *written) {
-  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id_cp_clear_all_breaches_by_efid_or_underlier_request_cl_ord_id[i] == written->cl_ord_id_cp_clear_all_breaches_by_efid_or_underlier_request_cl_ord_id[i]); }
-  for (size_t i = 0; i < 6; i++) { assert(read->underlier_cp_clear_all_breaches_by_efid_or_underlier_request_underlier_optional[i] == written->underlier_cp_clear_all_breaches_by_efid_or_underlier_request_underlier_optional[i]); }
-  for (size_t i = 0; i < 4; i++) { assert(read->efid_cp_clear_all_breaches_by_efid_or_underlier_request_efid_optional[i] == written->efid_cp_clear_all_breaches_by_efid_or_underlier_request_efid_optional[i]); }
+  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id[i] == written->cl_ord_id[i]); }
+  for (size_t i = 0; i < 6; i++) { assert(read->underlier_optional[i] == written->underlier_optional[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->efid_optional[i] == written->efid_optional[i]); }
 }
 
 /* Cp Clear All Breaches By Efid Or Underlier Request Message: written and read back, then read and written back */
@@ -2016,41 +2016,41 @@ static void check_cp_clear_all_breaches_by_efid_or_underlier_request_message(voi
 
 /* ActiveRiskAcknowledgeAllRequestMessage */
 typedef struct {
-  uint8_t cl_ord_id_active_risk_acknowledge_all_request_cl_ord_id[20];  /* bytes 0 to 19 */
-  uint8_t underlier_active_risk_acknowledge_all_request_underlier[6];   /* bytes 20 to 25 */
-  uint8_t efid_active_risk_acknowledge_all_request_efid[4];             /* bytes 26 to 29 */
+  uint8_t cl_ord_id[20];  /* bytes 0 to 19 */
+  uint8_t underlier[6];   /* bytes 20 to 25 */
+  uint8_t efid[4];        /* bytes 26 to 29 */
 } ActiveRiskAcknowledgeAllRequestMessage;
 
 /* any Active Risk Acknowledge All Request Message at all: every byte one the checker chooses */
 static void any_active_risk_acknowledge_all_request_message(ActiveRiskAcknowledgeAllRequestMessage *record) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_active_risk_acknowledge_all_request_cl_ord_id[i] = arbitrary(); }
-  for (size_t i = 0; i < 6; i++) { record->underlier_active_risk_acknowledge_all_request_underlier[i] = arbitrary(); }
-  for (size_t i = 0; i < 4; i++) { record->efid_active_risk_acknowledge_all_request_efid[i] = arbitrary(); }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = arbitrary(); }
+  for (size_t i = 0; i < 6; i++) { record->underlier[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->efid[i] = arbitrary(); }
 }
 
 /* Active Risk Acknowledge All Request Message to the wire: 30 bytes from at, returning where the next byte goes */
 static size_t encode_active_risk_acknowledge_all_request_message(const ActiveRiskAcknowledgeAllRequestMessage *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id_active_risk_acknowledge_all_request_cl_ord_id[i]; }
-  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier_active_risk_acknowledge_all_request_underlier[i]; }
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid_active_risk_acknowledge_all_request_efid[i]; }
+  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id[i]; }
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid[i]; }
 
   return at;
 }
 
 /* Active Risk Acknowledge All Request Message off the wire: 30 bytes from at, returning where the next byte lies */
 static size_t decode_active_risk_acknowledge_all_request_message(ActiveRiskAcknowledgeAllRequestMessage *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_active_risk_acknowledge_all_request_cl_ord_id[i] = wire[at++]; }
-  for (size_t i = 0; i < 6; i++) { record->underlier_active_risk_acknowledge_all_request_underlier[i] = wire[at++]; }
-  for (size_t i = 0; i < 4; i++) { record->efid_active_risk_acknowledge_all_request_efid[i] = wire[at++]; }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = wire[at++]; }
+  for (size_t i = 0; i < 6; i++) { record->underlier[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->efid[i] = wire[at++]; }
 
   return at;
 }
 
 /* what was read of Active Risk Acknowledge All Request Message is what was written, byte for byte */
 static void equal_active_risk_acknowledge_all_request_message(const ActiveRiskAcknowledgeAllRequestMessage *read, const ActiveRiskAcknowledgeAllRequestMessage *written) {
-  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id_active_risk_acknowledge_all_request_cl_ord_id[i] == written->cl_ord_id_active_risk_acknowledge_all_request_cl_ord_id[i]); }
-  for (size_t i = 0; i < 6; i++) { assert(read->underlier_active_risk_acknowledge_all_request_underlier[i] == written->underlier_active_risk_acknowledge_all_request_underlier[i]); }
-  for (size_t i = 0; i < 4; i++) { assert(read->efid_active_risk_acknowledge_all_request_efid[i] == written->efid_active_risk_acknowledge_all_request_efid[i]); }
+  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id[i] == written->cl_ord_id[i]); }
+  for (size_t i = 0; i < 6; i++) { assert(read->underlier[i] == written->underlier[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->efid[i] == written->efid[i]); }
 }
 
 /* Active Risk Acknowledge All Request Message: written and read back, then read and written back */

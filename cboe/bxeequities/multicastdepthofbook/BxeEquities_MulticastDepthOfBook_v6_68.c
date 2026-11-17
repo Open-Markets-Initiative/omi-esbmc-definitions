@@ -276,16 +276,16 @@ static void check_unit_clear_message(void) {
   for (size_t i = 0; i < 4; i++) { assert(again[i] == wire[i]); }
 }
 
-/* ---- Add Order Long Message: 31 bytes ---------------------------------------- */
+/* ---- Add Order Long Message: 33 bytes ---------------------------------------- */
 
 /* An Add Order message represents a newly accepted visible order on the Cboe book */
 typedef struct {
-  uint8_t time_offset[4];   /* bytes 0 to 3 */
-  uint8_t order_id[8];      /* bytes 4 to 11 */
-  uint8_t side_indicator;   /* byte 12 */
-  uint8_t quantity[4];      /* bytes 13 to 16 */
-  uint8_t symbol_short[6];  /* bytes 17 to 22 */
-  uint8_t price_long[8];    /* bytes 23 to 30 */
+  uint8_t time_offset[4];  /* bytes 0 to 3 */
+  uint8_t order_id[8];     /* bytes 4 to 11 */
+  uint8_t side_indicator;  /* byte 12 */
+  uint8_t quantity[4];     /* bytes 13 to 16 */
+  uint8_t symbol_long[8];  /* bytes 17 to 24 */
+  uint8_t price_long[8];   /* bytes 25 to 32 */
 } AddOrderLongMessage;
 
 /* any Add Order Long Message at all: every byte one the checker chooses */
@@ -294,29 +294,29 @@ static void any_add_order_long_message(AddOrderLongMessage *record) {
   for (size_t i = 0; i < 8; i++) { record->order_id[i] = arbitrary(); }
   record->side_indicator = arbitrary();
   for (size_t i = 0; i < 4; i++) { record->quantity[i] = arbitrary(); }
-  for (size_t i = 0; i < 6; i++) { record->symbol_short[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->symbol_long[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->price_long[i] = arbitrary(); }
 }
 
-/* Add Order Long Message to the wire: 31 bytes from at, returning where the next byte goes */
+/* Add Order Long Message to the wire: 33 bytes from at, returning where the next byte goes */
 static size_t encode_add_order_long_message(const AddOrderLongMessage *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->time_offset[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->order_id[i]; }
   wire[at++] = record->side_indicator;
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->quantity[i]; }
-  for (size_t i = 0; i < 6; i++) { wire[at++] = record->symbol_short[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->symbol_long[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->price_long[i]; }
 
   return at;
 }
 
-/* Add Order Long Message off the wire: 31 bytes from at, returning where the next byte lies */
+/* Add Order Long Message off the wire: 33 bytes from at, returning where the next byte lies */
 static size_t decode_add_order_long_message(AddOrderLongMessage *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 4; i++) { record->time_offset[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->order_id[i] = wire[at++]; }
   record->side_indicator = wire[at++];
   for (size_t i = 0; i < 4; i++) { record->quantity[i] = wire[at++]; }
-  for (size_t i = 0; i < 6; i++) { record->symbol_short[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->symbol_long[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->price_long[i] = wire[at++]; }
 
   return at;
@@ -328,7 +328,7 @@ static void equal_add_order_long_message(const AddOrderLongMessage *read, const 
   for (size_t i = 0; i < 8; i++) { assert(read->order_id[i] == written->order_id[i]); }
   assert(read->side_indicator == written->side_indicator);
   for (size_t i = 0; i < 4; i++) { assert(read->quantity[i] == written->quantity[i]); }
-  for (size_t i = 0; i < 6; i++) { assert(read->symbol_short[i] == written->symbol_short[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->symbol_long[i] == written->symbol_long[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->price_long[i] == written->price_long[i]); }
 }
 
@@ -336,18 +336,18 @@ static void equal_add_order_long_message(const AddOrderLongMessage *read, const 
 static void check_add_order_long_message(void) {
   AddOrderLongMessage sent;
   AddOrderLongMessage got;
-  uint8_t wire[31];
-  uint8_t again[31];
+  uint8_t wire[33];
+  uint8_t again[33];
 
   any_add_order_long_message(&sent);
-  assert(encode_add_order_long_message(&sent, wire, 0) == 31);
-  assert(decode_add_order_long_message(&got, wire, 0) == 31);
+  assert(encode_add_order_long_message(&sent, wire, 0) == 33);
+  assert(decode_add_order_long_message(&got, wire, 0) == 33);
   equal_add_order_long_message(&got, &sent);
 
-  for (size_t i = 0; i < 31; i++) { wire[i] = arbitrary(); }
-  assert(decode_add_order_long_message(&got, wire, 0) == 31);
-  assert(encode_add_order_long_message(&got, again, 0) == 31);
-  for (size_t i = 0; i < 31; i++) { assert(again[i] == wire[i]); }
+  for (size_t i = 0; i < 33; i++) { wire[i] = arbitrary(); }
+  assert(decode_add_order_long_message(&got, wire, 0) == 33);
+  assert(encode_add_order_long_message(&got, again, 0) == 33);
+  for (size_t i = 0; i < 33; i++) { assert(again[i] == wire[i]); }
 }
 
 /* ---- Add Order Short Message: 23 bytes --------------------------------------- */
@@ -1005,7 +1005,7 @@ static void check_trade_flags(void) {
   for (size_t i = 0; i < 5; i++) { assert(again[i] == wire[i]); }
 }
 
-/* ---- Trade Long Message: 44 bytes -------------------------------------------- */
+/* ---- Trade Long Message: 46 bytes -------------------------------------------- */
 
 /* The Trade message provides information about executions of complex order auctions on the Cboe complex book. */
 typedef struct {
@@ -1013,10 +1013,10 @@ typedef struct {
   uint8_t order_id[8];      /* bytes 4 to 11 */
   uint8_t side_indicator;   /* byte 12 */
   uint8_t shares_long[4];   /* bytes 13 to 16 */
-  uint8_t symbol_short[6];  /* bytes 17 to 22 */
-  uint8_t price_long[8];    /* bytes 23 to 30 */
-  uint8_t execution_id[8];  /* bytes 31 to 38 */
-  TradeFlags trade_flags;   /* bytes 39 to 43 */
+  uint8_t symbol_long[8];   /* bytes 17 to 24 */
+  uint8_t price_long[8];    /* bytes 25 to 32 */
+  uint8_t execution_id[8];  /* bytes 33 to 40 */
+  TradeFlags trade_flags;   /* bytes 41 to 45 */
 } TradeLongMessage;
 
 /* any Trade Long Message at all: every byte one the checker chooses */
@@ -1025,19 +1025,19 @@ static void any_trade_long_message(TradeLongMessage *record) {
   for (size_t i = 0; i < 8; i++) { record->order_id[i] = arbitrary(); }
   record->side_indicator = arbitrary();
   for (size_t i = 0; i < 4; i++) { record->shares_long[i] = arbitrary(); }
-  for (size_t i = 0; i < 6; i++) { record->symbol_short[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->symbol_long[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->price_long[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->execution_id[i] = arbitrary(); }
   any_trade_flags(&record->trade_flags);
 }
 
-/* Trade Long Message to the wire: 44 bytes from at, returning where the next byte goes */
+/* Trade Long Message to the wire: 46 bytes from at, returning where the next byte goes */
 static size_t encode_trade_long_message(const TradeLongMessage *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->time_offset[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->order_id[i]; }
   wire[at++] = record->side_indicator;
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->shares_long[i]; }
-  for (size_t i = 0; i < 6; i++) { wire[at++] = record->symbol_short[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->symbol_long[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->price_long[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->execution_id[i]; }
   at = encode_trade_flags(&record->trade_flags, wire, at);
@@ -1045,13 +1045,13 @@ static size_t encode_trade_long_message(const TradeLongMessage *record, uint8_t 
   return at;
 }
 
-/* Trade Long Message off the wire: 44 bytes from at, returning where the next byte lies */
+/* Trade Long Message off the wire: 46 bytes from at, returning where the next byte lies */
 static size_t decode_trade_long_message(TradeLongMessage *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 4; i++) { record->time_offset[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->order_id[i] = wire[at++]; }
   record->side_indicator = wire[at++];
   for (size_t i = 0; i < 4; i++) { record->shares_long[i] = wire[at++]; }
-  for (size_t i = 0; i < 6; i++) { record->symbol_short[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->symbol_long[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->price_long[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->execution_id[i] = wire[at++]; }
   at = decode_trade_flags(&record->trade_flags, wire, at);
@@ -1065,7 +1065,7 @@ static void equal_trade_long_message(const TradeLongMessage *read, const TradeLo
   for (size_t i = 0; i < 8; i++) { assert(read->order_id[i] == written->order_id[i]); }
   assert(read->side_indicator == written->side_indicator);
   for (size_t i = 0; i < 4; i++) { assert(read->shares_long[i] == written->shares_long[i]); }
-  for (size_t i = 0; i < 6; i++) { assert(read->symbol_short[i] == written->symbol_short[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->symbol_long[i] == written->symbol_long[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->price_long[i] == written->price_long[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->execution_id[i] == written->execution_id[i]); }
   equal_trade_flags(&read->trade_flags, &written->trade_flags);
@@ -1075,32 +1075,32 @@ static void equal_trade_long_message(const TradeLongMessage *read, const TradeLo
 static void check_trade_long_message(void) {
   TradeLongMessage sent;
   TradeLongMessage got;
-  uint8_t wire[44];
-  uint8_t again[44];
+  uint8_t wire[46];
+  uint8_t again[46];
 
   any_trade_long_message(&sent);
-  assert(encode_trade_long_message(&sent, wire, 0) == 44);
-  assert(decode_trade_long_message(&got, wire, 0) == 44);
+  assert(encode_trade_long_message(&sent, wire, 0) == 46);
+  assert(decode_trade_long_message(&got, wire, 0) == 46);
   equal_trade_long_message(&got, &sent);
 
-  for (size_t i = 0; i < 44; i++) { wire[i] = arbitrary(); }
-  assert(decode_trade_long_message(&got, wire, 0) == 44);
-  assert(encode_trade_long_message(&got, again, 0) == 44);
-  for (size_t i = 0; i < 44; i++) { assert(again[i] == wire[i]); }
+  for (size_t i = 0; i < 46; i++) { wire[i] = arbitrary(); }
+  assert(decode_trade_long_message(&got, wire, 0) == 46);
+  assert(encode_trade_long_message(&got, again, 0) == 46);
+  for (size_t i = 0; i < 46; i++) { assert(again[i] == wire[i]); }
 }
 
 /* ---- Trade Short Message: 36 bytes ------------------------------------------- */
 
 /* The Trade message provides information about executions of non-displayed orders on the Cboe book and routed executions to other trading centers. */
 typedef struct {
-  uint8_t time_offset[4];            /* bytes 0 to 3 */
-  uint8_t order_id[8];               /* bytes 4 to 11 */
-  uint8_t side_indicator;            /* byte 12 */
-  uint8_t contracts_short[2];        /* bytes 13 to 14 */
-  uint8_t symbol_alphanumeric_6[6];  /* bytes 15 to 20 */
-  uint8_t price_short[2];            /* bytes 21 to 22 */
-  uint8_t execution_id[8];           /* bytes 23 to 30 */
-  TradeFlags trade_flags;            /* bytes 31 to 35 */
+  uint8_t time_offset[4];      /* bytes 0 to 3 */
+  uint8_t order_id[8];         /* bytes 4 to 11 */
+  uint8_t side_indicator;      /* byte 12 */
+  uint8_t contracts_short[2];  /* bytes 13 to 14 */
+  uint8_t symbol_short[6];     /* bytes 15 to 20 */
+  uint8_t price_short[2];      /* bytes 21 to 22 */
+  uint8_t execution_id[8];     /* bytes 23 to 30 */
+  TradeFlags trade_flags;      /* bytes 31 to 35 */
 } TradeShortMessage;
 
 /* any Trade Short Message at all: every byte one the checker chooses */
@@ -1109,7 +1109,7 @@ static void any_trade_short_message(TradeShortMessage *record) {
   for (size_t i = 0; i < 8; i++) { record->order_id[i] = arbitrary(); }
   record->side_indicator = arbitrary();
   for (size_t i = 0; i < 2; i++) { record->contracts_short[i] = arbitrary(); }
-  for (size_t i = 0; i < 6; i++) { record->symbol_alphanumeric_6[i] = arbitrary(); }
+  for (size_t i = 0; i < 6; i++) { record->symbol_short[i] = arbitrary(); }
   for (size_t i = 0; i < 2; i++) { record->price_short[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->execution_id[i] = arbitrary(); }
   any_trade_flags(&record->trade_flags);
@@ -1121,7 +1121,7 @@ static size_t encode_trade_short_message(const TradeShortMessage *record, uint8_
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->order_id[i]; }
   wire[at++] = record->side_indicator;
   for (size_t i = 0; i < 2; i++) { wire[at++] = record->contracts_short[i]; }
-  for (size_t i = 0; i < 6; i++) { wire[at++] = record->symbol_alphanumeric_6[i]; }
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->symbol_short[i]; }
   for (size_t i = 0; i < 2; i++) { wire[at++] = record->price_short[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->execution_id[i]; }
   at = encode_trade_flags(&record->trade_flags, wire, at);
@@ -1135,7 +1135,7 @@ static size_t decode_trade_short_message(TradeShortMessage *record, const uint8_
   for (size_t i = 0; i < 8; i++) { record->order_id[i] = wire[at++]; }
   record->side_indicator = wire[at++];
   for (size_t i = 0; i < 2; i++) { record->contracts_short[i] = wire[at++]; }
-  for (size_t i = 0; i < 6; i++) { record->symbol_alphanumeric_6[i] = wire[at++]; }
+  for (size_t i = 0; i < 6; i++) { record->symbol_short[i] = wire[at++]; }
   for (size_t i = 0; i < 2; i++) { record->price_short[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->execution_id[i] = wire[at++]; }
   at = decode_trade_flags(&record->trade_flags, wire, at);
@@ -1149,7 +1149,7 @@ static void equal_trade_short_message(const TradeShortMessage *read, const Trade
   for (size_t i = 0; i < 8; i++) { assert(read->order_id[i] == written->order_id[i]); }
   assert(read->side_indicator == written->side_indicator);
   for (size_t i = 0; i < 2; i++) { assert(read->contracts_short[i] == written->contracts_short[i]); }
-  for (size_t i = 0; i < 6; i++) { assert(read->symbol_alphanumeric_6[i] == written->symbol_alphanumeric_6[i]); }
+  for (size_t i = 0; i < 6; i++) { assert(read->symbol_short[i] == written->symbol_short[i]); }
   for (size_t i = 0; i < 2; i++) { assert(read->price_short[i] == written->price_short[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->execution_id[i] == written->execution_id[i]); }
   equal_trade_flags(&read->trade_flags, &written->trade_flags);
@@ -1287,27 +1287,27 @@ static void check_extended_trade_flags(void) {
   for (size_t i = 0; i < 14; i++) { assert(again[i] == wire[i]); }
 }
 
-/* ---- Trade Extended Message: 64 bytes ---------------------------------------- */
+/* ---- Trade Extended Message: 66 bytes ---------------------------------------- */
 
 /* The Trade message provides information about executions of complex order auctions on the Cboe complex book. */
 typedef struct {
   uint8_t time_offset[4];                   /* bytes 0 to 3 */
   uint8_t shares_extended[8];               /* bytes 4 to 11 */
-  uint8_t symbol_short[6];                  /* bytes 12 to 17 */
-  uint8_t price_long[8];                    /* bytes 18 to 25 */
-  uint8_t trade_id[8];                      /* bytes 26 to 33 */
-  uint8_t trade_timestamp[8];               /* bytes 34 to 41 */
-  uint8_t execution_venue[4];               /* bytes 42 to 45 */
-  uint8_t currency[3];                      /* bytes 46 to 48 */
-  uint8_t cboe_trade_flags;                 /* byte 49 */
-  ExtendedTradeFlags extended_trade_flags;  /* bytes 50 to 63 */
+  uint8_t symbol_long[8];                   /* bytes 12 to 19 */
+  uint8_t price_long[8];                    /* bytes 20 to 27 */
+  uint8_t trade_id[8];                      /* bytes 28 to 35 */
+  uint8_t trade_timestamp[8];               /* bytes 36 to 43 */
+  uint8_t execution_venue[4];               /* bytes 44 to 47 */
+  uint8_t currency[3];                      /* bytes 48 to 50 */
+  uint8_t cboe_trade_flags;                 /* byte 51 */
+  ExtendedTradeFlags extended_trade_flags;  /* bytes 52 to 65 */
 } TradeExtendedMessage;
 
 /* any Trade Extended Message at all: every byte one the checker chooses */
 static void any_trade_extended_message(TradeExtendedMessage *record) {
   for (size_t i = 0; i < 4; i++) { record->time_offset[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->shares_extended[i] = arbitrary(); }
-  for (size_t i = 0; i < 6; i++) { record->symbol_short[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->symbol_long[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->price_long[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->trade_id[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->trade_timestamp[i] = arbitrary(); }
@@ -1317,11 +1317,11 @@ static void any_trade_extended_message(TradeExtendedMessage *record) {
   any_extended_trade_flags(&record->extended_trade_flags);
 }
 
-/* Trade Extended Message to the wire: 64 bytes from at, returning where the next byte goes */
+/* Trade Extended Message to the wire: 66 bytes from at, returning where the next byte goes */
 static size_t encode_trade_extended_message(const TradeExtendedMessage *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->time_offset[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->shares_extended[i]; }
-  for (size_t i = 0; i < 6; i++) { wire[at++] = record->symbol_short[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->symbol_long[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->price_long[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->trade_id[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->trade_timestamp[i]; }
@@ -1333,11 +1333,11 @@ static size_t encode_trade_extended_message(const TradeExtendedMessage *record, 
   return at;
 }
 
-/* Trade Extended Message off the wire: 64 bytes from at, returning where the next byte lies */
+/* Trade Extended Message off the wire: 66 bytes from at, returning where the next byte lies */
 static size_t decode_trade_extended_message(TradeExtendedMessage *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 4; i++) { record->time_offset[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->shares_extended[i] = wire[at++]; }
-  for (size_t i = 0; i < 6; i++) { record->symbol_short[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->symbol_long[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->price_long[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->trade_id[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->trade_timestamp[i] = wire[at++]; }
@@ -1353,7 +1353,7 @@ static size_t decode_trade_extended_message(TradeExtendedMessage *record, const 
 static void equal_trade_extended_message(const TradeExtendedMessage *read, const TradeExtendedMessage *written) {
   for (size_t i = 0; i < 4; i++) { assert(read->time_offset[i] == written->time_offset[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->shares_extended[i] == written->shares_extended[i]); }
-  for (size_t i = 0; i < 6; i++) { assert(read->symbol_short[i] == written->symbol_short[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->symbol_long[i] == written->symbol_long[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->price_long[i] == written->price_long[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->trade_id[i] == written->trade_id[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->trade_timestamp[i] == written->trade_timestamp[i]); }
@@ -1367,18 +1367,18 @@ static void equal_trade_extended_message(const TradeExtendedMessage *read, const
 static void check_trade_extended_message(void) {
   TradeExtendedMessage sent;
   TradeExtendedMessage got;
-  uint8_t wire[64];
-  uint8_t again[64];
+  uint8_t wire[66];
+  uint8_t again[66];
 
   any_trade_extended_message(&sent);
-  assert(encode_trade_extended_message(&sent, wire, 0) == 64);
-  assert(decode_trade_extended_message(&got, wire, 0) == 64);
+  assert(encode_trade_extended_message(&sent, wire, 0) == 66);
+  assert(decode_trade_extended_message(&got, wire, 0) == 66);
   equal_trade_extended_message(&got, &sent);
 
-  for (size_t i = 0; i < 64; i++) { wire[i] = arbitrary(); }
-  assert(decode_trade_extended_message(&got, wire, 0) == 64);
-  assert(encode_trade_extended_message(&got, again, 0) == 64);
-  for (size_t i = 0; i < 64; i++) { assert(again[i] == wire[i]); }
+  for (size_t i = 0; i < 66; i++) { wire[i] = arbitrary(); }
+  assert(decode_trade_extended_message(&got, wire, 0) == 66);
+  assert(encode_trade_extended_message(&got, again, 0) == 66);
+  for (size_t i = 0; i < 66; i++) { assert(again[i] == wire[i]); }
 }
 
 /* ---- Trade Unknown Symbol Message: 70 bytes ---------------------------------- */
@@ -1387,7 +1387,7 @@ static void check_trade_extended_message(void) {
 typedef struct {
   uint8_t time_offset[4];                   /* bytes 0 to 3 */
   uint8_t shares_extended[8];               /* bytes 4 to 11 */
-  uint8_t symbol_long[12];                  /* bytes 12 to 23 */
+  uint8_t symbol_extended[12];              /* bytes 12 to 23 */
   uint8_t price_long[8];                    /* bytes 24 to 31 */
   uint8_t trade_id[8];                      /* bytes 32 to 39 */
   uint8_t trade_timestamp[8];               /* bytes 40 to 47 */
@@ -1401,7 +1401,7 @@ typedef struct {
 static void any_trade_unknown_symbol_message(TradeUnknownSymbolMessage *record) {
   for (size_t i = 0; i < 4; i++) { record->time_offset[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->shares_extended[i] = arbitrary(); }
-  for (size_t i = 0; i < 12; i++) { record->symbol_long[i] = arbitrary(); }
+  for (size_t i = 0; i < 12; i++) { record->symbol_extended[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->price_long[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->trade_id[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->trade_timestamp[i] = arbitrary(); }
@@ -1415,7 +1415,7 @@ static void any_trade_unknown_symbol_message(TradeUnknownSymbolMessage *record) 
 static size_t encode_trade_unknown_symbol_message(const TradeUnknownSymbolMessage *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->time_offset[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->shares_extended[i]; }
-  for (size_t i = 0; i < 12; i++) { wire[at++] = record->symbol_long[i]; }
+  for (size_t i = 0; i < 12; i++) { wire[at++] = record->symbol_extended[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->price_long[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->trade_id[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->trade_timestamp[i]; }
@@ -1431,7 +1431,7 @@ static size_t encode_trade_unknown_symbol_message(const TradeUnknownSymbolMessag
 static size_t decode_trade_unknown_symbol_message(TradeUnknownSymbolMessage *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 4; i++) { record->time_offset[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->shares_extended[i] = wire[at++]; }
-  for (size_t i = 0; i < 12; i++) { record->symbol_long[i] = wire[at++]; }
+  for (size_t i = 0; i < 12; i++) { record->symbol_extended[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->price_long[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->trade_id[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->trade_timestamp[i] = wire[at++]; }
@@ -1447,7 +1447,7 @@ static size_t decode_trade_unknown_symbol_message(TradeUnknownSymbolMessage *rec
 static void equal_trade_unknown_symbol_message(const TradeUnknownSymbolMessage *read, const TradeUnknownSymbolMessage *written) {
   for (size_t i = 0; i < 4; i++) { assert(read->time_offset[i] == written->time_offset[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->shares_extended[i] == written->shares_extended[i]); }
-  for (size_t i = 0; i < 12; i++) { assert(read->symbol_long[i] == written->symbol_long[i]); }
+  for (size_t i = 0; i < 12; i++) { assert(read->symbol_extended[i] == written->symbol_extended[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->price_long[i] == written->price_long[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->trade_id[i] == written->trade_id[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->trade_timestamp[i] == written->trade_timestamp[i]); }
@@ -1622,38 +1622,38 @@ static void check_transaction_end_message(void) {
   for (size_t i = 0; i < 4; i++) { assert(again[i] == wire[i]); }
 }
 
-/* ---- Trading Status Message: 14 bytes ---------------------------------------- */
+/* ---- Trading Status Message: 16 bytes ---------------------------------------- */
 
 /* The Trading Status message is used to indicate the current trading status of a complex instrument. */
 typedef struct {
-  uint8_t time_offset[4];   /* bytes 0 to 3 */
-  uint8_t symbol_short[6];  /* bytes 4 to 9 */
-  uint8_t trading_status;   /* byte 10 */
-  uint8_t reserved_3[3];    /* bytes 11 to 13 */
+  uint8_t time_offset[4];  /* bytes 0 to 3 */
+  uint8_t symbol_long[8];  /* bytes 4 to 11 */
+  uint8_t trading_status;  /* byte 12 */
+  uint8_t reserved_3[3];   /* bytes 13 to 15 */
 } TradingStatusMessage;
 
 /* any Trading Status Message at all: every byte one the checker chooses */
 static void any_trading_status_message(TradingStatusMessage *record) {
   for (size_t i = 0; i < 4; i++) { record->time_offset[i] = arbitrary(); }
-  for (size_t i = 0; i < 6; i++) { record->symbol_short[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->symbol_long[i] = arbitrary(); }
   record->trading_status = arbitrary();
   for (size_t i = 0; i < 3; i++) { record->reserved_3[i] = arbitrary(); }
 }
 
-/* Trading Status Message to the wire: 14 bytes from at, returning where the next byte goes */
+/* Trading Status Message to the wire: 16 bytes from at, returning where the next byte goes */
 static size_t encode_trading_status_message(const TradingStatusMessage *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->time_offset[i]; }
-  for (size_t i = 0; i < 6; i++) { wire[at++] = record->symbol_short[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->symbol_long[i]; }
   wire[at++] = record->trading_status;
   for (size_t i = 0; i < 3; i++) { wire[at++] = record->reserved_3[i]; }
 
   return at;
 }
 
-/* Trading Status Message off the wire: 14 bytes from at, returning where the next byte lies */
+/* Trading Status Message off the wire: 16 bytes from at, returning where the next byte lies */
 static size_t decode_trading_status_message(TradingStatusMessage *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 4; i++) { record->time_offset[i] = wire[at++]; }
-  for (size_t i = 0; i < 6; i++) { record->symbol_short[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->symbol_long[i] = wire[at++]; }
   record->trading_status = wire[at++];
   for (size_t i = 0; i < 3; i++) { record->reserved_3[i] = wire[at++]; }
 
@@ -1663,7 +1663,7 @@ static size_t decode_trading_status_message(TradingStatusMessage *record, const 
 /* what was read of Trading Status Message is what was written, byte for byte */
 static void equal_trading_status_message(const TradingStatusMessage *read, const TradingStatusMessage *written) {
   for (size_t i = 0; i < 4; i++) { assert(read->time_offset[i] == written->time_offset[i]); }
-  for (size_t i = 0; i < 6; i++) { assert(read->symbol_short[i] == written->symbol_short[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->symbol_long[i] == written->symbol_long[i]); }
   assert(read->trading_status == written->trading_status);
   for (size_t i = 0; i < 3; i++) { assert(read->reserved_3[i] == written->reserved_3[i]); }
 }
@@ -1672,44 +1672,44 @@ static void equal_trading_status_message(const TradingStatusMessage *read, const
 static void check_trading_status_message(void) {
   TradingStatusMessage sent;
   TradingStatusMessage got;
-  uint8_t wire[14];
-  uint8_t again[14];
+  uint8_t wire[16];
+  uint8_t again[16];
 
   any_trading_status_message(&sent);
-  assert(encode_trading_status_message(&sent, wire, 0) == 14);
-  assert(decode_trading_status_message(&got, wire, 0) == 14);
+  assert(encode_trading_status_message(&sent, wire, 0) == 16);
+  assert(decode_trading_status_message(&got, wire, 0) == 16);
   equal_trading_status_message(&got, &sent);
 
-  for (size_t i = 0; i < 14; i++) { wire[i] = arbitrary(); }
-  assert(decode_trading_status_message(&got, wire, 0) == 14);
-  assert(encode_trading_status_message(&got, again, 0) == 14);
-  for (size_t i = 0; i < 14; i++) { assert(again[i] == wire[i]); }
+  for (size_t i = 0; i < 16; i++) { wire[i] = arbitrary(); }
+  assert(decode_trading_status_message(&got, wire, 0) == 16);
+  assert(encode_trading_status_message(&got, again, 0) == 16);
+  for (size_t i = 0; i < 16; i++) { assert(again[i] == wire[i]); }
 }
 
-/* ---- Statistics Message: 20 bytes -------------------------------------------- */
+/* ---- Statistics Message: 22 bytes -------------------------------------------- */
 
 /* The Statistics Message is used to disseminate the statistics prices: opening, closing, high, low */
 typedef struct {
   uint8_t time_offset[4];       /* bytes 0 to 3 */
-  uint8_t symbol_short[6];      /* bytes 4 to 9 */
-  uint8_t price_long[8];        /* bytes 10 to 17 */
-  uint8_t statistic_type;       /* byte 18 */
-  uint8_t price_determination;  /* byte 19 */
+  uint8_t symbol_long[8];       /* bytes 4 to 11 */
+  uint8_t price_long[8];        /* bytes 12 to 19 */
+  uint8_t statistic_type;       /* byte 20 */
+  uint8_t price_determination;  /* byte 21 */
 } StatisticsMessage;
 
 /* any Statistics Message at all: every byte one the checker chooses */
 static void any_statistics_message(StatisticsMessage *record) {
   for (size_t i = 0; i < 4; i++) { record->time_offset[i] = arbitrary(); }
-  for (size_t i = 0; i < 6; i++) { record->symbol_short[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->symbol_long[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->price_long[i] = arbitrary(); }
   record->statistic_type = arbitrary();
   record->price_determination = arbitrary();
 }
 
-/* Statistics Message to the wire: 20 bytes from at, returning where the next byte goes */
+/* Statistics Message to the wire: 22 bytes from at, returning where the next byte goes */
 static size_t encode_statistics_message(const StatisticsMessage *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->time_offset[i]; }
-  for (size_t i = 0; i < 6; i++) { wire[at++] = record->symbol_short[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->symbol_long[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->price_long[i]; }
   wire[at++] = record->statistic_type;
   wire[at++] = record->price_determination;
@@ -1717,10 +1717,10 @@ static size_t encode_statistics_message(const StatisticsMessage *record, uint8_t
   return at;
 }
 
-/* Statistics Message off the wire: 20 bytes from at, returning where the next byte lies */
+/* Statistics Message off the wire: 22 bytes from at, returning where the next byte lies */
 static size_t decode_statistics_message(StatisticsMessage *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 4; i++) { record->time_offset[i] = wire[at++]; }
-  for (size_t i = 0; i < 6; i++) { record->symbol_short[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->symbol_long[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->price_long[i] = wire[at++]; }
   record->statistic_type = wire[at++];
   record->price_determination = wire[at++];
@@ -1731,7 +1731,7 @@ static size_t decode_statistics_message(StatisticsMessage *record, const uint8_t
 /* what was read of Statistics Message is what was written, byte for byte */
 static void equal_statistics_message(const StatisticsMessage *read, const StatisticsMessage *written) {
   for (size_t i = 0; i < 4; i++) { assert(read->time_offset[i] == written->time_offset[i]); }
-  for (size_t i = 0; i < 6; i++) { assert(read->symbol_short[i] == written->symbol_short[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->symbol_long[i] == written->symbol_long[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->price_long[i] == written->price_long[i]); }
   assert(read->statistic_type == written->statistic_type);
   assert(read->price_determination == written->price_determination);
@@ -1741,38 +1741,38 @@ static void equal_statistics_message(const StatisticsMessage *read, const Statis
 static void check_statistics_message(void) {
   StatisticsMessage sent;
   StatisticsMessage got;
-  uint8_t wire[20];
-  uint8_t again[20];
+  uint8_t wire[22];
+  uint8_t again[22];
 
   any_statistics_message(&sent);
-  assert(encode_statistics_message(&sent, wire, 0) == 20);
-  assert(decode_statistics_message(&got, wire, 0) == 20);
+  assert(encode_statistics_message(&sent, wire, 0) == 22);
+  assert(decode_statistics_message(&got, wire, 0) == 22);
   equal_statistics_message(&got, &sent);
 
-  for (size_t i = 0; i < 20; i++) { wire[i] = arbitrary(); }
-  assert(decode_statistics_message(&got, wire, 0) == 20);
-  assert(encode_statistics_message(&got, again, 0) == 20);
-  for (size_t i = 0; i < 20; i++) { assert(again[i] == wire[i]); }
+  for (size_t i = 0; i < 22; i++) { wire[i] = arbitrary(); }
+  assert(decode_statistics_message(&got, wire, 0) == 22);
+  assert(encode_statistics_message(&got, again, 0) == 22);
+  for (size_t i = 0; i < 22; i++) { assert(again[i] == wire[i]); }
 }
 
-/* ---- Auction Update Message: 33 bytes ---------------------------------------- */
+/* ---- Auction Update Message: 35 bytes ---------------------------------------- */
 
 /* Auction Update messages are used to disseminate indicative price and size information during auctions for Cboe auction eligible securities */
 typedef struct {
   uint8_t time_offset[4];        /* bytes 0 to 3 */
-  uint8_t symbol_short[6];       /* bytes 4 to 9 */
-  uint8_t auction_type;          /* byte 10 */
-  uint8_t reference_price[8];    /* bytes 11 to 18 */
-  uint8_t indicative_price[8];   /* bytes 19 to 26 */
-  uint8_t indicative_shares[4];  /* bytes 27 to 30 */
-  uint8_t outside_tolerance;     /* byte 31 */
-  uint8_t includes_primary;      /* byte 32 */
+  uint8_t symbol_long[8];        /* bytes 4 to 11 */
+  uint8_t auction_type;          /* byte 12 */
+  uint8_t reference_price[8];    /* bytes 13 to 20 */
+  uint8_t indicative_price[8];   /* bytes 21 to 28 */
+  uint8_t indicative_shares[4];  /* bytes 29 to 32 */
+  uint8_t outside_tolerance;     /* byte 33 */
+  uint8_t includes_primary;      /* byte 34 */
 } AuctionUpdateMessage;
 
 /* any Auction Update Message at all: every byte one the checker chooses */
 static void any_auction_update_message(AuctionUpdateMessage *record) {
   for (size_t i = 0; i < 4; i++) { record->time_offset[i] = arbitrary(); }
-  for (size_t i = 0; i < 6; i++) { record->symbol_short[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->symbol_long[i] = arbitrary(); }
   record->auction_type = arbitrary();
   for (size_t i = 0; i < 8; i++) { record->reference_price[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->indicative_price[i] = arbitrary(); }
@@ -1781,10 +1781,10 @@ static void any_auction_update_message(AuctionUpdateMessage *record) {
   record->includes_primary = arbitrary();
 }
 
-/* Auction Update Message to the wire: 33 bytes from at, returning where the next byte goes */
+/* Auction Update Message to the wire: 35 bytes from at, returning where the next byte goes */
 static size_t encode_auction_update_message(const AuctionUpdateMessage *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->time_offset[i]; }
-  for (size_t i = 0; i < 6; i++) { wire[at++] = record->symbol_short[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->symbol_long[i]; }
   wire[at++] = record->auction_type;
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->reference_price[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->indicative_price[i]; }
@@ -1795,10 +1795,10 @@ static size_t encode_auction_update_message(const AuctionUpdateMessage *record, 
   return at;
 }
 
-/* Auction Update Message off the wire: 33 bytes from at, returning where the next byte lies */
+/* Auction Update Message off the wire: 35 bytes from at, returning where the next byte lies */
 static size_t decode_auction_update_message(AuctionUpdateMessage *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 4; i++) { record->time_offset[i] = wire[at++]; }
-  for (size_t i = 0; i < 6; i++) { record->symbol_short[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->symbol_long[i] = wire[at++]; }
   record->auction_type = wire[at++];
   for (size_t i = 0; i < 8; i++) { record->reference_price[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->indicative_price[i] = wire[at++]; }
@@ -1812,7 +1812,7 @@ static size_t decode_auction_update_message(AuctionUpdateMessage *record, const 
 /* what was read of Auction Update Message is what was written, byte for byte */
 static void equal_auction_update_message(const AuctionUpdateMessage *read, const AuctionUpdateMessage *written) {
   for (size_t i = 0; i < 4; i++) { assert(read->time_offset[i] == written->time_offset[i]); }
-  for (size_t i = 0; i < 6; i++) { assert(read->symbol_short[i] == written->symbol_short[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->symbol_long[i] == written->symbol_long[i]); }
   assert(read->auction_type == written->auction_type);
   for (size_t i = 0; i < 8; i++) { assert(read->reference_price[i] == written->reference_price[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->indicative_price[i] == written->indicative_price[i]); }
@@ -1825,44 +1825,44 @@ static void equal_auction_update_message(const AuctionUpdateMessage *read, const
 static void check_auction_update_message(void) {
   AuctionUpdateMessage sent;
   AuctionUpdateMessage got;
-  uint8_t wire[33];
-  uint8_t again[33];
+  uint8_t wire[35];
+  uint8_t again[35];
 
   any_auction_update_message(&sent);
-  assert(encode_auction_update_message(&sent, wire, 0) == 33);
-  assert(decode_auction_update_message(&got, wire, 0) == 33);
+  assert(encode_auction_update_message(&sent, wire, 0) == 35);
+  assert(decode_auction_update_message(&got, wire, 0) == 35);
   equal_auction_update_message(&got, &sent);
 
-  for (size_t i = 0; i < 33; i++) { wire[i] = arbitrary(); }
-  assert(decode_auction_update_message(&got, wire, 0) == 33);
-  assert(encode_auction_update_message(&got, again, 0) == 33);
-  for (size_t i = 0; i < 33; i++) { assert(again[i] == wire[i]); }
+  for (size_t i = 0; i < 35; i++) { wire[i] = arbitrary(); }
+  assert(decode_auction_update_message(&got, wire, 0) == 35);
+  assert(encode_auction_update_message(&got, again, 0) == 35);
+  for (size_t i = 0; i < 35; i++) { assert(again[i] == wire[i]); }
 }
 
-/* ---- Auction Summary Message: 23 bytes --------------------------------------- */
+/* ---- Auction Summary Message: 25 bytes --------------------------------------- */
 
 /* Auction Summary messages are used to disseminate the results of an auction in a Cboe auction eligible security */
 typedef struct {
-  uint8_t time_offset[4];   /* bytes 0 to 3 */
-  uint8_t symbol_short[6];  /* bytes 4 to 9 */
-  uint8_t auction_type;     /* byte 10 */
-  uint8_t price_long[8];    /* bytes 11 to 18 */
-  uint8_t shares_long[4];   /* bytes 19 to 22 */
+  uint8_t time_offset[4];  /* bytes 0 to 3 */
+  uint8_t symbol_long[8];  /* bytes 4 to 11 */
+  uint8_t auction_type;    /* byte 12 */
+  uint8_t price_long[8];   /* bytes 13 to 20 */
+  uint8_t shares_long[4];  /* bytes 21 to 24 */
 } AuctionSummaryMessage;
 
 /* any Auction Summary Message at all: every byte one the checker chooses */
 static void any_auction_summary_message(AuctionSummaryMessage *record) {
   for (size_t i = 0; i < 4; i++) { record->time_offset[i] = arbitrary(); }
-  for (size_t i = 0; i < 6; i++) { record->symbol_short[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->symbol_long[i] = arbitrary(); }
   record->auction_type = arbitrary();
   for (size_t i = 0; i < 8; i++) { record->price_long[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->shares_long[i] = arbitrary(); }
 }
 
-/* Auction Summary Message to the wire: 23 bytes from at, returning where the next byte goes */
+/* Auction Summary Message to the wire: 25 bytes from at, returning where the next byte goes */
 static size_t encode_auction_summary_message(const AuctionSummaryMessage *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->time_offset[i]; }
-  for (size_t i = 0; i < 6; i++) { wire[at++] = record->symbol_short[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->symbol_long[i]; }
   wire[at++] = record->auction_type;
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->price_long[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->shares_long[i]; }
@@ -1870,10 +1870,10 @@ static size_t encode_auction_summary_message(const AuctionSummaryMessage *record
   return at;
 }
 
-/* Auction Summary Message off the wire: 23 bytes from at, returning where the next byte lies */
+/* Auction Summary Message off the wire: 25 bytes from at, returning where the next byte lies */
 static size_t decode_auction_summary_message(AuctionSummaryMessage *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 4; i++) { record->time_offset[i] = wire[at++]; }
-  for (size_t i = 0; i < 6; i++) { record->symbol_short[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->symbol_long[i] = wire[at++]; }
   record->auction_type = wire[at++];
   for (size_t i = 0; i < 8; i++) { record->price_long[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->shares_long[i] = wire[at++]; }
@@ -1884,7 +1884,7 @@ static size_t decode_auction_summary_message(AuctionSummaryMessage *record, cons
 /* what was read of Auction Summary Message is what was written, byte for byte */
 static void equal_auction_summary_message(const AuctionSummaryMessage *read, const AuctionSummaryMessage *written) {
   for (size_t i = 0; i < 4; i++) { assert(read->time_offset[i] == written->time_offset[i]); }
-  for (size_t i = 0; i < 6; i++) { assert(read->symbol_short[i] == written->symbol_short[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->symbol_long[i] == written->symbol_long[i]); }
   assert(read->auction_type == written->auction_type);
   for (size_t i = 0; i < 8; i++) { assert(read->price_long[i] == written->price_long[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->shares_long[i] == written->shares_long[i]); }
@@ -1894,18 +1894,18 @@ static void equal_auction_summary_message(const AuctionSummaryMessage *read, con
 static void check_auction_summary_message(void) {
   AuctionSummaryMessage sent;
   AuctionSummaryMessage got;
-  uint8_t wire[23];
-  uint8_t again[23];
+  uint8_t wire[25];
+  uint8_t again[25];
 
   any_auction_summary_message(&sent);
-  assert(encode_auction_summary_message(&sent, wire, 0) == 23);
-  assert(decode_auction_summary_message(&got, wire, 0) == 23);
+  assert(encode_auction_summary_message(&sent, wire, 0) == 25);
+  assert(decode_auction_summary_message(&got, wire, 0) == 25);
   equal_auction_summary_message(&got, &sent);
 
-  for (size_t i = 0; i < 23; i++) { wire[i] = arbitrary(); }
-  assert(decode_auction_summary_message(&got, wire, 0) == 23);
-  assert(encode_auction_summary_message(&got, again, 0) == 23);
-  for (size_t i = 0; i < 23; i++) { assert(again[i] == wire[i]); }
+  for (size_t i = 0; i < 25; i++) { wire[i] = arbitrary(); }
+  assert(decode_auction_summary_message(&got, wire, 0) == 25);
+  assert(encode_auction_summary_message(&got, again, 0) == 25);
+  for (size_t i = 0; i < 25; i++) { assert(again[i] == wire[i]); }
 }
 
 /* ---- Index Quote Message: 27 bytes ------------------------------------------- */

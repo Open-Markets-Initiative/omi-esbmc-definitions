@@ -464,7 +464,7 @@ static void check_broker_reactivated_message(void) {
 
 /* ST_AUCTION_INQ_INFO */
 typedef struct {
-  uint8_t token_long_4[4];       /* bytes 0 to 3 */
+  uint8_t token[4];              /* bytes 0 to 3 */
   uint8_t auction_number[2];     /* bytes 4 to 5 */
   uint8_t auction_status[2];     /* bytes 6 to 7 */
   uint8_t initiator_type[2];     /* bytes 8 to 9 */
@@ -479,7 +479,7 @@ typedef struct {
 
 /* any St Auction Inq Info at all: every byte one the checker chooses */
 static void any_st_auction_inq_info(StAuctionInqInfo *record) {
-  for (size_t i = 0; i < 4; i++) { record->token_long_4[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->token[i] = arbitrary(); }
   for (size_t i = 0; i < 2; i++) { record->auction_number[i] = arbitrary(); }
   for (size_t i = 0; i < 2; i++) { record->auction_status[i] = arbitrary(); }
   for (size_t i = 0; i < 2; i++) { record->initiator_type[i] = arbitrary(); }
@@ -494,7 +494,7 @@ static void any_st_auction_inq_info(StAuctionInqInfo *record) {
 
 /* St Auction Inq Info to the wire: 36 bytes from at, returning where the next byte goes */
 static size_t encode_st_auction_inq_info(const StAuctionInqInfo *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->token_long_4[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->token[i]; }
   for (size_t i = 0; i < 2; i++) { wire[at++] = record->auction_number[i]; }
   for (size_t i = 0; i < 2; i++) { wire[at++] = record->auction_status[i]; }
   for (size_t i = 0; i < 2; i++) { wire[at++] = record->initiator_type[i]; }
@@ -511,7 +511,7 @@ static size_t encode_st_auction_inq_info(const StAuctionInqInfo *record, uint8_t
 
 /* St Auction Inq Info off the wire: 36 bytes from at, returning where the next byte lies */
 static size_t decode_st_auction_inq_info(StAuctionInqInfo *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 4; i++) { record->token_long_4[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->token[i] = wire[at++]; }
   for (size_t i = 0; i < 2; i++) { record->auction_number[i] = wire[at++]; }
   for (size_t i = 0; i < 2; i++) { record->auction_status[i] = wire[at++]; }
   for (size_t i = 0; i < 2; i++) { record->initiator_type[i] = wire[at++]; }
@@ -528,7 +528,7 @@ static size_t decode_st_auction_inq_info(StAuctionInqInfo *record, const uint8_t
 
 /* what was read of St Auction Inq Info is what was written, byte for byte */
 static void equal_st_auction_inq_info(const StAuctionInqInfo *read, const StAuctionInqInfo *written) {
-  for (size_t i = 0; i < 4; i++) { assert(read->token_long_4[i] == written->token_long_4[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->token[i] == written->token[i]); }
   for (size_t i = 0; i < 2; i++) { assert(read->auction_number[i] == written->auction_number[i]); }
   for (size_t i = 0; i < 2; i++) { assert(read->auction_status[i] == written->auction_status[i]); }
   for (size_t i = 0; i < 2; i++) { assert(read->initiator_type[i] == written->initiator_type[i]); }
@@ -613,21 +613,21 @@ static void check_auction_activity_message(void) {
 /* Sent as SECURITY_OPEN_PRICE with the open price of a security when the market opens */
 typedef struct {
   SecInfo sec_info;          /* bytes 0 to 11 */
-  uint8_t token_long_4[4];   /* bytes 12 to 15 */
+  uint8_t token[4];          /* bytes 12 to 15 */
   uint8_t opening_price[4];  /* bytes 16 to 19 */
 } SecurityOpenMessage;
 
 /* any Security Open Message at all: every byte one the checker chooses */
 static void any_security_open_message(SecurityOpenMessage *record) {
   any_sec_info(&record->sec_info);
-  for (size_t i = 0; i < 4; i++) { record->token_long_4[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->token[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->opening_price[i] = arbitrary(); }
 }
 
 /* Security Open Message to the wire: 20 bytes from at, returning where the next byte goes */
 static size_t encode_security_open_message(const SecurityOpenMessage *record, uint8_t *wire, size_t at) {
   at = encode_sec_info(&record->sec_info, wire, at);
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->token_long_4[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->token[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->opening_price[i]; }
 
   return at;
@@ -636,7 +636,7 @@ static size_t encode_security_open_message(const SecurityOpenMessage *record, ui
 /* Security Open Message off the wire: 20 bytes from at, returning where the next byte lies */
 static size_t decode_security_open_message(SecurityOpenMessage *record, const uint8_t *wire, size_t at) {
   at = decode_sec_info(&record->sec_info, wire, at);
-  for (size_t i = 0; i < 4; i++) { record->token_long_4[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->token[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->opening_price[i] = wire[at++]; }
 
   return at;
@@ -645,7 +645,7 @@ static size_t decode_security_open_message(SecurityOpenMessage *record, const ui
 /* what was read of Security Open Message is what was written, byte for byte */
 static void equal_security_open_message(const SecurityOpenMessage *read, const SecurityOpenMessage *written) {
   equal_sec_info(&read->sec_info, &written->sec_info);
-  for (size_t i = 0; i < 4; i++) { assert(read->token_long_4[i] == written->token_long_4[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->token[i] == written->token[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->opening_price[i] == written->opening_price[i]); }
 }
 
@@ -750,19 +750,19 @@ static void check_report_header_body(void) {
 
 /* Report Trailer Body */
 typedef struct {
-  uint8_t number_of_records_long_4[4];  /* bytes 0 to 3 */
-  uint8_t reserved_1;                   /* byte 4 */
+  uint8_t number_of_records_long[4];  /* bytes 0 to 3 */
+  uint8_t reserved_1;                 /* byte 4 */
 } ReportTrailerBody;
 
 /* any Report Trailer Body at all: every byte one the checker chooses */
 static void any_report_trailer_body(ReportTrailerBody *record) {
-  for (size_t i = 0; i < 4; i++) { record->number_of_records_long_4[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->number_of_records_long[i] = arbitrary(); }
   record->reserved_1 = arbitrary();
 }
 
 /* Report Trailer Body to the wire: 5 bytes from at, returning where the next byte goes */
 static size_t encode_report_trailer_body(const ReportTrailerBody *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->number_of_records_long_4[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->number_of_records_long[i]; }
   wire[at++] = record->reserved_1;
 
   return at;
@@ -770,7 +770,7 @@ static size_t encode_report_trailer_body(const ReportTrailerBody *record, uint8_
 
 /* Report Trailer Body off the wire: 5 bytes from at, returning where the next byte lies */
 static size_t decode_report_trailer_body(ReportTrailerBody *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 4; i++) { record->number_of_records_long_4[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->number_of_records_long[i] = wire[at++]; }
   record->reserved_1 = wire[at++];
 
   return at;
@@ -778,7 +778,7 @@ static size_t decode_report_trailer_body(ReportTrailerBody *record, const uint8_
 
 /* what was read of Report Trailer Body is what was written, byte for byte */
 static void equal_report_trailer_body(const ReportTrailerBody *read, const ReportTrailerBody *written) {
-  for (size_t i = 0; i < 4; i++) { assert(read->number_of_records_long_4[i] == written->number_of_records_long_4[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->number_of_records_long[i] == written->number_of_records_long[i]); }
   assert(read->reserved_1 == written->reserved_1);
 }
 

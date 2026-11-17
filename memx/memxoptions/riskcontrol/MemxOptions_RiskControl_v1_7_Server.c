@@ -704,27 +704,27 @@ static void check_active_risk_threshold_state_message(void) {
 
 /* ActiveRiskThresholdChangeRejectedMessage */
 typedef struct {
-  uint8_t cl_ord_id_active_risk_threshold_change_rejected_cl_ord_id[20];          /* bytes 0 to 19 */
-  uint8_t underlier_active_risk_threshold_change_rejected_underlier_optional[6];  /* bytes 20 to 25 */
-  uint8_t efid_active_risk_threshold_change_rejected_efid_optional[4];            /* bytes 26 to 29 */
-  uint8_t threshold_quantity[4];                                                  /* bytes 30 to 33 */
-  uint8_t reject_reason[2];                                                       /* bytes 34 to 35 */
+  uint8_t cl_ord_id[20];          /* bytes 0 to 19 */
+  uint8_t underlier_optional[6];  /* bytes 20 to 25 */
+  uint8_t efid_optional[4];       /* bytes 26 to 29 */
+  uint8_t threshold_quantity[4];  /* bytes 30 to 33 */
+  uint8_t reject_reason[2];       /* bytes 34 to 35 */
 } ActiveRiskThresholdChangeRejectedMessage;
 
 /* any Active Risk Threshold Change Rejected Message at all: every byte one the checker chooses */
 static void any_active_risk_threshold_change_rejected_message(ActiveRiskThresholdChangeRejectedMessage *record) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_active_risk_threshold_change_rejected_cl_ord_id[i] = arbitrary(); }
-  for (size_t i = 0; i < 6; i++) { record->underlier_active_risk_threshold_change_rejected_underlier_optional[i] = arbitrary(); }
-  for (size_t i = 0; i < 4; i++) { record->efid_active_risk_threshold_change_rejected_efid_optional[i] = arbitrary(); }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = arbitrary(); }
+  for (size_t i = 0; i < 6; i++) { record->underlier_optional[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->efid_optional[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->threshold_quantity[i] = arbitrary(); }
   for (size_t i = 0; i < 2; i++) { record->reject_reason[i] = arbitrary(); }
 }
 
 /* Active Risk Threshold Change Rejected Message to the wire: 36 bytes from at, returning where the next byte goes */
 static size_t encode_active_risk_threshold_change_rejected_message(const ActiveRiskThresholdChangeRejectedMessage *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id_active_risk_threshold_change_rejected_cl_ord_id[i]; }
-  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier_active_risk_threshold_change_rejected_underlier_optional[i]; }
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid_active_risk_threshold_change_rejected_efid_optional[i]; }
+  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id[i]; }
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier_optional[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid_optional[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->threshold_quantity[i]; }
   for (size_t i = 0; i < 2; i++) { wire[at++] = record->reject_reason[i]; }
 
@@ -733,9 +733,9 @@ static size_t encode_active_risk_threshold_change_rejected_message(const ActiveR
 
 /* Active Risk Threshold Change Rejected Message off the wire: 36 bytes from at, returning where the next byte lies */
 static size_t decode_active_risk_threshold_change_rejected_message(ActiveRiskThresholdChangeRejectedMessage *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_active_risk_threshold_change_rejected_cl_ord_id[i] = wire[at++]; }
-  for (size_t i = 0; i < 6; i++) { record->underlier_active_risk_threshold_change_rejected_underlier_optional[i] = wire[at++]; }
-  for (size_t i = 0; i < 4; i++) { record->efid_active_risk_threshold_change_rejected_efid_optional[i] = wire[at++]; }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = wire[at++]; }
+  for (size_t i = 0; i < 6; i++) { record->underlier_optional[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->efid_optional[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->threshold_quantity[i] = wire[at++]; }
   for (size_t i = 0; i < 2; i++) { record->reject_reason[i] = wire[at++]; }
 
@@ -744,9 +744,9 @@ static size_t decode_active_risk_threshold_change_rejected_message(ActiveRiskThr
 
 /* what was read of Active Risk Threshold Change Rejected Message is what was written, byte for byte */
 static void equal_active_risk_threshold_change_rejected_message(const ActiveRiskThresholdChangeRejectedMessage *read, const ActiveRiskThresholdChangeRejectedMessage *written) {
-  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id_active_risk_threshold_change_rejected_cl_ord_id[i] == written->cl_ord_id_active_risk_threshold_change_rejected_cl_ord_id[i]); }
-  for (size_t i = 0; i < 6; i++) { assert(read->underlier_active_risk_threshold_change_rejected_underlier_optional[i] == written->underlier_active_risk_threshold_change_rejected_underlier_optional[i]); }
-  for (size_t i = 0; i < 4; i++) { assert(read->efid_active_risk_threshold_change_rejected_efid_optional[i] == written->efid_active_risk_threshold_change_rejected_efid_optional[i]); }
+  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id[i] == written->cl_ord_id[i]); }
+  for (size_t i = 0; i < 6; i++) { assert(read->underlier_optional[i] == written->underlier_optional[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->efid_optional[i] == written->efid_optional[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->threshold_quantity[i] == written->threshold_quantity[i]); }
   for (size_t i = 0; i < 2; i++) { assert(read->reject_reason[i] == written->reject_reason[i]); }
 }
@@ -842,27 +842,27 @@ static void check_active_risk_acknowledged_message(void) {
 
 /* ActiveRiskAcknowledgeRejectedMessage */
 typedef struct {
-  uint8_t cl_ord_id_active_risk_acknowledge_rejected_cl_ord_id[20];  /* bytes 0 to 19 */
-  uint8_t underlier_active_risk_acknowledge_rejected_underlier[6];   /* bytes 20 to 25 */
-  uint8_t efid_active_risk_acknowledge_rejected_efid[4];             /* bytes 26 to 29 */
-  uint8_t threshold_quantity[4];                                     /* bytes 30 to 33 */
-  uint8_t reject_reason[2];                                          /* bytes 34 to 35 */
+  uint8_t cl_ord_id[20];          /* bytes 0 to 19 */
+  uint8_t underlier[6];           /* bytes 20 to 25 */
+  uint8_t efid[4];                /* bytes 26 to 29 */
+  uint8_t threshold_quantity[4];  /* bytes 30 to 33 */
+  uint8_t reject_reason[2];       /* bytes 34 to 35 */
 } ActiveRiskAcknowledgeRejectedMessage;
 
 /* any Active Risk Acknowledge Rejected Message at all: every byte one the checker chooses */
 static void any_active_risk_acknowledge_rejected_message(ActiveRiskAcknowledgeRejectedMessage *record) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_active_risk_acknowledge_rejected_cl_ord_id[i] = arbitrary(); }
-  for (size_t i = 0; i < 6; i++) { record->underlier_active_risk_acknowledge_rejected_underlier[i] = arbitrary(); }
-  for (size_t i = 0; i < 4; i++) { record->efid_active_risk_acknowledge_rejected_efid[i] = arbitrary(); }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = arbitrary(); }
+  for (size_t i = 0; i < 6; i++) { record->underlier[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->efid[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->threshold_quantity[i] = arbitrary(); }
   for (size_t i = 0; i < 2; i++) { record->reject_reason[i] = arbitrary(); }
 }
 
 /* Active Risk Acknowledge Rejected Message to the wire: 36 bytes from at, returning where the next byte goes */
 static size_t encode_active_risk_acknowledge_rejected_message(const ActiveRiskAcknowledgeRejectedMessage *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id_active_risk_acknowledge_rejected_cl_ord_id[i]; }
-  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier_active_risk_acknowledge_rejected_underlier[i]; }
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid_active_risk_acknowledge_rejected_efid[i]; }
+  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id[i]; }
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->threshold_quantity[i]; }
   for (size_t i = 0; i < 2; i++) { wire[at++] = record->reject_reason[i]; }
 
@@ -871,9 +871,9 @@ static size_t encode_active_risk_acknowledge_rejected_message(const ActiveRiskAc
 
 /* Active Risk Acknowledge Rejected Message off the wire: 36 bytes from at, returning where the next byte lies */
 static size_t decode_active_risk_acknowledge_rejected_message(ActiveRiskAcknowledgeRejectedMessage *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_active_risk_acknowledge_rejected_cl_ord_id[i] = wire[at++]; }
-  for (size_t i = 0; i < 6; i++) { record->underlier_active_risk_acknowledge_rejected_underlier[i] = wire[at++]; }
-  for (size_t i = 0; i < 4; i++) { record->efid_active_risk_acknowledge_rejected_efid[i] = wire[at++]; }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = wire[at++]; }
+  for (size_t i = 0; i < 6; i++) { record->underlier[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->efid[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->threshold_quantity[i] = wire[at++]; }
   for (size_t i = 0; i < 2; i++) { record->reject_reason[i] = wire[at++]; }
 
@@ -882,9 +882,9 @@ static size_t decode_active_risk_acknowledge_rejected_message(ActiveRiskAcknowle
 
 /* what was read of Active Risk Acknowledge Rejected Message is what was written, byte for byte */
 static void equal_active_risk_acknowledge_rejected_message(const ActiveRiskAcknowledgeRejectedMessage *read, const ActiveRiskAcknowledgeRejectedMessage *written) {
-  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id_active_risk_acknowledge_rejected_cl_ord_id[i] == written->cl_ord_id_active_risk_acknowledge_rejected_cl_ord_id[i]); }
-  for (size_t i = 0; i < 6; i++) { assert(read->underlier_active_risk_acknowledge_rejected_underlier[i] == written->underlier_active_risk_acknowledge_rejected_underlier[i]); }
-  for (size_t i = 0; i < 4; i++) { assert(read->efid_active_risk_acknowledge_rejected_efid[i] == written->efid_active_risk_acknowledge_rejected_efid[i]); }
+  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id[i] == written->cl_ord_id[i]); }
+  for (size_t i = 0; i < 6; i++) { assert(read->underlier[i] == written->underlier[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->efid[i] == written->efid[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->threshold_quantity[i] == written->threshold_quantity[i]); }
   for (size_t i = 0; i < 2; i++) { assert(read->reject_reason[i] == written->reject_reason[i]); }
 }
@@ -1513,21 +1513,21 @@ static void check_manual_cp_breach_trigger_done_message(void) {
 
 /* RiskThresholdUpdateRejectedMessage */
 typedef struct {
-  uint8_t cl_ord_id_risk_threshold_update_rejected_cl_ord_id[20];  /* bytes 0 to 19 */
-  uint8_t risk_type;                                               /* byte 20 */
-  uint8_t reject_reason[2];                                        /* bytes 21 to 22 */
+  uint8_t cl_ord_id[20];     /* bytes 0 to 19 */
+  uint8_t risk_type;         /* byte 20 */
+  uint8_t reject_reason[2];  /* bytes 21 to 22 */
 } RiskThresholdUpdateRejectedMessage;
 
 /* any Risk Threshold Update Rejected Message at all: every byte one the checker chooses */
 static void any_risk_threshold_update_rejected_message(RiskThresholdUpdateRejectedMessage *record) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_risk_threshold_update_rejected_cl_ord_id[i] = arbitrary(); }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = arbitrary(); }
   record->risk_type = arbitrary();
   for (size_t i = 0; i < 2; i++) { record->reject_reason[i] = arbitrary(); }
 }
 
 /* Risk Threshold Update Rejected Message to the wire: 23 bytes from at, returning where the next byte goes */
 static size_t encode_risk_threshold_update_rejected_message(const RiskThresholdUpdateRejectedMessage *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id_risk_threshold_update_rejected_cl_ord_id[i]; }
+  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id[i]; }
   wire[at++] = record->risk_type;
   for (size_t i = 0; i < 2; i++) { wire[at++] = record->reject_reason[i]; }
 
@@ -1536,7 +1536,7 @@ static size_t encode_risk_threshold_update_rejected_message(const RiskThresholdU
 
 /* Risk Threshold Update Rejected Message off the wire: 23 bytes from at, returning where the next byte lies */
 static size_t decode_risk_threshold_update_rejected_message(RiskThresholdUpdateRejectedMessage *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_risk_threshold_update_rejected_cl_ord_id[i] = wire[at++]; }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = wire[at++]; }
   record->risk_type = wire[at++];
   for (size_t i = 0; i < 2; i++) { record->reject_reason[i] = wire[at++]; }
 
@@ -1545,7 +1545,7 @@ static size_t decode_risk_threshold_update_rejected_message(RiskThresholdUpdateR
 
 /* what was read of Risk Threshold Update Rejected Message is what was written, byte for byte */
 static void equal_risk_threshold_update_rejected_message(const RiskThresholdUpdateRejectedMessage *read, const RiskThresholdUpdateRejectedMessage *written) {
-  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id_risk_threshold_update_rejected_cl_ord_id[i] == written->cl_ord_id_risk_threshold_update_rejected_cl_ord_id[i]); }
+  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id[i] == written->cl_ord_id[i]); }
   assert(read->risk_type == written->risk_type);
   for (size_t i = 0; i < 2; i++) { assert(read->reject_reason[i] == written->reject_reason[i]); }
 }
@@ -1927,27 +1927,27 @@ static void check_single_order_max_contracts_threshold_state_message(void) {
 
 /* SingleOrderAllowMarketOrdersStateMessage */
 typedef struct {
-  uint8_t cl_ord_id_single_order_allow_market_orders_state_cl_ord_id_optional[20];  /* bytes 0 to 19 */
-  uint8_t underlier_single_order_allow_market_orders_state_underlier_optional[6];   /* bytes 20 to 25 */
-  uint8_t efid_single_order_allow_market_orders_state_efid_optional[4];             /* bytes 26 to 29 */
-  uint8_t risk_group_id[2];                                                         /* bytes 30 to 31 */
-  uint8_t market_orders;                                                            /* byte 32 */
+  uint8_t cl_ord_id_optional[20];  /* bytes 0 to 19 */
+  uint8_t underlier_optional[6];   /* bytes 20 to 25 */
+  uint8_t efid_optional[4];        /* bytes 26 to 29 */
+  uint8_t risk_group_id[2];        /* bytes 30 to 31 */
+  uint8_t market_orders;           /* byte 32 */
 } SingleOrderAllowMarketOrdersStateMessage;
 
 /* any Single Order Allow Market Orders State Message at all: every byte one the checker chooses */
 static void any_single_order_allow_market_orders_state_message(SingleOrderAllowMarketOrdersStateMessage *record) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_single_order_allow_market_orders_state_cl_ord_id_optional[i] = arbitrary(); }
-  for (size_t i = 0; i < 6; i++) { record->underlier_single_order_allow_market_orders_state_underlier_optional[i] = arbitrary(); }
-  for (size_t i = 0; i < 4; i++) { record->efid_single_order_allow_market_orders_state_efid_optional[i] = arbitrary(); }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_optional[i] = arbitrary(); }
+  for (size_t i = 0; i < 6; i++) { record->underlier_optional[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->efid_optional[i] = arbitrary(); }
   for (size_t i = 0; i < 2; i++) { record->risk_group_id[i] = arbitrary(); }
   record->market_orders = arbitrary();
 }
 
 /* Single Order Allow Market Orders State Message to the wire: 33 bytes from at, returning where the next byte goes */
 static size_t encode_single_order_allow_market_orders_state_message(const SingleOrderAllowMarketOrdersStateMessage *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id_single_order_allow_market_orders_state_cl_ord_id_optional[i]; }
-  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier_single_order_allow_market_orders_state_underlier_optional[i]; }
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid_single_order_allow_market_orders_state_efid_optional[i]; }
+  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id_optional[i]; }
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier_optional[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid_optional[i]; }
   for (size_t i = 0; i < 2; i++) { wire[at++] = record->risk_group_id[i]; }
   wire[at++] = record->market_orders;
 
@@ -1956,9 +1956,9 @@ static size_t encode_single_order_allow_market_orders_state_message(const Single
 
 /* Single Order Allow Market Orders State Message off the wire: 33 bytes from at, returning where the next byte lies */
 static size_t decode_single_order_allow_market_orders_state_message(SingleOrderAllowMarketOrdersStateMessage *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_single_order_allow_market_orders_state_cl_ord_id_optional[i] = wire[at++]; }
-  for (size_t i = 0; i < 6; i++) { record->underlier_single_order_allow_market_orders_state_underlier_optional[i] = wire[at++]; }
-  for (size_t i = 0; i < 4; i++) { record->efid_single_order_allow_market_orders_state_efid_optional[i] = wire[at++]; }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_optional[i] = wire[at++]; }
+  for (size_t i = 0; i < 6; i++) { record->underlier_optional[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->efid_optional[i] = wire[at++]; }
   for (size_t i = 0; i < 2; i++) { record->risk_group_id[i] = wire[at++]; }
   record->market_orders = wire[at++];
 
@@ -1967,9 +1967,9 @@ static size_t decode_single_order_allow_market_orders_state_message(SingleOrderA
 
 /* what was read of Single Order Allow Market Orders State Message is what was written, byte for byte */
 static void equal_single_order_allow_market_orders_state_message(const SingleOrderAllowMarketOrdersStateMessage *read, const SingleOrderAllowMarketOrdersStateMessage *written) {
-  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id_single_order_allow_market_orders_state_cl_ord_id_optional[i] == written->cl_ord_id_single_order_allow_market_orders_state_cl_ord_id_optional[i]); }
-  for (size_t i = 0; i < 6; i++) { assert(read->underlier_single_order_allow_market_orders_state_underlier_optional[i] == written->underlier_single_order_allow_market_orders_state_underlier_optional[i]); }
-  for (size_t i = 0; i < 4; i++) { assert(read->efid_single_order_allow_market_orders_state_efid_optional[i] == written->efid_single_order_allow_market_orders_state_efid_optional[i]); }
+  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id_optional[i] == written->cl_ord_id_optional[i]); }
+  for (size_t i = 0; i < 6; i++) { assert(read->underlier_optional[i] == written->underlier_optional[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->efid_optional[i] == written->efid_optional[i]); }
   for (size_t i = 0; i < 2; i++) { assert(read->risk_group_id[i] == written->risk_group_id[i]); }
   assert(read->market_orders == written->market_orders);
 }
@@ -1996,27 +1996,27 @@ static void check_single_order_allow_market_orders_state_message(void) {
 
 /* SingleOrderRestrictedUnderlierStateMessage */
 typedef struct {
-  uint8_t cl_ord_id_single_order_restricted_underlier_state_cl_ord_id_optional[20];  /* bytes 0 to 19 */
-  uint8_t underlier_single_order_restricted_underlier_state_underlier[6];            /* bytes 20 to 25 */
-  uint8_t efid_single_order_restricted_underlier_state_efid_optional[4];             /* bytes 26 to 29 */
-  uint8_t risk_group_id[2];                                                          /* bytes 30 to 31 */
-  uint8_t restricted;                                                                /* byte 32 */
+  uint8_t cl_ord_id_optional[20];  /* bytes 0 to 19 */
+  uint8_t underlier[6];            /* bytes 20 to 25 */
+  uint8_t efid_optional[4];        /* bytes 26 to 29 */
+  uint8_t risk_group_id[2];        /* bytes 30 to 31 */
+  uint8_t restricted;              /* byte 32 */
 } SingleOrderRestrictedUnderlierStateMessage;
 
 /* any Single Order Restricted Underlier State Message at all: every byte one the checker chooses */
 static void any_single_order_restricted_underlier_state_message(SingleOrderRestrictedUnderlierStateMessage *record) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_single_order_restricted_underlier_state_cl_ord_id_optional[i] = arbitrary(); }
-  for (size_t i = 0; i < 6; i++) { record->underlier_single_order_restricted_underlier_state_underlier[i] = arbitrary(); }
-  for (size_t i = 0; i < 4; i++) { record->efid_single_order_restricted_underlier_state_efid_optional[i] = arbitrary(); }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_optional[i] = arbitrary(); }
+  for (size_t i = 0; i < 6; i++) { record->underlier[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->efid_optional[i] = arbitrary(); }
   for (size_t i = 0; i < 2; i++) { record->risk_group_id[i] = arbitrary(); }
   record->restricted = arbitrary();
 }
 
 /* Single Order Restricted Underlier State Message to the wire: 33 bytes from at, returning where the next byte goes */
 static size_t encode_single_order_restricted_underlier_state_message(const SingleOrderRestrictedUnderlierStateMessage *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id_single_order_restricted_underlier_state_cl_ord_id_optional[i]; }
-  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier_single_order_restricted_underlier_state_underlier[i]; }
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid_single_order_restricted_underlier_state_efid_optional[i]; }
+  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id_optional[i]; }
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid_optional[i]; }
   for (size_t i = 0; i < 2; i++) { wire[at++] = record->risk_group_id[i]; }
   wire[at++] = record->restricted;
 
@@ -2025,9 +2025,9 @@ static size_t encode_single_order_restricted_underlier_state_message(const Singl
 
 /* Single Order Restricted Underlier State Message off the wire: 33 bytes from at, returning where the next byte lies */
 static size_t decode_single_order_restricted_underlier_state_message(SingleOrderRestrictedUnderlierStateMessage *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_single_order_restricted_underlier_state_cl_ord_id_optional[i] = wire[at++]; }
-  for (size_t i = 0; i < 6; i++) { record->underlier_single_order_restricted_underlier_state_underlier[i] = wire[at++]; }
-  for (size_t i = 0; i < 4; i++) { record->efid_single_order_restricted_underlier_state_efid_optional[i] = wire[at++]; }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_optional[i] = wire[at++]; }
+  for (size_t i = 0; i < 6; i++) { record->underlier[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->efid_optional[i] = wire[at++]; }
   for (size_t i = 0; i < 2; i++) { record->risk_group_id[i] = wire[at++]; }
   record->restricted = wire[at++];
 
@@ -2036,9 +2036,9 @@ static size_t decode_single_order_restricted_underlier_state_message(SingleOrder
 
 /* what was read of Single Order Restricted Underlier State Message is what was written, byte for byte */
 static void equal_single_order_restricted_underlier_state_message(const SingleOrderRestrictedUnderlierStateMessage *read, const SingleOrderRestrictedUnderlierStateMessage *written) {
-  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id_single_order_restricted_underlier_state_cl_ord_id_optional[i] == written->cl_ord_id_single_order_restricted_underlier_state_cl_ord_id_optional[i]); }
-  for (size_t i = 0; i < 6; i++) { assert(read->underlier_single_order_restricted_underlier_state_underlier[i] == written->underlier_single_order_restricted_underlier_state_underlier[i]); }
-  for (size_t i = 0; i < 4; i++) { assert(read->efid_single_order_restricted_underlier_state_efid_optional[i] == written->efid_single_order_restricted_underlier_state_efid_optional[i]); }
+  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id_optional[i] == written->cl_ord_id_optional[i]); }
+  for (size_t i = 0; i < 6; i++) { assert(read->underlier[i] == written->underlier[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->efid_optional[i] == written->efid_optional[i]); }
   for (size_t i = 0; i < 2; i++) { assert(read->risk_group_id[i] == written->risk_group_id[i]); }
   assert(read->restricted == written->restricted);
 }
@@ -2119,19 +2119,19 @@ static void check_risk_settings_query_done_message(void) {
 
 /* RiskSettingsQueryRejectedMessage */
 typedef struct {
-  uint8_t cl_ord_id_risk_settings_query_rejected_cl_ord_id[20];  /* bytes 0 to 19 */
-  uint8_t reject_reason[2];                                      /* bytes 20 to 21 */
+  uint8_t cl_ord_id[20];     /* bytes 0 to 19 */
+  uint8_t reject_reason[2];  /* bytes 20 to 21 */
 } RiskSettingsQueryRejectedMessage;
 
 /* any Risk Settings Query Rejected Message at all: every byte one the checker chooses */
 static void any_risk_settings_query_rejected_message(RiskSettingsQueryRejectedMessage *record) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_risk_settings_query_rejected_cl_ord_id[i] = arbitrary(); }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = arbitrary(); }
   for (size_t i = 0; i < 2; i++) { record->reject_reason[i] = arbitrary(); }
 }
 
 /* Risk Settings Query Rejected Message to the wire: 22 bytes from at, returning where the next byte goes */
 static size_t encode_risk_settings_query_rejected_message(const RiskSettingsQueryRejectedMessage *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id_risk_settings_query_rejected_cl_ord_id[i]; }
+  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id[i]; }
   for (size_t i = 0; i < 2; i++) { wire[at++] = record->reject_reason[i]; }
 
   return at;
@@ -2139,7 +2139,7 @@ static size_t encode_risk_settings_query_rejected_message(const RiskSettingsQuer
 
 /* Risk Settings Query Rejected Message off the wire: 22 bytes from at, returning where the next byte lies */
 static size_t decode_risk_settings_query_rejected_message(RiskSettingsQueryRejectedMessage *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_risk_settings_query_rejected_cl_ord_id[i] = wire[at++]; }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = wire[at++]; }
   for (size_t i = 0; i < 2; i++) { record->reject_reason[i] = wire[at++]; }
 
   return at;
@@ -2147,7 +2147,7 @@ static size_t decode_risk_settings_query_rejected_message(RiskSettingsQueryRejec
 
 /* what was read of Risk Settings Query Rejected Message is what was written, byte for byte */
 static void equal_risk_settings_query_rejected_message(const RiskSettingsQueryRejectedMessage *read, const RiskSettingsQueryRejectedMessage *written) {
-  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id_risk_settings_query_rejected_cl_ord_id[i] == written->cl_ord_id_risk_settings_query_rejected_cl_ord_id[i]); }
+  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id[i] == written->cl_ord_id[i]); }
   for (size_t i = 0; i < 2; i++) { assert(read->reject_reason[i] == written->reject_reason[i]); }
 }
 
@@ -2173,27 +2173,27 @@ static void check_risk_settings_query_rejected_message(void) {
 
 /* ManualCPBreachTriggerRejectedMessage */
 typedef struct {
-  uint8_t cl_ord_id_manual_cp_breach_trigger_rejected_cl_ord_id[20];          /* bytes 0 to 19 */
-  uint8_t underlier_manual_cp_breach_trigger_rejected_underlier_optional[6];  /* bytes 20 to 25 */
-  uint8_t efid_manual_cp_breach_trigger_rejected_efid_optional[4];            /* bytes 26 to 29 */
-  uint8_t risk_group_id[2];                                                   /* bytes 30 to 31 */
-  uint8_t reject_reason[2];                                                   /* bytes 32 to 33 */
+  uint8_t cl_ord_id[20];          /* bytes 0 to 19 */
+  uint8_t underlier_optional[6];  /* bytes 20 to 25 */
+  uint8_t efid_optional[4];       /* bytes 26 to 29 */
+  uint8_t risk_group_id[2];       /* bytes 30 to 31 */
+  uint8_t reject_reason[2];       /* bytes 32 to 33 */
 } ManualCpBreachTriggerRejectedMessage;
 
 /* any Manual Cp Breach Trigger Rejected Message at all: every byte one the checker chooses */
 static void any_manual_cp_breach_trigger_rejected_message(ManualCpBreachTriggerRejectedMessage *record) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_manual_cp_breach_trigger_rejected_cl_ord_id[i] = arbitrary(); }
-  for (size_t i = 0; i < 6; i++) { record->underlier_manual_cp_breach_trigger_rejected_underlier_optional[i] = arbitrary(); }
-  for (size_t i = 0; i < 4; i++) { record->efid_manual_cp_breach_trigger_rejected_efid_optional[i] = arbitrary(); }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = arbitrary(); }
+  for (size_t i = 0; i < 6; i++) { record->underlier_optional[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->efid_optional[i] = arbitrary(); }
   for (size_t i = 0; i < 2; i++) { record->risk_group_id[i] = arbitrary(); }
   for (size_t i = 0; i < 2; i++) { record->reject_reason[i] = arbitrary(); }
 }
 
 /* Manual Cp Breach Trigger Rejected Message to the wire: 34 bytes from at, returning where the next byte goes */
 static size_t encode_manual_cp_breach_trigger_rejected_message(const ManualCpBreachTriggerRejectedMessage *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id_manual_cp_breach_trigger_rejected_cl_ord_id[i]; }
-  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier_manual_cp_breach_trigger_rejected_underlier_optional[i]; }
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid_manual_cp_breach_trigger_rejected_efid_optional[i]; }
+  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id[i]; }
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier_optional[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid_optional[i]; }
   for (size_t i = 0; i < 2; i++) { wire[at++] = record->risk_group_id[i]; }
   for (size_t i = 0; i < 2; i++) { wire[at++] = record->reject_reason[i]; }
 
@@ -2202,9 +2202,9 @@ static size_t encode_manual_cp_breach_trigger_rejected_message(const ManualCpBre
 
 /* Manual Cp Breach Trigger Rejected Message off the wire: 34 bytes from at, returning where the next byte lies */
 static size_t decode_manual_cp_breach_trigger_rejected_message(ManualCpBreachTriggerRejectedMessage *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_manual_cp_breach_trigger_rejected_cl_ord_id[i] = wire[at++]; }
-  for (size_t i = 0; i < 6; i++) { record->underlier_manual_cp_breach_trigger_rejected_underlier_optional[i] = wire[at++]; }
-  for (size_t i = 0; i < 4; i++) { record->efid_manual_cp_breach_trigger_rejected_efid_optional[i] = wire[at++]; }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = wire[at++]; }
+  for (size_t i = 0; i < 6; i++) { record->underlier_optional[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->efid_optional[i] = wire[at++]; }
   for (size_t i = 0; i < 2; i++) { record->risk_group_id[i] = wire[at++]; }
   for (size_t i = 0; i < 2; i++) { record->reject_reason[i] = wire[at++]; }
 
@@ -2213,9 +2213,9 @@ static size_t decode_manual_cp_breach_trigger_rejected_message(ManualCpBreachTri
 
 /* what was read of Manual Cp Breach Trigger Rejected Message is what was written, byte for byte */
 static void equal_manual_cp_breach_trigger_rejected_message(const ManualCpBreachTriggerRejectedMessage *read, const ManualCpBreachTriggerRejectedMessage *written) {
-  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id_manual_cp_breach_trigger_rejected_cl_ord_id[i] == written->cl_ord_id_manual_cp_breach_trigger_rejected_cl_ord_id[i]); }
-  for (size_t i = 0; i < 6; i++) { assert(read->underlier_manual_cp_breach_trigger_rejected_underlier_optional[i] == written->underlier_manual_cp_breach_trigger_rejected_underlier_optional[i]); }
-  for (size_t i = 0; i < 4; i++) { assert(read->efid_manual_cp_breach_trigger_rejected_efid_optional[i] == written->efid_manual_cp_breach_trigger_rejected_efid_optional[i]); }
+  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id[i] == written->cl_ord_id[i]); }
+  for (size_t i = 0; i < 6; i++) { assert(read->underlier_optional[i] == written->underlier_optional[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->efid_optional[i] == written->efid_optional[i]); }
   for (size_t i = 0; i < 2; i++) { assert(read->risk_group_id[i] == written->risk_group_id[i]); }
   for (size_t i = 0; i < 2; i++) { assert(read->reject_reason[i] == written->reject_reason[i]); }
 }
@@ -2242,21 +2242,21 @@ static void check_manual_cp_breach_trigger_rejected_message(void) {
 
 /* BreachClearRejectedMessage */
 typedef struct {
-  uint8_t cl_ord_id_breach_clear_rejected_cl_ord_id[20];  /* bytes 0 to 19 */
-  uint8_t breach_id_optional[8];                          /* bytes 20 to 27 */
-  uint8_t reject_reason[2];                               /* bytes 28 to 29 */
+  uint8_t cl_ord_id[20];          /* bytes 0 to 19 */
+  uint8_t breach_id_optional[8];  /* bytes 20 to 27 */
+  uint8_t reject_reason[2];       /* bytes 28 to 29 */
 } BreachClearRejectedMessage;
 
 /* any Breach Clear Rejected Message at all: every byte one the checker chooses */
 static void any_breach_clear_rejected_message(BreachClearRejectedMessage *record) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_breach_clear_rejected_cl_ord_id[i] = arbitrary(); }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->breach_id_optional[i] = arbitrary(); }
   for (size_t i = 0; i < 2; i++) { record->reject_reason[i] = arbitrary(); }
 }
 
 /* Breach Clear Rejected Message to the wire: 30 bytes from at, returning where the next byte goes */
 static size_t encode_breach_clear_rejected_message(const BreachClearRejectedMessage *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id_breach_clear_rejected_cl_ord_id[i]; }
+  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->breach_id_optional[i]; }
   for (size_t i = 0; i < 2; i++) { wire[at++] = record->reject_reason[i]; }
 
@@ -2265,7 +2265,7 @@ static size_t encode_breach_clear_rejected_message(const BreachClearRejectedMess
 
 /* Breach Clear Rejected Message off the wire: 30 bytes from at, returning where the next byte lies */
 static size_t decode_breach_clear_rejected_message(BreachClearRejectedMessage *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_breach_clear_rejected_cl_ord_id[i] = wire[at++]; }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->breach_id_optional[i] = wire[at++]; }
   for (size_t i = 0; i < 2; i++) { record->reject_reason[i] = wire[at++]; }
 
@@ -2274,7 +2274,7 @@ static size_t decode_breach_clear_rejected_message(BreachClearRejectedMessage *r
 
 /* what was read of Breach Clear Rejected Message is what was written, byte for byte */
 static void equal_breach_clear_rejected_message(const BreachClearRejectedMessage *read, const BreachClearRejectedMessage *written) {
-  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id_breach_clear_rejected_cl_ord_id[i] == written->cl_ord_id_breach_clear_rejected_cl_ord_id[i]); }
+  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id[i] == written->cl_ord_id[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->breach_id_optional[i] == written->breach_id_optional[i]); }
   for (size_t i = 0; i < 2; i++) { assert(read->reject_reason[i] == written->reject_reason[i]); }
 }
@@ -2355,31 +2355,31 @@ static void check_breach_cleared_message(void) {
 
 /* BreachClearAllAcceptedMessage */
 typedef struct {
-  uint8_t cl_ord_id_breach_clear_all_accepted_cl_ord_id[20];  /* bytes 0 to 19 */
+  uint8_t cl_ord_id[20];  /* bytes 0 to 19 */
 } BreachClearAllAcceptedMessage;
 
 /* any Breach Clear All Accepted Message at all: every byte one the checker chooses */
 static void any_breach_clear_all_accepted_message(BreachClearAllAcceptedMessage *record) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_breach_clear_all_accepted_cl_ord_id[i] = arbitrary(); }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = arbitrary(); }
 }
 
 /* Breach Clear All Accepted Message to the wire: 20 bytes from at, returning where the next byte goes */
 static size_t encode_breach_clear_all_accepted_message(const BreachClearAllAcceptedMessage *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id_breach_clear_all_accepted_cl_ord_id[i]; }
+  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id[i]; }
 
   return at;
 }
 
 /* Breach Clear All Accepted Message off the wire: 20 bytes from at, returning where the next byte lies */
 static size_t decode_breach_clear_all_accepted_message(BreachClearAllAcceptedMessage *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_breach_clear_all_accepted_cl_ord_id[i] = wire[at++]; }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = wire[at++]; }
 
   return at;
 }
 
 /* what was read of Breach Clear All Accepted Message is what was written, byte for byte */
 static void equal_breach_clear_all_accepted_message(const BreachClearAllAcceptedMessage *read, const BreachClearAllAcceptedMessage *written) {
-  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id_breach_clear_all_accepted_cl_ord_id[i] == written->cl_ord_id_breach_clear_all_accepted_cl_ord_id[i]); }
+  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id[i] == written->cl_ord_id[i]); }
 }
 
 /* Breach Clear All Accepted Message: written and read back, then read and written back */
@@ -2404,19 +2404,19 @@ static void check_breach_clear_all_accepted_message(void) {
 
 /* BreachClearAllRejectedMessage */
 typedef struct {
-  uint8_t cl_ord_id_breach_clear_all_rejected_cl_ord_id[20];  /* bytes 0 to 19 */
-  uint8_t reject_reason[2];                                   /* bytes 20 to 21 */
+  uint8_t cl_ord_id[20];     /* bytes 0 to 19 */
+  uint8_t reject_reason[2];  /* bytes 20 to 21 */
 } BreachClearAllRejectedMessage;
 
 /* any Breach Clear All Rejected Message at all: every byte one the checker chooses */
 static void any_breach_clear_all_rejected_message(BreachClearAllRejectedMessage *record) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_breach_clear_all_rejected_cl_ord_id[i] = arbitrary(); }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = arbitrary(); }
   for (size_t i = 0; i < 2; i++) { record->reject_reason[i] = arbitrary(); }
 }
 
 /* Breach Clear All Rejected Message to the wire: 22 bytes from at, returning where the next byte goes */
 static size_t encode_breach_clear_all_rejected_message(const BreachClearAllRejectedMessage *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id_breach_clear_all_rejected_cl_ord_id[i]; }
+  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id[i]; }
   for (size_t i = 0; i < 2; i++) { wire[at++] = record->reject_reason[i]; }
 
   return at;
@@ -2424,7 +2424,7 @@ static size_t encode_breach_clear_all_rejected_message(const BreachClearAllRejec
 
 /* Breach Clear All Rejected Message off the wire: 22 bytes from at, returning where the next byte lies */
 static size_t decode_breach_clear_all_rejected_message(BreachClearAllRejectedMessage *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_breach_clear_all_rejected_cl_ord_id[i] = wire[at++]; }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = wire[at++]; }
   for (size_t i = 0; i < 2; i++) { record->reject_reason[i] = wire[at++]; }
 
   return at;
@@ -2432,7 +2432,7 @@ static size_t decode_breach_clear_all_rejected_message(BreachClearAllRejectedMes
 
 /* what was read of Breach Clear All Rejected Message is what was written, byte for byte */
 static void equal_breach_clear_all_rejected_message(const BreachClearAllRejectedMessage *read, const BreachClearAllRejectedMessage *written) {
-  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id_breach_clear_all_rejected_cl_ord_id[i] == written->cl_ord_id_breach_clear_all_rejected_cl_ord_id[i]); }
+  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id[i] == written->cl_ord_id[i]); }
   for (size_t i = 0; i < 2; i++) { assert(read->reject_reason[i] == written->reject_reason[i]); }
 }
 
@@ -2458,41 +2458,41 @@ static void check_breach_clear_all_rejected_message(void) {
 
 /* BreachClearAllByEFIDOrUnderlierAcceptedMessage */
 typedef struct {
-  uint8_t cl_ord_id_breach_clear_all_by_efid_or_underlier_accepted_cl_ord_id[20];          /* bytes 0 to 19 */
-  uint8_t underlier_breach_clear_all_by_efid_or_underlier_accepted_underlier_optional[6];  /* bytes 20 to 25 */
-  uint8_t efid_breach_clear_all_by_efid_or_underlier_accepted_efid_optional[4];            /* bytes 26 to 29 */
+  uint8_t cl_ord_id[20];          /* bytes 0 to 19 */
+  uint8_t underlier_optional[6];  /* bytes 20 to 25 */
+  uint8_t efid_optional[4];       /* bytes 26 to 29 */
 } BreachClearAllByEfidOrUnderlierAcceptedMessage;
 
 /* any Breach Clear All By Efid Or Underlier Accepted Message at all: every byte one the checker chooses */
 static void any_breach_clear_all_by_efid_or_underlier_accepted_message(BreachClearAllByEfidOrUnderlierAcceptedMessage *record) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_breach_clear_all_by_efid_or_underlier_accepted_cl_ord_id[i] = arbitrary(); }
-  for (size_t i = 0; i < 6; i++) { record->underlier_breach_clear_all_by_efid_or_underlier_accepted_underlier_optional[i] = arbitrary(); }
-  for (size_t i = 0; i < 4; i++) { record->efid_breach_clear_all_by_efid_or_underlier_accepted_efid_optional[i] = arbitrary(); }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = arbitrary(); }
+  for (size_t i = 0; i < 6; i++) { record->underlier_optional[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->efid_optional[i] = arbitrary(); }
 }
 
 /* Breach Clear All By Efid Or Underlier Accepted Message to the wire: 30 bytes from at, returning where the next byte goes */
 static size_t encode_breach_clear_all_by_efid_or_underlier_accepted_message(const BreachClearAllByEfidOrUnderlierAcceptedMessage *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id_breach_clear_all_by_efid_or_underlier_accepted_cl_ord_id[i]; }
-  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier_breach_clear_all_by_efid_or_underlier_accepted_underlier_optional[i]; }
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid_breach_clear_all_by_efid_or_underlier_accepted_efid_optional[i]; }
+  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id[i]; }
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier_optional[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid_optional[i]; }
 
   return at;
 }
 
 /* Breach Clear All By Efid Or Underlier Accepted Message off the wire: 30 bytes from at, returning where the next byte lies */
 static size_t decode_breach_clear_all_by_efid_or_underlier_accepted_message(BreachClearAllByEfidOrUnderlierAcceptedMessage *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_breach_clear_all_by_efid_or_underlier_accepted_cl_ord_id[i] = wire[at++]; }
-  for (size_t i = 0; i < 6; i++) { record->underlier_breach_clear_all_by_efid_or_underlier_accepted_underlier_optional[i] = wire[at++]; }
-  for (size_t i = 0; i < 4; i++) { record->efid_breach_clear_all_by_efid_or_underlier_accepted_efid_optional[i] = wire[at++]; }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = wire[at++]; }
+  for (size_t i = 0; i < 6; i++) { record->underlier_optional[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->efid_optional[i] = wire[at++]; }
 
   return at;
 }
 
 /* what was read of Breach Clear All By Efid Or Underlier Accepted Message is what was written, byte for byte */
 static void equal_breach_clear_all_by_efid_or_underlier_accepted_message(const BreachClearAllByEfidOrUnderlierAcceptedMessage *read, const BreachClearAllByEfidOrUnderlierAcceptedMessage *written) {
-  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id_breach_clear_all_by_efid_or_underlier_accepted_cl_ord_id[i] == written->cl_ord_id_breach_clear_all_by_efid_or_underlier_accepted_cl_ord_id[i]); }
-  for (size_t i = 0; i < 6; i++) { assert(read->underlier_breach_clear_all_by_efid_or_underlier_accepted_underlier_optional[i] == written->underlier_breach_clear_all_by_efid_or_underlier_accepted_underlier_optional[i]); }
-  for (size_t i = 0; i < 4; i++) { assert(read->efid_breach_clear_all_by_efid_or_underlier_accepted_efid_optional[i] == written->efid_breach_clear_all_by_efid_or_underlier_accepted_efid_optional[i]); }
+  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id[i] == written->cl_ord_id[i]); }
+  for (size_t i = 0; i < 6; i++) { assert(read->underlier_optional[i] == written->underlier_optional[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->efid_optional[i] == written->efid_optional[i]); }
 }
 
 /* Breach Clear All By Efid Or Underlier Accepted Message: written and read back, then read and written back */
@@ -2517,25 +2517,25 @@ static void check_breach_clear_all_by_efid_or_underlier_accepted_message(void) {
 
 /* BreachClearAllByEFIDOrUnderlierRejectedMessage */
 typedef struct {
-  uint8_t cl_ord_id_breach_clear_all_by_efid_or_underlier_rejected_cl_ord_id[20];          /* bytes 0 to 19 */
-  uint8_t underlier_breach_clear_all_by_efid_or_underlier_rejected_underlier_optional[6];  /* bytes 20 to 25 */
-  uint8_t efid_breach_clear_all_by_efid_or_underlier_rejected_efid_optional[4];            /* bytes 26 to 29 */
-  uint8_t reject_reason[2];                                                                /* bytes 30 to 31 */
+  uint8_t cl_ord_id[20];          /* bytes 0 to 19 */
+  uint8_t underlier_optional[6];  /* bytes 20 to 25 */
+  uint8_t efid_optional[4];       /* bytes 26 to 29 */
+  uint8_t reject_reason[2];       /* bytes 30 to 31 */
 } BreachClearAllByEfidOrUnderlierRejectedMessage;
 
 /* any Breach Clear All By Efid Or Underlier Rejected Message at all: every byte one the checker chooses */
 static void any_breach_clear_all_by_efid_or_underlier_rejected_message(BreachClearAllByEfidOrUnderlierRejectedMessage *record) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_breach_clear_all_by_efid_or_underlier_rejected_cl_ord_id[i] = arbitrary(); }
-  for (size_t i = 0; i < 6; i++) { record->underlier_breach_clear_all_by_efid_or_underlier_rejected_underlier_optional[i] = arbitrary(); }
-  for (size_t i = 0; i < 4; i++) { record->efid_breach_clear_all_by_efid_or_underlier_rejected_efid_optional[i] = arbitrary(); }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = arbitrary(); }
+  for (size_t i = 0; i < 6; i++) { record->underlier_optional[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->efid_optional[i] = arbitrary(); }
   for (size_t i = 0; i < 2; i++) { record->reject_reason[i] = arbitrary(); }
 }
 
 /* Breach Clear All By Efid Or Underlier Rejected Message to the wire: 32 bytes from at, returning where the next byte goes */
 static size_t encode_breach_clear_all_by_efid_or_underlier_rejected_message(const BreachClearAllByEfidOrUnderlierRejectedMessage *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id_breach_clear_all_by_efid_or_underlier_rejected_cl_ord_id[i]; }
-  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier_breach_clear_all_by_efid_or_underlier_rejected_underlier_optional[i]; }
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid_breach_clear_all_by_efid_or_underlier_rejected_efid_optional[i]; }
+  for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id[i]; }
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier_optional[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid_optional[i]; }
   for (size_t i = 0; i < 2; i++) { wire[at++] = record->reject_reason[i]; }
 
   return at;
@@ -2543,9 +2543,9 @@ static size_t encode_breach_clear_all_by_efid_or_underlier_rejected_message(cons
 
 /* Breach Clear All By Efid Or Underlier Rejected Message off the wire: 32 bytes from at, returning where the next byte lies */
 static size_t decode_breach_clear_all_by_efid_or_underlier_rejected_message(BreachClearAllByEfidOrUnderlierRejectedMessage *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 20; i++) { record->cl_ord_id_breach_clear_all_by_efid_or_underlier_rejected_cl_ord_id[i] = wire[at++]; }
-  for (size_t i = 0; i < 6; i++) { record->underlier_breach_clear_all_by_efid_or_underlier_rejected_underlier_optional[i] = wire[at++]; }
-  for (size_t i = 0; i < 4; i++) { record->efid_breach_clear_all_by_efid_or_underlier_rejected_efid_optional[i] = wire[at++]; }
+  for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = wire[at++]; }
+  for (size_t i = 0; i < 6; i++) { record->underlier_optional[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->efid_optional[i] = wire[at++]; }
   for (size_t i = 0; i < 2; i++) { record->reject_reason[i] = wire[at++]; }
 
   return at;
@@ -2553,9 +2553,9 @@ static size_t decode_breach_clear_all_by_efid_or_underlier_rejected_message(Brea
 
 /* what was read of Breach Clear All By Efid Or Underlier Rejected Message is what was written, byte for byte */
 static void equal_breach_clear_all_by_efid_or_underlier_rejected_message(const BreachClearAllByEfidOrUnderlierRejectedMessage *read, const BreachClearAllByEfidOrUnderlierRejectedMessage *written) {
-  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id_breach_clear_all_by_efid_or_underlier_rejected_cl_ord_id[i] == written->cl_ord_id_breach_clear_all_by_efid_or_underlier_rejected_cl_ord_id[i]); }
-  for (size_t i = 0; i < 6; i++) { assert(read->underlier_breach_clear_all_by_efid_or_underlier_rejected_underlier_optional[i] == written->underlier_breach_clear_all_by_efid_or_underlier_rejected_underlier_optional[i]); }
-  for (size_t i = 0; i < 4; i++) { assert(read->efid_breach_clear_all_by_efid_or_underlier_rejected_efid_optional[i] == written->efid_breach_clear_all_by_efid_or_underlier_rejected_efid_optional[i]); }
+  for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id[i] == written->cl_ord_id[i]); }
+  for (size_t i = 0; i < 6; i++) { assert(read->underlier_optional[i] == written->underlier_optional[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->efid_optional[i] == written->efid_optional[i]); }
   for (size_t i = 0; i < 2; i++) { assert(read->reject_reason[i] == written->reject_reason[i]); }
 }
 

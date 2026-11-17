@@ -294,7 +294,7 @@ typedef struct {
   uint8_t source_time_micro_secs[2];  /* bytes 12 to 13 */
   uint8_t scope;                      /* byte 14 */
   uint8_t title[80];                  /* bytes 15 to 94 */
-  uint8_t text_ascii_str_1000[1000];  /* bytes 95 to 1094 */
+  uint8_t mail_text[1000];            /* bytes 95 to 1094 */
   uint8_t reserved_3[3];              /* bytes 1095 to 1097 */
 } MailMessage;
 
@@ -306,7 +306,7 @@ static void any_mail_message(MailMessage *record) {
   for (size_t i = 0; i < 2; i++) { record->source_time_micro_secs[i] = arbitrary(); }
   record->scope = arbitrary();
   for (size_t i = 0; i < 80; i++) { record->title[i] = arbitrary(); }
-  for (size_t i = 0; i < 1000; i++) { record->text_ascii_str_1000[i] = arbitrary(); }
+  for (size_t i = 0; i < 1000; i++) { record->mail_text[i] = arbitrary(); }
   for (size_t i = 0; i < 3; i++) { record->reserved_3[i] = arbitrary(); }
 }
 
@@ -318,7 +318,7 @@ static size_t encode_mail_message(const MailMessage *record, uint8_t *wire, size
   for (size_t i = 0; i < 2; i++) { wire[at++] = record->source_time_micro_secs[i]; }
   wire[at++] = record->scope;
   for (size_t i = 0; i < 80; i++) { wire[at++] = record->title[i]; }
-  for (size_t i = 0; i < 1000; i++) { wire[at++] = record->text_ascii_str_1000[i]; }
+  for (size_t i = 0; i < 1000; i++) { wire[at++] = record->mail_text[i]; }
   for (size_t i = 0; i < 3; i++) { wire[at++] = record->reserved_3[i]; }
 
   return at;
@@ -332,7 +332,7 @@ static size_t decode_mail_message(MailMessage *record, const uint8_t *wire, size
   for (size_t i = 0; i < 2; i++) { record->source_time_micro_secs[i] = wire[at++]; }
   record->scope = wire[at++];
   for (size_t i = 0; i < 80; i++) { record->title[i] = wire[at++]; }
-  for (size_t i = 0; i < 1000; i++) { record->text_ascii_str_1000[i] = wire[at++]; }
+  for (size_t i = 0; i < 1000; i++) { record->mail_text[i] = wire[at++]; }
   for (size_t i = 0; i < 3; i++) { record->reserved_3[i] = wire[at++]; }
 
   return at;
@@ -346,7 +346,7 @@ static void equal_mail_message(const MailMessage *read, const MailMessage *writt
   for (size_t i = 0; i < 2; i++) { assert(read->source_time_micro_secs[i] == written->source_time_micro_secs[i]); }
   assert(read->scope == written->scope);
   for (size_t i = 0; i < 80; i++) { assert(read->title[i] == written->title[i]); }
-  for (size_t i = 0; i < 1000; i++) { assert(read->text_ascii_str_1000[i] == written->text_ascii_str_1000[i]); }
+  for (size_t i = 0; i < 1000; i++) { assert(read->mail_text[i] == written->mail_text[i]); }
   for (size_t i = 0; i < 3; i++) { assert(read->reserved_3[i] == written->reserved_3[i]); }
 }
 
@@ -582,7 +582,7 @@ typedef struct {
   uint8_t symbol_index[4];                        /* bytes 0 to 3 */
   uint8_t source_time[4];                         /* bytes 4 to 7 */
   uint8_t source_seq_num[4];                      /* bytes 8 to 11 */
-  uint8_t date_binary_int_4[4];                   /* bytes 12 to 15 */
+  uint8_t date[4];                                /* bytes 12 to 15 */
   uint8_t multiplier[4];                          /* bytes 16 to 19 */
   uint8_t accumulated_interest[4];                /* bytes 20 to 23 */
   uint8_t opening_price[4];                       /* bytes 24 to 27 */
@@ -690,7 +690,7 @@ static void any_session_summary_message(SessionSummaryMessage *record) {
   for (size_t i = 0; i < 4; i++) { record->symbol_index[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->source_time[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->source_seq_num[i] = arbitrary(); }
-  for (size_t i = 0; i < 4; i++) { record->date_binary_int_4[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->date[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->multiplier[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->accumulated_interest[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->opening_price[i] = arbitrary(); }
@@ -798,7 +798,7 @@ static size_t encode_session_summary_message(const SessionSummaryMessage *record
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->symbol_index[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->source_time[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->source_seq_num[i]; }
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->date_binary_int_4[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->date[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->multiplier[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->accumulated_interest[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->opening_price[i]; }
@@ -908,7 +908,7 @@ static size_t decode_session_summary_message(SessionSummaryMessage *record, cons
   for (size_t i = 0; i < 4; i++) { record->symbol_index[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->source_time[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->source_seq_num[i] = wire[at++]; }
-  for (size_t i = 0; i < 4; i++) { record->date_binary_int_4[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->date[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->multiplier[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->accumulated_interest[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->opening_price[i] = wire[at++]; }
@@ -1018,7 +1018,7 @@ static void equal_session_summary_message(const SessionSummaryMessage *read, con
   for (size_t i = 0; i < 4; i++) { assert(read->symbol_index[i] == written->symbol_index[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->source_time[i] == written->source_time[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->source_seq_num[i] == written->source_seq_num[i]); }
-  for (size_t i = 0; i < 4; i++) { assert(read->date_binary_int_4[i] == written->date_binary_int_4[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->date[i] == written->date[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->multiplier[i] == written->multiplier[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->accumulated_interest[i] == written->accumulated_interest[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->opening_price[i] == written->opening_price[i]); }
@@ -1371,7 +1371,7 @@ typedef struct {
   uint8_t source_time[4];             /* bytes 8 to 11 */
   uint8_t system_id[4];               /* bytes 12 to 15 */
   uint8_t source_time_micro_secs[2];  /* bytes 16 to 17 */
-  uint8_t text_ascii_ch_100[100];     /* bytes 18 to 117 */
+  uint8_t text[100];                  /* bytes 18 to 117 */
   uint8_t authority;                  /* byte 118 */
   uint8_t ss_market_maker;            /* byte 119 */
   uint8_t ss_non_market_maker;        /* byte 120 */
@@ -1385,7 +1385,7 @@ static void any_short_sale_change_message(ShortSaleChangeMessage *record) {
   for (size_t i = 0; i < 4; i++) { record->source_time[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->system_id[i] = arbitrary(); }
   for (size_t i = 0; i < 2; i++) { record->source_time_micro_secs[i] = arbitrary(); }
-  for (size_t i = 0; i < 100; i++) { record->text_ascii_ch_100[i] = arbitrary(); }
+  for (size_t i = 0; i < 100; i++) { record->text[i] = arbitrary(); }
   record->authority = arbitrary();
   record->ss_market_maker = arbitrary();
   record->ss_non_market_maker = arbitrary();
@@ -1399,7 +1399,7 @@ static size_t encode_short_sale_change_message(const ShortSaleChangeMessage *rec
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->source_time[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->system_id[i]; }
   for (size_t i = 0; i < 2; i++) { wire[at++] = record->source_time_micro_secs[i]; }
-  for (size_t i = 0; i < 100; i++) { wire[at++] = record->text_ascii_ch_100[i]; }
+  for (size_t i = 0; i < 100; i++) { wire[at++] = record->text[i]; }
   wire[at++] = record->authority;
   wire[at++] = record->ss_market_maker;
   wire[at++] = record->ss_non_market_maker;
@@ -1415,7 +1415,7 @@ static size_t decode_short_sale_change_message(ShortSaleChangeMessage *record, c
   for (size_t i = 0; i < 4; i++) { record->source_time[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->system_id[i] = wire[at++]; }
   for (size_t i = 0; i < 2; i++) { record->source_time_micro_secs[i] = wire[at++]; }
-  for (size_t i = 0; i < 100; i++) { record->text_ascii_ch_100[i] = wire[at++]; }
+  for (size_t i = 0; i < 100; i++) { record->text[i] = wire[at++]; }
   record->authority = wire[at++];
   record->ss_market_maker = wire[at++];
   record->ss_non_market_maker = wire[at++];
@@ -1431,7 +1431,7 @@ static void equal_short_sale_change_message(const ShortSaleChangeMessage *read, 
   for (size_t i = 0; i < 4; i++) { assert(read->source_time[i] == written->source_time[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->system_id[i] == written->system_id[i]); }
   for (size_t i = 0; i < 2; i++) { assert(read->source_time_micro_secs[i] == written->source_time_micro_secs[i]); }
-  for (size_t i = 0; i < 100; i++) { assert(read->text_ascii_ch_100[i] == written->text_ascii_ch_100[i]); }
+  for (size_t i = 0; i < 100; i++) { assert(read->text[i] == written->text[i]); }
   assert(read->authority == written->authority);
   assert(read->ss_market_maker == written->ss_market_maker);
   assert(read->ss_non_market_maker == written->ss_non_market_maker);
@@ -1463,7 +1463,7 @@ typedef struct {
   uint8_t isin_code[12];                       /* bytes 0 to 11 */
   uint8_t date_of_first_quotation[8];          /* bytes 12 to 19 */
   uint8_t short_name[16];                      /* bytes 20 to 35 */
-  uint8_t date_ascii_str_8[8];                 /* bytes 36 to 43 */
+  uint8_t start_date[8];                       /* bytes 36 to 43 */
   uint8_t underlying_isin_code[12];            /* bytes 44 to 55 */
   uint8_t treasury_bond_1_isin_code[12];       /* bytes 56 to 67 */
   uint8_t conversion_coefficient_factor_1[9];  /* bytes 68 to 76 */
@@ -1483,7 +1483,7 @@ static void any_treasury_bond_futures_data(TreasuryBondFuturesData *record) {
   for (size_t i = 0; i < 12; i++) { record->isin_code[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->date_of_first_quotation[i] = arbitrary(); }
   for (size_t i = 0; i < 16; i++) { record->short_name[i] = arbitrary(); }
-  for (size_t i = 0; i < 8; i++) { record->date_ascii_str_8[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->start_date[i] = arbitrary(); }
   for (size_t i = 0; i < 12; i++) { record->underlying_isin_code[i] = arbitrary(); }
   for (size_t i = 0; i < 12; i++) { record->treasury_bond_1_isin_code[i] = arbitrary(); }
   for (size_t i = 0; i < 9; i++) { record->conversion_coefficient_factor_1[i] = arbitrary(); }
@@ -1503,7 +1503,7 @@ static size_t encode_treasury_bond_futures_data(const TreasuryBondFuturesData *r
   for (size_t i = 0; i < 12; i++) { wire[at++] = record->isin_code[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->date_of_first_quotation[i]; }
   for (size_t i = 0; i < 16; i++) { wire[at++] = record->short_name[i]; }
-  for (size_t i = 0; i < 8; i++) { wire[at++] = record->date_ascii_str_8[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->start_date[i]; }
   for (size_t i = 0; i < 12; i++) { wire[at++] = record->underlying_isin_code[i]; }
   for (size_t i = 0; i < 12; i++) { wire[at++] = record->treasury_bond_1_isin_code[i]; }
   for (size_t i = 0; i < 9; i++) { wire[at++] = record->conversion_coefficient_factor_1[i]; }
@@ -1525,7 +1525,7 @@ static size_t decode_treasury_bond_futures_data(TreasuryBondFuturesData *record,
   for (size_t i = 0; i < 12; i++) { record->isin_code[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->date_of_first_quotation[i] = wire[at++]; }
   for (size_t i = 0; i < 16; i++) { record->short_name[i] = wire[at++]; }
-  for (size_t i = 0; i < 8; i++) { record->date_ascii_str_8[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->start_date[i] = wire[at++]; }
   for (size_t i = 0; i < 12; i++) { record->underlying_isin_code[i] = wire[at++]; }
   for (size_t i = 0; i < 12; i++) { record->treasury_bond_1_isin_code[i] = wire[at++]; }
   for (size_t i = 0; i < 9; i++) { record->conversion_coefficient_factor_1[i] = wire[at++]; }
@@ -1547,7 +1547,7 @@ static void equal_treasury_bond_futures_data(const TreasuryBondFuturesData *read
   for (size_t i = 0; i < 12; i++) { assert(read->isin_code[i] == written->isin_code[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->date_of_first_quotation[i] == written->date_of_first_quotation[i]); }
   for (size_t i = 0; i < 16; i++) { assert(read->short_name[i] == written->short_name[i]); }
-  for (size_t i = 0; i < 8; i++) { assert(read->date_ascii_str_8[i] == written->date_ascii_str_8[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->start_date[i] == written->start_date[i]); }
   for (size_t i = 0; i < 12; i++) { assert(read->underlying_isin_code[i] == written->underlying_isin_code[i]); }
   for (size_t i = 0; i < 12; i++) { assert(read->treasury_bond_1_isin_code[i] == written->treasury_bond_1_isin_code[i]); }
   for (size_t i = 0; i < 9; i++) { assert(read->conversion_coefficient_factor_1[i] == written->conversion_coefficient_factor_1[i]); }
@@ -1584,19 +1584,19 @@ static void check_treasury_bond_futures_data(void) {
 
 /* Body Message for InternalMsgType field = 03, which informs about the selected values for PRIIPs key information for the given trading day and includes the link to the issuer's website */
 typedef struct {
-  uint8_t isin_code[12];                      /* bytes 0 to 11 */
-  uint8_t type_of_instrument_ascii_str_4[4];  /* bytes 12 to 15 */
-  uint8_t kid_version[10];                    /* bytes 16 to 25 */
-  uint8_t kid_issue_date[8];                  /* bytes 26 to 33 */
-  uint8_t value_at_risk;                      /* byte 34 */
-  uint8_t holding_period[3];                  /* bytes 35 to 37 */
-  uint8_t priip_kid_url[182];                 /* bytes 38 to 219 */
+  uint8_t isin_code[12];              /* bytes 0 to 11 */
+  uint8_t kid_type_of_instrument[4];  /* bytes 12 to 15 */
+  uint8_t kid_version[10];            /* bytes 16 to 25 */
+  uint8_t kid_issue_date[8];          /* bytes 26 to 33 */
+  uint8_t value_at_risk;              /* byte 34 */
+  uint8_t holding_period[3];          /* bytes 35 to 37 */
+  uint8_t priip_kid_url[182];         /* bytes 38 to 219 */
 } Kid;
 
 /* any Kid at all: every byte one the checker chooses */
 static void any_kid(Kid *record) {
   for (size_t i = 0; i < 12; i++) { record->isin_code[i] = arbitrary(); }
-  for (size_t i = 0; i < 4; i++) { record->type_of_instrument_ascii_str_4[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->kid_type_of_instrument[i] = arbitrary(); }
   for (size_t i = 0; i < 10; i++) { record->kid_version[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->kid_issue_date[i] = arbitrary(); }
   record->value_at_risk = arbitrary();
@@ -1607,7 +1607,7 @@ static void any_kid(Kid *record) {
 /* Kid to the wire: 220 bytes from at, returning where the next byte goes */
 static size_t encode_kid(const Kid *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 12; i++) { wire[at++] = record->isin_code[i]; }
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->type_of_instrument_ascii_str_4[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->kid_type_of_instrument[i]; }
   for (size_t i = 0; i < 10; i++) { wire[at++] = record->kid_version[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->kid_issue_date[i]; }
   wire[at++] = record->value_at_risk;
@@ -1620,7 +1620,7 @@ static size_t encode_kid(const Kid *record, uint8_t *wire, size_t at) {
 /* Kid off the wire: 220 bytes from at, returning where the next byte lies */
 static size_t decode_kid(Kid *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 12; i++) { record->isin_code[i] = wire[at++]; }
-  for (size_t i = 0; i < 4; i++) { record->type_of_instrument_ascii_str_4[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->kid_type_of_instrument[i] = wire[at++]; }
   for (size_t i = 0; i < 10; i++) { record->kid_version[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->kid_issue_date[i] = wire[at++]; }
   record->value_at_risk = wire[at++];
@@ -1633,7 +1633,7 @@ static size_t decode_kid(Kid *record, const uint8_t *wire, size_t at) {
 /* what was read of Kid is what was written, byte for byte */
 static void equal_kid(const Kid *read, const Kid *written) {
   for (size_t i = 0; i < 12; i++) { assert(read->isin_code[i] == written->isin_code[i]); }
-  for (size_t i = 0; i < 4; i++) { assert(read->type_of_instrument_ascii_str_4[i] == written->type_of_instrument_ascii_str_4[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->kid_type_of_instrument[i] == written->kid_type_of_instrument[i]); }
   for (size_t i = 0; i < 10; i++) { assert(read->kid_version[i] == written->kid_version[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->kid_issue_date[i] == written->kid_issue_date[i]); }
   assert(read->value_at_risk == written->value_at_risk);

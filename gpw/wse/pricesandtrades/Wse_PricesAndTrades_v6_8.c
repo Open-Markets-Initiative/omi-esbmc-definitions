@@ -222,7 +222,7 @@ typedef struct {
   uint8_t publication_date_time[27];          /* bytes 87 to 113 */
   uint8_t instrument_id_code_type[4];         /* bytes 114 to 117 */
   uint8_t instrument_id_code[12];             /* bytes 118 to 129 */
-  uint8_t price_ascii_ch_20[20];              /* bytes 130 to 149 */
+  uint8_t traded_price[20];                   /* bytes 130 to 149 */
   uint8_t quantity[20];                       /* bytes 150 to 169 */
   uint8_t notional_amount[20];                /* bytes 170 to 189 */
   uint8_t notional_currency[3];               /* bytes 190 to 192 */
@@ -265,7 +265,7 @@ static void any_trade_full_information_message(TradeFullInformationMessage *reco
   for (size_t i = 0; i < 27; i++) { record->publication_date_time[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->instrument_id_code_type[i] = arbitrary(); }
   for (size_t i = 0; i < 12; i++) { record->instrument_id_code[i] = arbitrary(); }
-  for (size_t i = 0; i < 20; i++) { record->price_ascii_ch_20[i] = arbitrary(); }
+  for (size_t i = 0; i < 20; i++) { record->traded_price[i] = arbitrary(); }
   for (size_t i = 0; i < 20; i++) { record->quantity[i] = arbitrary(); }
   for (size_t i = 0; i < 20; i++) { record->notional_amount[i] = arbitrary(); }
   for (size_t i = 0; i < 3; i++) { record->notional_currency[i] = arbitrary(); }
@@ -308,7 +308,7 @@ static size_t encode_trade_full_information_message(const TradeFullInformationMe
   for (size_t i = 0; i < 27; i++) { wire[at++] = record->publication_date_time[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->instrument_id_code_type[i]; }
   for (size_t i = 0; i < 12; i++) { wire[at++] = record->instrument_id_code[i]; }
-  for (size_t i = 0; i < 20; i++) { wire[at++] = record->price_ascii_ch_20[i]; }
+  for (size_t i = 0; i < 20; i++) { wire[at++] = record->traded_price[i]; }
   for (size_t i = 0; i < 20; i++) { wire[at++] = record->quantity[i]; }
   for (size_t i = 0; i < 20; i++) { wire[at++] = record->notional_amount[i]; }
   for (size_t i = 0; i < 3; i++) { wire[at++] = record->notional_currency[i]; }
@@ -353,7 +353,7 @@ static size_t decode_trade_full_information_message(TradeFullInformationMessage 
   for (size_t i = 0; i < 27; i++) { record->publication_date_time[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->instrument_id_code_type[i] = wire[at++]; }
   for (size_t i = 0; i < 12; i++) { record->instrument_id_code[i] = wire[at++]; }
-  for (size_t i = 0; i < 20; i++) { record->price_ascii_ch_20[i] = wire[at++]; }
+  for (size_t i = 0; i < 20; i++) { record->traded_price[i] = wire[at++]; }
   for (size_t i = 0; i < 20; i++) { record->quantity[i] = wire[at++]; }
   for (size_t i = 0; i < 20; i++) { record->notional_amount[i] = wire[at++]; }
   for (size_t i = 0; i < 3; i++) { record->notional_currency[i] = wire[at++]; }
@@ -398,7 +398,7 @@ static void equal_trade_full_information_message(const TradeFullInformationMessa
   for (size_t i = 0; i < 27; i++) { assert(read->publication_date_time[i] == written->publication_date_time[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->instrument_id_code_type[i] == written->instrument_id_code_type[i]); }
   for (size_t i = 0; i < 12; i++) { assert(read->instrument_id_code[i] == written->instrument_id_code[i]); }
-  for (size_t i = 0; i < 20; i++) { assert(read->price_ascii_ch_20[i] == written->price_ascii_ch_20[i]); }
+  for (size_t i = 0; i < 20; i++) { assert(read->traded_price[i] == written->traded_price[i]); }
   for (size_t i = 0; i < 20; i++) { assert(read->quantity[i] == written->quantity[i]); }
   for (size_t i = 0; i < 20; i++) { assert(read->notional_amount[i] == written->notional_amount[i]); }
   for (size_t i = 0; i < 3; i++) { assert(read->notional_currency[i] == written->notional_currency[i]); }
@@ -439,7 +439,7 @@ typedef struct {
   uint8_t symbol_index[4];            /* bytes 0 to 3 */
   uint8_t source_time[4];             /* bytes 4 to 7 */
   uint8_t source_seq_num[4];          /* bytes 8 to 11 */
-  uint8_t price_binary_int_4[4];      /* bytes 12 to 15 */
+  uint8_t price[4];                   /* bytes 12 to 15 */
   uint8_t highest_price[4];           /* bytes 16 to 19 */
   uint8_t lowest_price[4];            /* bytes 20 to 23 */
   uint8_t variation_last_price[4];    /* bytes 24 to 27 */
@@ -456,7 +456,7 @@ static void any_price_update_message(PriceUpdateMessage *record) {
   for (size_t i = 0; i < 4; i++) { record->symbol_index[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->source_time[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->source_seq_num[i] = arbitrary(); }
-  for (size_t i = 0; i < 4; i++) { record->price_binary_int_4[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->price[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->highest_price[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->lowest_price[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->variation_last_price[i] = arbitrary(); }
@@ -473,7 +473,7 @@ static size_t encode_price_update_message(const PriceUpdateMessage *record, uint
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->symbol_index[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->source_time[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->source_seq_num[i]; }
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->price_binary_int_4[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->price[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->highest_price[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->lowest_price[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->variation_last_price[i]; }
@@ -492,7 +492,7 @@ static size_t decode_price_update_message(PriceUpdateMessage *record, const uint
   for (size_t i = 0; i < 4; i++) { record->symbol_index[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->source_time[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->source_seq_num[i] = wire[at++]; }
-  for (size_t i = 0; i < 4; i++) { record->price_binary_int_4[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->price[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->highest_price[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->lowest_price[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->variation_last_price[i] = wire[at++]; }
@@ -511,7 +511,7 @@ static void equal_price_update_message(const PriceUpdateMessage *read, const Pri
   for (size_t i = 0; i < 4; i++) { assert(read->symbol_index[i] == written->symbol_index[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->source_time[i] == written->source_time[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->source_seq_num[i] == written->source_seq_num[i]); }
-  for (size_t i = 0; i < 4; i++) { assert(read->price_binary_int_4[i] == written->price_binary_int_4[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->price[i] == written->price[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->highest_price[i] == written->highest_price[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->lowest_price[i] == written->lowest_price[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->variation_last_price[i] == written->variation_last_price[i]); }
@@ -565,7 +565,7 @@ typedef struct {
   uint8_t mmt_benchmark_indicator[4];         /* bytes 127 to 130 */
   uint8_t mmt_contribution_to_price[4];       /* bytes 131 to 134 */
   uint8_t multiplier_scale_code;              /* byte 135 */
-  uint8_t price_ascii_ch_20[20];              /* bytes 136 to 155 */
+  uint8_t traded_price[20];                   /* bytes 136 to 155 */
   uint8_t quantity[20];                       /* bytes 156 to 175 */
   uint8_t notional_amount[20];                /* bytes 176 to 195 */
   uint8_t transaction_id_code[52];            /* bytes 196 to 247 */
@@ -604,7 +604,7 @@ static void any_trade_publication_message(TradePublicationMessage *record) {
   for (size_t i = 0; i < 4; i++) { record->mmt_benchmark_indicator[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->mmt_contribution_to_price[i] = arbitrary(); }
   record->multiplier_scale_code = arbitrary();
-  for (size_t i = 0; i < 20; i++) { record->price_ascii_ch_20[i] = arbitrary(); }
+  for (size_t i = 0; i < 20; i++) { record->traded_price[i] = arbitrary(); }
   for (size_t i = 0; i < 20; i++) { record->quantity[i] = arbitrary(); }
   for (size_t i = 0; i < 20; i++) { record->notional_amount[i] = arbitrary(); }
   for (size_t i = 0; i < 52; i++) { record->transaction_id_code[i] = arbitrary(); }
@@ -643,7 +643,7 @@ static size_t encode_trade_publication_message(const TradePublicationMessage *re
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->mmt_benchmark_indicator[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->mmt_contribution_to_price[i]; }
   wire[at++] = record->multiplier_scale_code;
-  for (size_t i = 0; i < 20; i++) { wire[at++] = record->price_ascii_ch_20[i]; }
+  for (size_t i = 0; i < 20; i++) { wire[at++] = record->traded_price[i]; }
   for (size_t i = 0; i < 20; i++) { wire[at++] = record->quantity[i]; }
   for (size_t i = 0; i < 20; i++) { wire[at++] = record->notional_amount[i]; }
   for (size_t i = 0; i < 52; i++) { wire[at++] = record->transaction_id_code[i]; }
@@ -684,7 +684,7 @@ static size_t decode_trade_publication_message(TradePublicationMessage *record, 
   for (size_t i = 0; i < 4; i++) { record->mmt_benchmark_indicator[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->mmt_contribution_to_price[i] = wire[at++]; }
   record->multiplier_scale_code = wire[at++];
-  for (size_t i = 0; i < 20; i++) { record->price_ascii_ch_20[i] = wire[at++]; }
+  for (size_t i = 0; i < 20; i++) { record->traded_price[i] = wire[at++]; }
   for (size_t i = 0; i < 20; i++) { record->quantity[i] = wire[at++]; }
   for (size_t i = 0; i < 20; i++) { record->notional_amount[i] = wire[at++]; }
   for (size_t i = 0; i < 52; i++) { record->transaction_id_code[i] = wire[at++]; }
@@ -725,7 +725,7 @@ static void equal_trade_publication_message(const TradePublicationMessage *read,
   for (size_t i = 0; i < 4; i++) { assert(read->mmt_benchmark_indicator[i] == written->mmt_benchmark_indicator[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->mmt_contribution_to_price[i] == written->mmt_contribution_to_price[i]); }
   assert(read->multiplier_scale_code == written->multiplier_scale_code);
-  for (size_t i = 0; i < 20; i++) { assert(read->price_ascii_ch_20[i] == written->price_ascii_ch_20[i]); }
+  for (size_t i = 0; i < 20; i++) { assert(read->traded_price[i] == written->traded_price[i]); }
   for (size_t i = 0; i < 20; i++) { assert(read->quantity[i] == written->quantity[i]); }
   for (size_t i = 0; i < 20; i++) { assert(read->notional_amount[i] == written->notional_amount[i]); }
   for (size_t i = 0; i < 52; i++) { assert(read->transaction_id_code[i] == written->transaction_id_code[i]); }

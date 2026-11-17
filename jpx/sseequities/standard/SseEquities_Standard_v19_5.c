@@ -407,7 +407,7 @@ typedef struct {
   uint8_t reserved_2[2];                 /* bytes 0 to 1 */
   uint8_t change_flag;                   /* byte 2 */
   StatusInformation status_information;  /* bytes 3 to 7 */
-  uint8_t time_c_12[12];                 /* bytes 8 to 19 */
+  uint8_t precise_time[12];              /* bytes 8 to 19 */
   uint8_t reserved_4[4];                 /* bytes 20 to 23 */
 } StatusInformationMessage;
 
@@ -416,7 +416,7 @@ static void any_status_information_message(StatusInformationMessage *record) {
   for (size_t i = 0; i < 2; i++) { record->reserved_2[i] = arbitrary(); }
   record->change_flag = arbitrary();
   any_status_information(&record->status_information);
-  for (size_t i = 0; i < 12; i++) { record->time_c_12[i] = arbitrary(); }
+  for (size_t i = 0; i < 12; i++) { record->precise_time[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->reserved_4[i] = arbitrary(); }
 }
 
@@ -425,7 +425,7 @@ static size_t encode_status_information_message(const StatusInformationMessage *
   for (size_t i = 0; i < 2; i++) { wire[at++] = record->reserved_2[i]; }
   wire[at++] = record->change_flag;
   at = encode_status_information(&record->status_information, wire, at);
-  for (size_t i = 0; i < 12; i++) { wire[at++] = record->time_c_12[i]; }
+  for (size_t i = 0; i < 12; i++) { wire[at++] = record->precise_time[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->reserved_4[i]; }
 
   return at;
@@ -436,7 +436,7 @@ static size_t decode_status_information_message(StatusInformationMessage *record
   for (size_t i = 0; i < 2; i++) { record->reserved_2[i] = wire[at++]; }
   record->change_flag = wire[at++];
   at = decode_status_information(&record->status_information, wire, at);
-  for (size_t i = 0; i < 12; i++) { record->time_c_12[i] = wire[at++]; }
+  for (size_t i = 0; i < 12; i++) { record->precise_time[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->reserved_4[i] = wire[at++]; }
 
   return at;
@@ -447,7 +447,7 @@ static void equal_status_information_message(const StatusInformationMessage *rea
   for (size_t i = 0; i < 2; i++) { assert(read->reserved_2[i] == written->reserved_2[i]); }
   assert(read->change_flag == written->change_flag);
   equal_status_information(&read->status_information, &written->status_information);
-  for (size_t i = 0; i < 12; i++) { assert(read->time_c_12[i] == written->time_c_12[i]); }
+  for (size_t i = 0; i < 12; i++) { assert(read->precise_time[i] == written->precise_time[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->reserved_4[i] == written->reserved_4[i]); }
 }
 
@@ -473,22 +473,22 @@ static void check_status_information_message(void) {
 
 /* Price */
 typedef struct {
-  uint8_t unit_flag;       /* byte 0 */
-  uint8_t price_c_14[14];  /* bytes 1 to 14 */
-  uint8_t sign;            /* byte 15 */
+  uint8_t unit_flag;        /* byte 0 */
+  uint8_t price_value[14];  /* bytes 1 to 14 */
+  uint8_t sign;             /* byte 15 */
 } Price;
 
 /* any Price at all: every byte one the checker chooses */
 static void any_price(Price *record) {
   record->unit_flag = arbitrary();
-  for (size_t i = 0; i < 14; i++) { record->price_c_14[i] = arbitrary(); }
+  for (size_t i = 0; i < 14; i++) { record->price_value[i] = arbitrary(); }
   record->sign = arbitrary();
 }
 
 /* Price to the wire: 16 bytes from at, returning where the next byte goes */
 static size_t encode_price(const Price *record, uint8_t *wire, size_t at) {
   wire[at++] = record->unit_flag;
-  for (size_t i = 0; i < 14; i++) { wire[at++] = record->price_c_14[i]; }
+  for (size_t i = 0; i < 14; i++) { wire[at++] = record->price_value[i]; }
   wire[at++] = record->sign;
 
   return at;
@@ -497,7 +497,7 @@ static size_t encode_price(const Price *record, uint8_t *wire, size_t at) {
 /* Price off the wire: 16 bytes from at, returning where the next byte lies */
 static size_t decode_price(Price *record, const uint8_t *wire, size_t at) {
   record->unit_flag = wire[at++];
-  for (size_t i = 0; i < 14; i++) { record->price_c_14[i] = wire[at++]; }
+  for (size_t i = 0; i < 14; i++) { record->price_value[i] = wire[at++]; }
   record->sign = wire[at++];
 
   return at;
@@ -506,7 +506,7 @@ static size_t decode_price(Price *record, const uint8_t *wire, size_t at) {
 /* what was read of Price is what was written, byte for byte */
 static void equal_price(const Price *read, const Price *written) {
   assert(read->unit_flag == written->unit_flag);
-  for (size_t i = 0; i < 14; i++) { assert(read->price_c_14[i] == written->price_c_14[i]); }
+  for (size_t i = 0; i < 14; i++) { assert(read->price_value[i] == written->price_value[i]); }
   assert(read->sign == written->sign);
 }
 
@@ -533,21 +533,21 @@ static void check_price(void) {
 /* Open */
 typedef struct {
   Price price;          /* bytes 0 to 15 */
-  uint8_t time_c_6[6];  /* bytes 16 to 21 */
+  uint8_t time[6];      /* bytes 16 to 21 */
   uint8_t change_flag;  /* byte 22 */
 } Open;
 
 /* any Open at all: every byte one the checker chooses */
 static void any_open(Open *record) {
   any_price(&record->price);
-  for (size_t i = 0; i < 6; i++) { record->time_c_6[i] = arbitrary(); }
+  for (size_t i = 0; i < 6; i++) { record->time[i] = arbitrary(); }
   record->change_flag = arbitrary();
 }
 
 /* Open to the wire: 23 bytes from at, returning where the next byte goes */
 static size_t encode_open(const Open *record, uint8_t *wire, size_t at) {
   at = encode_price(&record->price, wire, at);
-  for (size_t i = 0; i < 6; i++) { wire[at++] = record->time_c_6[i]; }
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->time[i]; }
   wire[at++] = record->change_flag;
 
   return at;
@@ -556,7 +556,7 @@ static size_t encode_open(const Open *record, uint8_t *wire, size_t at) {
 /* Open off the wire: 23 bytes from at, returning where the next byte lies */
 static size_t decode_open(Open *record, const uint8_t *wire, size_t at) {
   at = decode_price(&record->price, wire, at);
-  for (size_t i = 0; i < 6; i++) { record->time_c_6[i] = wire[at++]; }
+  for (size_t i = 0; i < 6; i++) { record->time[i] = wire[at++]; }
   record->change_flag = wire[at++];
 
   return at;
@@ -565,7 +565,7 @@ static size_t decode_open(Open *record, const uint8_t *wire, size_t at) {
 /* what was read of Open is what was written, byte for byte */
 static void equal_open(const Open *read, const Open *written) {
   equal_price(&read->price, &written->price);
-  for (size_t i = 0; i < 6; i++) { assert(read->time_c_6[i] == written->time_c_6[i]); }
+  for (size_t i = 0; i < 6; i++) { assert(read->time[i] == written->time[i]); }
   assert(read->change_flag == written->change_flag);
 }
 
@@ -593,7 +593,7 @@ static void check_open(void) {
 typedef struct {
   uint8_t limit_up_flag;  /* byte 0 */
   Price price;            /* bytes 1 to 16 */
-  uint8_t time_c_6[6];    /* bytes 17 to 22 */
+  uint8_t time[6];        /* bytes 17 to 22 */
   uint8_t change_flag;    /* byte 23 */
 } High;
 
@@ -601,7 +601,7 @@ typedef struct {
 static void any_high(High *record) {
   record->limit_up_flag = arbitrary();
   any_price(&record->price);
-  for (size_t i = 0; i < 6; i++) { record->time_c_6[i] = arbitrary(); }
+  for (size_t i = 0; i < 6; i++) { record->time[i] = arbitrary(); }
   record->change_flag = arbitrary();
 }
 
@@ -609,7 +609,7 @@ static void any_high(High *record) {
 static size_t encode_high(const High *record, uint8_t *wire, size_t at) {
   wire[at++] = record->limit_up_flag;
   at = encode_price(&record->price, wire, at);
-  for (size_t i = 0; i < 6; i++) { wire[at++] = record->time_c_6[i]; }
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->time[i]; }
   wire[at++] = record->change_flag;
 
   return at;
@@ -619,7 +619,7 @@ static size_t encode_high(const High *record, uint8_t *wire, size_t at) {
 static size_t decode_high(High *record, const uint8_t *wire, size_t at) {
   record->limit_up_flag = wire[at++];
   at = decode_price(&record->price, wire, at);
-  for (size_t i = 0; i < 6; i++) { record->time_c_6[i] = wire[at++]; }
+  for (size_t i = 0; i < 6; i++) { record->time[i] = wire[at++]; }
   record->change_flag = wire[at++];
 
   return at;
@@ -629,7 +629,7 @@ static size_t decode_high(High *record, const uint8_t *wire, size_t at) {
 static void equal_high(const High *read, const High *written) {
   assert(read->limit_up_flag == written->limit_up_flag);
   equal_price(&read->price, &written->price);
-  for (size_t i = 0; i < 6; i++) { assert(read->time_c_6[i] == written->time_c_6[i]); }
+  for (size_t i = 0; i < 6; i++) { assert(read->time[i] == written->time[i]); }
   assert(read->change_flag == written->change_flag);
 }
 
@@ -657,7 +657,7 @@ static void check_high(void) {
 typedef struct {
   uint8_t limit_down_flag;  /* byte 0 */
   Price price;              /* bytes 1 to 16 */
-  uint8_t time_c_6[6];      /* bytes 17 to 22 */
+  uint8_t time[6];          /* bytes 17 to 22 */
   uint8_t change_flag;      /* byte 23 */
 } Low;
 
@@ -665,7 +665,7 @@ typedef struct {
 static void any_low(Low *record) {
   record->limit_down_flag = arbitrary();
   any_price(&record->price);
-  for (size_t i = 0; i < 6; i++) { record->time_c_6[i] = arbitrary(); }
+  for (size_t i = 0; i < 6; i++) { record->time[i] = arbitrary(); }
   record->change_flag = arbitrary();
 }
 
@@ -673,7 +673,7 @@ static void any_low(Low *record) {
 static size_t encode_low(const Low *record, uint8_t *wire, size_t at) {
   wire[at++] = record->limit_down_flag;
   at = encode_price(&record->price, wire, at);
-  for (size_t i = 0; i < 6; i++) { wire[at++] = record->time_c_6[i]; }
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->time[i]; }
   wire[at++] = record->change_flag;
 
   return at;
@@ -683,7 +683,7 @@ static size_t encode_low(const Low *record, uint8_t *wire, size_t at) {
 static size_t decode_low(Low *record, const uint8_t *wire, size_t at) {
   record->limit_down_flag = wire[at++];
   at = decode_price(&record->price, wire, at);
-  for (size_t i = 0; i < 6; i++) { record->time_c_6[i] = wire[at++]; }
+  for (size_t i = 0; i < 6; i++) { record->time[i] = wire[at++]; }
   record->change_flag = wire[at++];
 
   return at;
@@ -693,7 +693,7 @@ static size_t decode_low(Low *record, const uint8_t *wire, size_t at) {
 static void equal_low(const Low *read, const Low *written) {
   assert(read->limit_down_flag == written->limit_down_flag);
   equal_price(&read->price, &written->price);
-  for (size_t i = 0; i < 6; i++) { assert(read->time_c_6[i] == written->time_c_6[i]); }
+  for (size_t i = 0; i < 6; i++) { assert(read->time[i] == written->time[i]); }
   assert(read->change_flag == written->change_flag);
 }
 
@@ -720,7 +720,7 @@ static void check_low(void) {
 /* Current */
 typedef struct {
   Price price;                       /* bytes 0 to 15 */
-  uint8_t time_c_12[12];             /* bytes 16 to 27 */
+  uint8_t precise_time[12];          /* bytes 16 to 27 */
   uint8_t current_change_flag;       /* byte 28 */
   uint8_t stq_reference_point_flag;  /* byte 29 */
   uint8_t reserved_1;                /* byte 30 */
@@ -730,7 +730,7 @@ typedef struct {
 /* any Current at all: every byte one the checker chooses */
 static void any_current(Current *record) {
   any_price(&record->price);
-  for (size_t i = 0; i < 12; i++) { record->time_c_12[i] = arbitrary(); }
+  for (size_t i = 0; i < 12; i++) { record->precise_time[i] = arbitrary(); }
   record->current_change_flag = arbitrary();
   record->stq_reference_point_flag = arbitrary();
   record->reserved_1 = arbitrary();
@@ -740,7 +740,7 @@ static void any_current(Current *record) {
 /* Current to the wire: 32 bytes from at, returning where the next byte goes */
 static size_t encode_current(const Current *record, uint8_t *wire, size_t at) {
   at = encode_price(&record->price, wire, at);
-  for (size_t i = 0; i < 12; i++) { wire[at++] = record->time_c_12[i]; }
+  for (size_t i = 0; i < 12; i++) { wire[at++] = record->precise_time[i]; }
   wire[at++] = record->current_change_flag;
   wire[at++] = record->stq_reference_point_flag;
   wire[at++] = record->reserved_1;
@@ -752,7 +752,7 @@ static size_t encode_current(const Current *record, uint8_t *wire, size_t at) {
 /* Current off the wire: 32 bytes from at, returning where the next byte lies */
 static size_t decode_current(Current *record, const uint8_t *wire, size_t at) {
   at = decode_price(&record->price, wire, at);
-  for (size_t i = 0; i < 12; i++) { record->time_c_12[i] = wire[at++]; }
+  for (size_t i = 0; i < 12; i++) { record->precise_time[i] = wire[at++]; }
   record->current_change_flag = wire[at++];
   record->stq_reference_point_flag = wire[at++];
   record->reserved_1 = wire[at++];
@@ -764,7 +764,7 @@ static size_t decode_current(Current *record, const uint8_t *wire, size_t at) {
 /* what was read of Current is what was written, byte for byte */
 static void equal_current(const Current *read, const Current *written) {
   equal_price(&read->price, &written->price);
-  for (size_t i = 0; i < 12; i++) { assert(read->time_c_12[i] == written->time_c_12[i]); }
+  for (size_t i = 0; i < 12; i++) { assert(read->precise_time[i] == written->precise_time[i]); }
   assert(read->current_change_flag == written->current_change_flag);
   assert(read->stq_reference_point_flag == written->stq_reference_point_flag);
   assert(read->reserved_1 == written->reserved_1);
@@ -923,7 +923,7 @@ static void check_quote_quantity(void) {
 typedef struct {
   uint8_t change_flag;           /* byte 0 */
   Price price;                   /* bytes 1 to 16 */
-  uint8_t time_c_12[12];         /* bytes 17 to 28 */
+  uint8_t precise_time[12];      /* bytes 17 to 28 */
   uint8_t quote_flag;            /* byte 29 */
   QuoteQuantity quote_quantity;  /* bytes 30 to 45 */
 } AskQuote;
@@ -932,7 +932,7 @@ typedef struct {
 static void any_ask_quote(AskQuote *record) {
   record->change_flag = arbitrary();
   any_price(&record->price);
-  for (size_t i = 0; i < 12; i++) { record->time_c_12[i] = arbitrary(); }
+  for (size_t i = 0; i < 12; i++) { record->precise_time[i] = arbitrary(); }
   record->quote_flag = arbitrary();
   any_quote_quantity(&record->quote_quantity);
 }
@@ -941,7 +941,7 @@ static void any_ask_quote(AskQuote *record) {
 static size_t encode_ask_quote(const AskQuote *record, uint8_t *wire, size_t at) {
   wire[at++] = record->change_flag;
   at = encode_price(&record->price, wire, at);
-  for (size_t i = 0; i < 12; i++) { wire[at++] = record->time_c_12[i]; }
+  for (size_t i = 0; i < 12; i++) { wire[at++] = record->precise_time[i]; }
   wire[at++] = record->quote_flag;
   at = encode_quote_quantity(&record->quote_quantity, wire, at);
 
@@ -952,7 +952,7 @@ static size_t encode_ask_quote(const AskQuote *record, uint8_t *wire, size_t at)
 static size_t decode_ask_quote(AskQuote *record, const uint8_t *wire, size_t at) {
   record->change_flag = wire[at++];
   at = decode_price(&record->price, wire, at);
-  for (size_t i = 0; i < 12; i++) { record->time_c_12[i] = wire[at++]; }
+  for (size_t i = 0; i < 12; i++) { record->precise_time[i] = wire[at++]; }
   record->quote_flag = wire[at++];
   at = decode_quote_quantity(&record->quote_quantity, wire, at);
 
@@ -963,7 +963,7 @@ static size_t decode_ask_quote(AskQuote *record, const uint8_t *wire, size_t at)
 static void equal_ask_quote(const AskQuote *read, const AskQuote *written) {
   assert(read->change_flag == written->change_flag);
   equal_price(&read->price, &written->price);
-  for (size_t i = 0; i < 12; i++) { assert(read->time_c_12[i] == written->time_c_12[i]); }
+  for (size_t i = 0; i < 12; i++) { assert(read->precise_time[i] == written->precise_time[i]); }
   assert(read->quote_flag == written->quote_flag);
   equal_quote_quantity(&read->quote_quantity, &written->quote_quantity);
 }
@@ -992,7 +992,7 @@ static void check_ask_quote(void) {
 typedef struct {
   uint8_t change_flag;           /* byte 0 */
   Price price;                   /* bytes 1 to 16 */
-  uint8_t time_c_12[12];         /* bytes 17 to 28 */
+  uint8_t precise_time[12];      /* bytes 17 to 28 */
   uint8_t quote_flag;            /* byte 29 */
   QuoteQuantity quote_quantity;  /* bytes 30 to 45 */
 } BidQuote;
@@ -1001,7 +1001,7 @@ typedef struct {
 static void any_bid_quote(BidQuote *record) {
   record->change_flag = arbitrary();
   any_price(&record->price);
-  for (size_t i = 0; i < 12; i++) { record->time_c_12[i] = arbitrary(); }
+  for (size_t i = 0; i < 12; i++) { record->precise_time[i] = arbitrary(); }
   record->quote_flag = arbitrary();
   any_quote_quantity(&record->quote_quantity);
 }
@@ -1010,7 +1010,7 @@ static void any_bid_quote(BidQuote *record) {
 static size_t encode_bid_quote(const BidQuote *record, uint8_t *wire, size_t at) {
   wire[at++] = record->change_flag;
   at = encode_price(&record->price, wire, at);
-  for (size_t i = 0; i < 12; i++) { wire[at++] = record->time_c_12[i]; }
+  for (size_t i = 0; i < 12; i++) { wire[at++] = record->precise_time[i]; }
   wire[at++] = record->quote_flag;
   at = encode_quote_quantity(&record->quote_quantity, wire, at);
 
@@ -1021,7 +1021,7 @@ static size_t encode_bid_quote(const BidQuote *record, uint8_t *wire, size_t at)
 static size_t decode_bid_quote(BidQuote *record, const uint8_t *wire, size_t at) {
   record->change_flag = wire[at++];
   at = decode_price(&record->price, wire, at);
-  for (size_t i = 0; i < 12; i++) { record->time_c_12[i] = wire[at++]; }
+  for (size_t i = 0; i < 12; i++) { record->precise_time[i] = wire[at++]; }
   record->quote_flag = wire[at++];
   at = decode_quote_quantity(&record->quote_quantity, wire, at);
 
@@ -1032,7 +1032,7 @@ static size_t decode_bid_quote(BidQuote *record, const uint8_t *wire, size_t at)
 static void equal_bid_quote(const BidQuote *read, const BidQuote *written) {
   assert(read->change_flag == written->change_flag);
   equal_price(&read->price, &written->price);
-  for (size_t i = 0; i < 12; i++) { assert(read->time_c_12[i] == written->time_c_12[i]); }
+  for (size_t i = 0; i < 12; i++) { assert(read->precise_time[i] == written->precise_time[i]); }
   assert(read->quote_flag == written->quote_flag);
   equal_quote_quantity(&read->quote_quantity, &written->quote_quantity);
 }
@@ -1650,21 +1650,21 @@ static void check_quote10_message(void) {
 /* Sell Order */
 typedef struct {
   uint8_t change_flag;           /* byte 0 */
-  uint8_t time_c_12[12];         /* bytes 1 to 12 */
+  uint8_t precise_time[12];      /* bytes 1 to 12 */
   QuoteQuantity quote_quantity;  /* bytes 13 to 28 */
 } SellOrder;
 
 /* any Sell Order at all: every byte one the checker chooses */
 static void any_sell_order(SellOrder *record) {
   record->change_flag = arbitrary();
-  for (size_t i = 0; i < 12; i++) { record->time_c_12[i] = arbitrary(); }
+  for (size_t i = 0; i < 12; i++) { record->precise_time[i] = arbitrary(); }
   any_quote_quantity(&record->quote_quantity);
 }
 
 /* Sell Order to the wire: 29 bytes from at, returning where the next byte goes */
 static size_t encode_sell_order(const SellOrder *record, uint8_t *wire, size_t at) {
   wire[at++] = record->change_flag;
-  for (size_t i = 0; i < 12; i++) { wire[at++] = record->time_c_12[i]; }
+  for (size_t i = 0; i < 12; i++) { wire[at++] = record->precise_time[i]; }
   at = encode_quote_quantity(&record->quote_quantity, wire, at);
 
   return at;
@@ -1673,7 +1673,7 @@ static size_t encode_sell_order(const SellOrder *record, uint8_t *wire, size_t a
 /* Sell Order off the wire: 29 bytes from at, returning where the next byte lies */
 static size_t decode_sell_order(SellOrder *record, const uint8_t *wire, size_t at) {
   record->change_flag = wire[at++];
-  for (size_t i = 0; i < 12; i++) { record->time_c_12[i] = wire[at++]; }
+  for (size_t i = 0; i < 12; i++) { record->precise_time[i] = wire[at++]; }
   at = decode_quote_quantity(&record->quote_quantity, wire, at);
 
   return at;
@@ -1682,7 +1682,7 @@ static size_t decode_sell_order(SellOrder *record, const uint8_t *wire, size_t a
 /* what was read of Sell Order is what was written, byte for byte */
 static void equal_sell_order(const SellOrder *read, const SellOrder *written) {
   assert(read->change_flag == written->change_flag);
-  for (size_t i = 0; i < 12; i++) { assert(read->time_c_12[i] == written->time_c_12[i]); }
+  for (size_t i = 0; i < 12; i++) { assert(read->precise_time[i] == written->precise_time[i]); }
   equal_quote_quantity(&read->quote_quantity, &written->quote_quantity);
 }
 
@@ -1709,21 +1709,21 @@ static void check_sell_order(void) {
 /* Buy Order */
 typedef struct {
   uint8_t change_flag;           /* byte 0 */
-  uint8_t time_c_12[12];         /* bytes 1 to 12 */
+  uint8_t precise_time[12];      /* bytes 1 to 12 */
   QuoteQuantity quote_quantity;  /* bytes 13 to 28 */
 } BuyOrder;
 
 /* any Buy Order at all: every byte one the checker chooses */
 static void any_buy_order(BuyOrder *record) {
   record->change_flag = arbitrary();
-  for (size_t i = 0; i < 12; i++) { record->time_c_12[i] = arbitrary(); }
+  for (size_t i = 0; i < 12; i++) { record->precise_time[i] = arbitrary(); }
   any_quote_quantity(&record->quote_quantity);
 }
 
 /* Buy Order to the wire: 29 bytes from at, returning where the next byte goes */
 static size_t encode_buy_order(const BuyOrder *record, uint8_t *wire, size_t at) {
   wire[at++] = record->change_flag;
-  for (size_t i = 0; i < 12; i++) { wire[at++] = record->time_c_12[i]; }
+  for (size_t i = 0; i < 12; i++) { wire[at++] = record->precise_time[i]; }
   at = encode_quote_quantity(&record->quote_quantity, wire, at);
 
   return at;
@@ -1732,7 +1732,7 @@ static size_t encode_buy_order(const BuyOrder *record, uint8_t *wire, size_t at)
 /* Buy Order off the wire: 29 bytes from at, returning where the next byte lies */
 static size_t decode_buy_order(BuyOrder *record, const uint8_t *wire, size_t at) {
   record->change_flag = wire[at++];
-  for (size_t i = 0; i < 12; i++) { record->time_c_12[i] = wire[at++]; }
+  for (size_t i = 0; i < 12; i++) { record->precise_time[i] = wire[at++]; }
   at = decode_quote_quantity(&record->quote_quantity, wire, at);
 
   return at;
@@ -1741,7 +1741,7 @@ static size_t decode_buy_order(BuyOrder *record, const uint8_t *wire, size_t at)
 /* what was read of Buy Order is what was written, byte for byte */
 static void equal_buy_order(const BuyOrder *read, const BuyOrder *written) {
   assert(read->change_flag == written->change_flag);
-  for (size_t i = 0; i < 12; i++) { assert(read->time_c_12[i] == written->time_c_12[i]); }
+  for (size_t i = 0; i < 12; i++) { assert(read->precise_time[i] == written->precise_time[i]); }
   equal_quote_quantity(&read->quote_quantity, &written->quote_quantity);
 }
 
@@ -1827,21 +1827,21 @@ static void check_market_order_message(void) {
 /* OVER Quote */
 typedef struct {
   uint8_t change_flag;           /* byte 0 */
-  uint8_t time_c_12[12];         /* bytes 1 to 12 */
+  uint8_t precise_time[12];      /* bytes 1 to 12 */
   QuoteQuantity quote_quantity;  /* bytes 13 to 28 */
 } OverQuote;
 
 /* any Over Quote at all: every byte one the checker chooses */
 static void any_over_quote(OverQuote *record) {
   record->change_flag = arbitrary();
-  for (size_t i = 0; i < 12; i++) { record->time_c_12[i] = arbitrary(); }
+  for (size_t i = 0; i < 12; i++) { record->precise_time[i] = arbitrary(); }
   any_quote_quantity(&record->quote_quantity);
 }
 
 /* Over Quote to the wire: 29 bytes from at, returning where the next byte goes */
 static size_t encode_over_quote(const OverQuote *record, uint8_t *wire, size_t at) {
   wire[at++] = record->change_flag;
-  for (size_t i = 0; i < 12; i++) { wire[at++] = record->time_c_12[i]; }
+  for (size_t i = 0; i < 12; i++) { wire[at++] = record->precise_time[i]; }
   at = encode_quote_quantity(&record->quote_quantity, wire, at);
 
   return at;
@@ -1850,7 +1850,7 @@ static size_t encode_over_quote(const OverQuote *record, uint8_t *wire, size_t a
 /* Over Quote off the wire: 29 bytes from at, returning where the next byte lies */
 static size_t decode_over_quote(OverQuote *record, const uint8_t *wire, size_t at) {
   record->change_flag = wire[at++];
-  for (size_t i = 0; i < 12; i++) { record->time_c_12[i] = wire[at++]; }
+  for (size_t i = 0; i < 12; i++) { record->precise_time[i] = wire[at++]; }
   at = decode_quote_quantity(&record->quote_quantity, wire, at);
 
   return at;
@@ -1859,7 +1859,7 @@ static size_t decode_over_quote(OverQuote *record, const uint8_t *wire, size_t a
 /* what was read of Over Quote is what was written, byte for byte */
 static void equal_over_quote(const OverQuote *read, const OverQuote *written) {
   assert(read->change_flag == written->change_flag);
-  for (size_t i = 0; i < 12; i++) { assert(read->time_c_12[i] == written->time_c_12[i]); }
+  for (size_t i = 0; i < 12; i++) { assert(read->precise_time[i] == written->precise_time[i]); }
   equal_quote_quantity(&read->quote_quantity, &written->quote_quantity);
 }
 
@@ -1886,21 +1886,21 @@ static void check_over_quote(void) {
 /* UNDER Quote */
 typedef struct {
   uint8_t change_flag;           /* byte 0 */
-  uint8_t time_c_12[12];         /* bytes 1 to 12 */
+  uint8_t precise_time[12];      /* bytes 1 to 12 */
   QuoteQuantity quote_quantity;  /* bytes 13 to 28 */
 } UnderQuote;
 
 /* any Under Quote at all: every byte one the checker chooses */
 static void any_under_quote(UnderQuote *record) {
   record->change_flag = arbitrary();
-  for (size_t i = 0; i < 12; i++) { record->time_c_12[i] = arbitrary(); }
+  for (size_t i = 0; i < 12; i++) { record->precise_time[i] = arbitrary(); }
   any_quote_quantity(&record->quote_quantity);
 }
 
 /* Under Quote to the wire: 29 bytes from at, returning where the next byte goes */
 static size_t encode_under_quote(const UnderQuote *record, uint8_t *wire, size_t at) {
   wire[at++] = record->change_flag;
-  for (size_t i = 0; i < 12; i++) { wire[at++] = record->time_c_12[i]; }
+  for (size_t i = 0; i < 12; i++) { wire[at++] = record->precise_time[i]; }
   at = encode_quote_quantity(&record->quote_quantity, wire, at);
 
   return at;
@@ -1909,7 +1909,7 @@ static size_t encode_under_quote(const UnderQuote *record, uint8_t *wire, size_t
 /* Under Quote off the wire: 29 bytes from at, returning where the next byte lies */
 static size_t decode_under_quote(UnderQuote *record, const uint8_t *wire, size_t at) {
   record->change_flag = wire[at++];
-  for (size_t i = 0; i < 12; i++) { record->time_c_12[i] = wire[at++]; }
+  for (size_t i = 0; i < 12; i++) { record->precise_time[i] = wire[at++]; }
   at = decode_quote_quantity(&record->quote_quantity, wire, at);
 
   return at;
@@ -1918,7 +1918,7 @@ static size_t decode_under_quote(UnderQuote *record, const uint8_t *wire, size_t
 /* what was read of Under Quote is what was written, byte for byte */
 static void equal_under_quote(const UnderQuote *read, const UnderQuote *written) {
   assert(read->change_flag == written->change_flag);
-  for (size_t i = 0; i < 12; i++) { assert(read->time_c_12[i] == written->time_c_12[i]); }
+  for (size_t i = 0; i < 12; i++) { assert(read->precise_time[i] == written->precise_time[i]); }
   equal_quote_quantity(&read->quote_quantity, &written->quote_quantity);
 }
 
@@ -2005,8 +2005,8 @@ static void check_over_under_message(void) {
 typedef struct {
   uint8_t reserved_1;                         /* byte 0 */
   uint8_t trading_volume_turnover_unit_flag;  /* byte 1 */
-  uint8_t trading_volume_c_14[14];            /* bytes 2 to 15 */
-  uint8_t time_c_6[6];                        /* bytes 16 to 21 */
+  uint8_t trading_volume_value[14];           /* bytes 2 to 15 */
+  uint8_t time[6];                            /* bytes 16 to 21 */
   uint8_t second_reserved_1;                  /* byte 22 */
 } TradingVolume;
 
@@ -2014,8 +2014,8 @@ typedef struct {
 static void any_trading_volume(TradingVolume *record) {
   record->reserved_1 = arbitrary();
   record->trading_volume_turnover_unit_flag = arbitrary();
-  for (size_t i = 0; i < 14; i++) { record->trading_volume_c_14[i] = arbitrary(); }
-  for (size_t i = 0; i < 6; i++) { record->time_c_6[i] = arbitrary(); }
+  for (size_t i = 0; i < 14; i++) { record->trading_volume_value[i] = arbitrary(); }
+  for (size_t i = 0; i < 6; i++) { record->time[i] = arbitrary(); }
   record->second_reserved_1 = arbitrary();
 }
 
@@ -2023,8 +2023,8 @@ static void any_trading_volume(TradingVolume *record) {
 static size_t encode_trading_volume(const TradingVolume *record, uint8_t *wire, size_t at) {
   wire[at++] = record->reserved_1;
   wire[at++] = record->trading_volume_turnover_unit_flag;
-  for (size_t i = 0; i < 14; i++) { wire[at++] = record->trading_volume_c_14[i]; }
-  for (size_t i = 0; i < 6; i++) { wire[at++] = record->time_c_6[i]; }
+  for (size_t i = 0; i < 14; i++) { wire[at++] = record->trading_volume_value[i]; }
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->time[i]; }
   wire[at++] = record->second_reserved_1;
 
   return at;
@@ -2034,8 +2034,8 @@ static size_t encode_trading_volume(const TradingVolume *record, uint8_t *wire, 
 static size_t decode_trading_volume(TradingVolume *record, const uint8_t *wire, size_t at) {
   record->reserved_1 = wire[at++];
   record->trading_volume_turnover_unit_flag = wire[at++];
-  for (size_t i = 0; i < 14; i++) { record->trading_volume_c_14[i] = wire[at++]; }
-  for (size_t i = 0; i < 6; i++) { record->time_c_6[i] = wire[at++]; }
+  for (size_t i = 0; i < 14; i++) { record->trading_volume_value[i] = wire[at++]; }
+  for (size_t i = 0; i < 6; i++) { record->time[i] = wire[at++]; }
   record->second_reserved_1 = wire[at++];
 
   return at;
@@ -2045,8 +2045,8 @@ static size_t decode_trading_volume(TradingVolume *record, const uint8_t *wire, 
 static void equal_trading_volume(const TradingVolume *read, const TradingVolume *written) {
   assert(read->reserved_1 == written->reserved_1);
   assert(read->trading_volume_turnover_unit_flag == written->trading_volume_turnover_unit_flag);
-  for (size_t i = 0; i < 14; i++) { assert(read->trading_volume_c_14[i] == written->trading_volume_c_14[i]); }
-  for (size_t i = 0; i < 6; i++) { assert(read->time_c_6[i] == written->time_c_6[i]); }
+  for (size_t i = 0; i < 14; i++) { assert(read->trading_volume_value[i] == written->trading_volume_value[i]); }
+  for (size_t i = 0; i < 6; i++) { assert(read->time[i] == written->time[i]); }
   assert(read->second_reserved_1 == written->second_reserved_1);
 }
 
@@ -2129,7 +2129,7 @@ typedef struct {
   uint8_t reserved_1;                         /* byte 0 */
   uint8_t trading_volume_turnover_unit_flag;  /* byte 1 */
   uint8_t turnover_value[14];                 /* bytes 2 to 15 */
-  uint8_t time_c_6[6];                        /* bytes 16 to 21 */
+  uint8_t time[6];                            /* bytes 16 to 21 */
   uint8_t second_reserved_1;                  /* byte 22 */
 } TurnoverInYenValue;
 
@@ -2138,7 +2138,7 @@ static void any_turnover_in_yen_value(TurnoverInYenValue *record) {
   record->reserved_1 = arbitrary();
   record->trading_volume_turnover_unit_flag = arbitrary();
   for (size_t i = 0; i < 14; i++) { record->turnover_value[i] = arbitrary(); }
-  for (size_t i = 0; i < 6; i++) { record->time_c_6[i] = arbitrary(); }
+  for (size_t i = 0; i < 6; i++) { record->time[i] = arbitrary(); }
   record->second_reserved_1 = arbitrary();
 }
 
@@ -2147,7 +2147,7 @@ static size_t encode_turnover_in_yen_value(const TurnoverInYenValue *record, uin
   wire[at++] = record->reserved_1;
   wire[at++] = record->trading_volume_turnover_unit_flag;
   for (size_t i = 0; i < 14; i++) { wire[at++] = record->turnover_value[i]; }
-  for (size_t i = 0; i < 6; i++) { wire[at++] = record->time_c_6[i]; }
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->time[i]; }
   wire[at++] = record->second_reserved_1;
 
   return at;
@@ -2158,7 +2158,7 @@ static size_t decode_turnover_in_yen_value(TurnoverInYenValue *record, const uin
   record->reserved_1 = wire[at++];
   record->trading_volume_turnover_unit_flag = wire[at++];
   for (size_t i = 0; i < 14; i++) { record->turnover_value[i] = wire[at++]; }
-  for (size_t i = 0; i < 6; i++) { record->time_c_6[i] = wire[at++]; }
+  for (size_t i = 0; i < 6; i++) { record->time[i] = wire[at++]; }
   record->second_reserved_1 = wire[at++];
 
   return at;
@@ -2169,7 +2169,7 @@ static void equal_turnover_in_yen_value(const TurnoverInYenValue *read, const Tu
   assert(read->reserved_1 == written->reserved_1);
   assert(read->trading_volume_turnover_unit_flag == written->trading_volume_turnover_unit_flag);
   for (size_t i = 0; i < 14; i++) { assert(read->turnover_value[i] == written->turnover_value[i]); }
-  for (size_t i = 0; i < 6; i++) { assert(read->time_c_6[i] == written->time_c_6[i]); }
+  for (size_t i = 0; i < 6; i++) { assert(read->time[i] == written->time[i]); }
   assert(read->second_reserved_1 == written->second_reserved_1);
 }
 
@@ -2249,21 +2249,21 @@ static void check_turnover_message(void) {
 
 /* All-Day VWAP */
 typedef struct {
-  uint8_t reserved_1;             /* byte 0 */
-  uint8_t lot_size_unit_flag;     /* byte 1 */
-  uint8_t all_day_vwap_c_14[14];  /* bytes 2 to 15 */
-  uint8_t sign;                   /* byte 16 */
-  uint8_t time_c_6[6];            /* bytes 17 to 22 */
-  uint8_t second_reserved_1;      /* byte 23 */
+  uint8_t reserved_1;              /* byte 0 */
+  uint8_t lot_size_unit_flag;      /* byte 1 */
+  uint8_t all_day_vwap_value[14];  /* bytes 2 to 15 */
+  uint8_t sign;                    /* byte 16 */
+  uint8_t time[6];                 /* bytes 17 to 22 */
+  uint8_t second_reserved_1;       /* byte 23 */
 } AllDayVwap;
 
 /* any All Day Vwap at all: every byte one the checker chooses */
 static void any_all_day_vwap(AllDayVwap *record) {
   record->reserved_1 = arbitrary();
   record->lot_size_unit_flag = arbitrary();
-  for (size_t i = 0; i < 14; i++) { record->all_day_vwap_c_14[i] = arbitrary(); }
+  for (size_t i = 0; i < 14; i++) { record->all_day_vwap_value[i] = arbitrary(); }
   record->sign = arbitrary();
-  for (size_t i = 0; i < 6; i++) { record->time_c_6[i] = arbitrary(); }
+  for (size_t i = 0; i < 6; i++) { record->time[i] = arbitrary(); }
   record->second_reserved_1 = arbitrary();
 }
 
@@ -2271,9 +2271,9 @@ static void any_all_day_vwap(AllDayVwap *record) {
 static size_t encode_all_day_vwap(const AllDayVwap *record, uint8_t *wire, size_t at) {
   wire[at++] = record->reserved_1;
   wire[at++] = record->lot_size_unit_flag;
-  for (size_t i = 0; i < 14; i++) { wire[at++] = record->all_day_vwap_c_14[i]; }
+  for (size_t i = 0; i < 14; i++) { wire[at++] = record->all_day_vwap_value[i]; }
   wire[at++] = record->sign;
-  for (size_t i = 0; i < 6; i++) { wire[at++] = record->time_c_6[i]; }
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->time[i]; }
   wire[at++] = record->second_reserved_1;
 
   return at;
@@ -2283,9 +2283,9 @@ static size_t encode_all_day_vwap(const AllDayVwap *record, uint8_t *wire, size_
 static size_t decode_all_day_vwap(AllDayVwap *record, const uint8_t *wire, size_t at) {
   record->reserved_1 = wire[at++];
   record->lot_size_unit_flag = wire[at++];
-  for (size_t i = 0; i < 14; i++) { record->all_day_vwap_c_14[i] = wire[at++]; }
+  for (size_t i = 0; i < 14; i++) { record->all_day_vwap_value[i] = wire[at++]; }
   record->sign = wire[at++];
-  for (size_t i = 0; i < 6; i++) { record->time_c_6[i] = wire[at++]; }
+  for (size_t i = 0; i < 6; i++) { record->time[i] = wire[at++]; }
   record->second_reserved_1 = wire[at++];
 
   return at;
@@ -2295,9 +2295,9 @@ static size_t decode_all_day_vwap(AllDayVwap *record, const uint8_t *wire, size_
 static void equal_all_day_vwap(const AllDayVwap *read, const AllDayVwap *written) {
   assert(read->reserved_1 == written->reserved_1);
   assert(read->lot_size_unit_flag == written->lot_size_unit_flag);
-  for (size_t i = 0; i < 14; i++) { assert(read->all_day_vwap_c_14[i] == written->all_day_vwap_c_14[i]); }
+  for (size_t i = 0; i < 14; i++) { assert(read->all_day_vwap_value[i] == written->all_day_vwap_value[i]); }
   assert(read->sign == written->sign);
-  for (size_t i = 0; i < 6; i++) { assert(read->time_c_6[i] == written->time_c_6[i]); }
+  for (size_t i = 0; i < 6; i++) { assert(read->time[i] == written->time[i]); }
   assert(read->second_reserved_1 == written->second_reserved_1);
 }
 
@@ -2323,21 +2323,21 @@ static void check_all_day_vwap(void) {
 
 /* Current-Session VWAP */
 typedef struct {
-  uint8_t reserved_1;                     /* byte 0 */
-  uint8_t lot_size_unit_flag;             /* byte 1 */
-  uint8_t current_session_vwap_c_14[14];  /* bytes 2 to 15 */
-  uint8_t sign;                           /* byte 16 */
-  uint8_t time_c_6[6];                    /* bytes 17 to 22 */
-  uint8_t second_reserved_1;              /* byte 23 */
+  uint8_t reserved_1;                      /* byte 0 */
+  uint8_t lot_size_unit_flag;              /* byte 1 */
+  uint8_t current_session_vwap_value[14];  /* bytes 2 to 15 */
+  uint8_t sign;                            /* byte 16 */
+  uint8_t time[6];                         /* bytes 17 to 22 */
+  uint8_t second_reserved_1;               /* byte 23 */
 } CurrentSessionVwap;
 
 /* any Current Session Vwap at all: every byte one the checker chooses */
 static void any_current_session_vwap(CurrentSessionVwap *record) {
   record->reserved_1 = arbitrary();
   record->lot_size_unit_flag = arbitrary();
-  for (size_t i = 0; i < 14; i++) { record->current_session_vwap_c_14[i] = arbitrary(); }
+  for (size_t i = 0; i < 14; i++) { record->current_session_vwap_value[i] = arbitrary(); }
   record->sign = arbitrary();
-  for (size_t i = 0; i < 6; i++) { record->time_c_6[i] = arbitrary(); }
+  for (size_t i = 0; i < 6; i++) { record->time[i] = arbitrary(); }
   record->second_reserved_1 = arbitrary();
 }
 
@@ -2345,9 +2345,9 @@ static void any_current_session_vwap(CurrentSessionVwap *record) {
 static size_t encode_current_session_vwap(const CurrentSessionVwap *record, uint8_t *wire, size_t at) {
   wire[at++] = record->reserved_1;
   wire[at++] = record->lot_size_unit_flag;
-  for (size_t i = 0; i < 14; i++) { wire[at++] = record->current_session_vwap_c_14[i]; }
+  for (size_t i = 0; i < 14; i++) { wire[at++] = record->current_session_vwap_value[i]; }
   wire[at++] = record->sign;
-  for (size_t i = 0; i < 6; i++) { wire[at++] = record->time_c_6[i]; }
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->time[i]; }
   wire[at++] = record->second_reserved_1;
 
   return at;
@@ -2357,9 +2357,9 @@ static size_t encode_current_session_vwap(const CurrentSessionVwap *record, uint
 static size_t decode_current_session_vwap(CurrentSessionVwap *record, const uint8_t *wire, size_t at) {
   record->reserved_1 = wire[at++];
   record->lot_size_unit_flag = wire[at++];
-  for (size_t i = 0; i < 14; i++) { record->current_session_vwap_c_14[i] = wire[at++]; }
+  for (size_t i = 0; i < 14; i++) { record->current_session_vwap_value[i] = wire[at++]; }
   record->sign = wire[at++];
-  for (size_t i = 0; i < 6; i++) { record->time_c_6[i] = wire[at++]; }
+  for (size_t i = 0; i < 6; i++) { record->time[i] = wire[at++]; }
   record->second_reserved_1 = wire[at++];
 
   return at;
@@ -2369,9 +2369,9 @@ static size_t decode_current_session_vwap(CurrentSessionVwap *record, const uint
 static void equal_current_session_vwap(const CurrentSessionVwap *read, const CurrentSessionVwap *written) {
   assert(read->reserved_1 == written->reserved_1);
   assert(read->lot_size_unit_flag == written->lot_size_unit_flag);
-  for (size_t i = 0; i < 14; i++) { assert(read->current_session_vwap_c_14[i] == written->current_session_vwap_c_14[i]); }
+  for (size_t i = 0; i < 14; i++) { assert(read->current_session_vwap_value[i] == written->current_session_vwap_value[i]); }
   assert(read->sign == written->sign);
-  for (size_t i = 0; i < 6; i++) { assert(read->time_c_6[i] == written->time_c_6[i]); }
+  for (size_t i = 0; i < 6; i++) { assert(read->time[i] == written->time[i]); }
   assert(read->second_reserved_1 == written->second_reserved_1);
 }
 
@@ -2456,28 +2456,28 @@ static void check_vwap_message(void) {
 
 /* Parity/Estimated Price */
 typedef struct {
-  uint8_t unit_flag;                        /* byte 0 */
-  uint8_t parity_estimated_price_c_14[14];  /* bytes 1 to 14 */
-  uint8_t sign;                             /* byte 15 */
-  uint8_t time_c_6[6];                      /* bytes 16 to 21 */
-  uint8_t reserved_1;                       /* byte 22 */
+  uint8_t unit_flag;                         /* byte 0 */
+  uint8_t parity_estimated_price_value[14];  /* bytes 1 to 14 */
+  uint8_t sign;                              /* byte 15 */
+  uint8_t time[6];                           /* bytes 16 to 21 */
+  uint8_t reserved_1;                        /* byte 22 */
 } ParityEstimatedPrice;
 
 /* any Parity Estimated Price at all: every byte one the checker chooses */
 static void any_parity_estimated_price(ParityEstimatedPrice *record) {
   record->unit_flag = arbitrary();
-  for (size_t i = 0; i < 14; i++) { record->parity_estimated_price_c_14[i] = arbitrary(); }
+  for (size_t i = 0; i < 14; i++) { record->parity_estimated_price_value[i] = arbitrary(); }
   record->sign = arbitrary();
-  for (size_t i = 0; i < 6; i++) { record->time_c_6[i] = arbitrary(); }
+  for (size_t i = 0; i < 6; i++) { record->time[i] = arbitrary(); }
   record->reserved_1 = arbitrary();
 }
 
 /* Parity Estimated Price to the wire: 23 bytes from at, returning where the next byte goes */
 static size_t encode_parity_estimated_price(const ParityEstimatedPrice *record, uint8_t *wire, size_t at) {
   wire[at++] = record->unit_flag;
-  for (size_t i = 0; i < 14; i++) { wire[at++] = record->parity_estimated_price_c_14[i]; }
+  for (size_t i = 0; i < 14; i++) { wire[at++] = record->parity_estimated_price_value[i]; }
   wire[at++] = record->sign;
-  for (size_t i = 0; i < 6; i++) { wire[at++] = record->time_c_6[i]; }
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->time[i]; }
   wire[at++] = record->reserved_1;
 
   return at;
@@ -2486,9 +2486,9 @@ static size_t encode_parity_estimated_price(const ParityEstimatedPrice *record, 
 /* Parity Estimated Price off the wire: 23 bytes from at, returning where the next byte lies */
 static size_t decode_parity_estimated_price(ParityEstimatedPrice *record, const uint8_t *wire, size_t at) {
   record->unit_flag = wire[at++];
-  for (size_t i = 0; i < 14; i++) { record->parity_estimated_price_c_14[i] = wire[at++]; }
+  for (size_t i = 0; i < 14; i++) { record->parity_estimated_price_value[i] = wire[at++]; }
   record->sign = wire[at++];
-  for (size_t i = 0; i < 6; i++) { record->time_c_6[i] = wire[at++]; }
+  for (size_t i = 0; i < 6; i++) { record->time[i] = wire[at++]; }
   record->reserved_1 = wire[at++];
 
   return at;
@@ -2497,9 +2497,9 @@ static size_t decode_parity_estimated_price(ParityEstimatedPrice *record, const 
 /* what was read of Parity Estimated Price is what was written, byte for byte */
 static void equal_parity_estimated_price(const ParityEstimatedPrice *read, const ParityEstimatedPrice *written) {
   assert(read->unit_flag == written->unit_flag);
-  for (size_t i = 0; i < 14; i++) { assert(read->parity_estimated_price_c_14[i] == written->parity_estimated_price_c_14[i]); }
+  for (size_t i = 0; i < 14; i++) { assert(read->parity_estimated_price_value[i] == written->parity_estimated_price_value[i]); }
   assert(read->sign == written->sign);
-  for (size_t i = 0; i < 6; i++) { assert(read->time_c_6[i] == written->time_c_6[i]); }
+  for (size_t i = 0; i < 6; i++) { assert(read->time[i] == written->time[i]); }
   assert(read->reserved_1 == written->reserved_1);
 }
 
@@ -2579,19 +2579,19 @@ static void check_parity_message(void) {
 
 /* Direct Yield */
 typedef struct {
-  uint8_t direct_yield_c_8[8];  /* bytes 0 to 7 */
-  uint8_t sign;                 /* byte 8 */
+  uint8_t direct_yield_value[8];  /* bytes 0 to 7 */
+  uint8_t sign;                   /* byte 8 */
 } DirectYield;
 
 /* any Direct Yield at all: every byte one the checker chooses */
 static void any_direct_yield(DirectYield *record) {
-  for (size_t i = 0; i < 8; i++) { record->direct_yield_c_8[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->direct_yield_value[i] = arbitrary(); }
   record->sign = arbitrary();
 }
 
 /* Direct Yield to the wire: 9 bytes from at, returning where the next byte goes */
 static size_t encode_direct_yield(const DirectYield *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 8; i++) { wire[at++] = record->direct_yield_c_8[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->direct_yield_value[i]; }
   wire[at++] = record->sign;
 
   return at;
@@ -2599,7 +2599,7 @@ static size_t encode_direct_yield(const DirectYield *record, uint8_t *wire, size
 
 /* Direct Yield off the wire: 9 bytes from at, returning where the next byte lies */
 static size_t decode_direct_yield(DirectYield *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 8; i++) { record->direct_yield_c_8[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->direct_yield_value[i] = wire[at++]; }
   record->sign = wire[at++];
 
   return at;
@@ -2607,7 +2607,7 @@ static size_t decode_direct_yield(DirectYield *record, const uint8_t *wire, size
 
 /* what was read of Direct Yield is what was written, byte for byte */
 static void equal_direct_yield(const DirectYield *read, const DirectYield *written) {
-  for (size_t i = 0; i < 8; i++) { assert(read->direct_yield_c_8[i] == written->direct_yield_c_8[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->direct_yield_value[i] == written->direct_yield_value[i]); }
   assert(read->sign == written->sign);
 }
 
@@ -2633,19 +2633,19 @@ static void check_direct_yield(void) {
 
 /* Final Yield */
 typedef struct {
-  uint8_t final_yield_c_8[8];  /* bytes 0 to 7 */
-  uint8_t sign;                /* byte 8 */
+  uint8_t final_yield_value[8];  /* bytes 0 to 7 */
+  uint8_t sign;                  /* byte 8 */
 } FinalYield;
 
 /* any Final Yield at all: every byte one the checker chooses */
 static void any_final_yield(FinalYield *record) {
-  for (size_t i = 0; i < 8; i++) { record->final_yield_c_8[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->final_yield_value[i] = arbitrary(); }
   record->sign = arbitrary();
 }
 
 /* Final Yield to the wire: 9 bytes from at, returning where the next byte goes */
 static size_t encode_final_yield(const FinalYield *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 8; i++) { wire[at++] = record->final_yield_c_8[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->final_yield_value[i]; }
   wire[at++] = record->sign;
 
   return at;
@@ -2653,7 +2653,7 @@ static size_t encode_final_yield(const FinalYield *record, uint8_t *wire, size_t
 
 /* Final Yield off the wire: 9 bytes from at, returning where the next byte lies */
 static size_t decode_final_yield(FinalYield *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 8; i++) { record->final_yield_c_8[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->final_yield_value[i] = wire[at++]; }
   record->sign = wire[at++];
 
   return at;
@@ -2661,7 +2661,7 @@ static size_t decode_final_yield(FinalYield *record, const uint8_t *wire, size_t
 
 /* what was read of Final Yield is what was written, byte for byte */
 static void equal_final_yield(const FinalYield *read, const FinalYield *written) {
-  for (size_t i = 0; i < 8; i++) { assert(read->final_yield_c_8[i] == written->final_yield_c_8[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->final_yield_value[i] == written->final_yield_value[i]); }
   assert(read->sign == written->sign);
 }
 
@@ -2690,7 +2690,7 @@ typedef struct {
   uint8_t reserved_2[2];     /* bytes 0 to 1 */
   DirectYield direct_yield;  /* bytes 2 to 10 */
   FinalYield final_yield;    /* bytes 11 to 19 */
-  uint8_t time_c_6[6];       /* bytes 20 to 25 */
+  uint8_t time[6];           /* bytes 20 to 25 */
   uint8_t reserved_1;        /* byte 26 */
 } YieldMessage;
 
@@ -2699,7 +2699,7 @@ static void any_yield_message(YieldMessage *record) {
   for (size_t i = 0; i < 2; i++) { record->reserved_2[i] = arbitrary(); }
   any_direct_yield(&record->direct_yield);
   any_final_yield(&record->final_yield);
-  for (size_t i = 0; i < 6; i++) { record->time_c_6[i] = arbitrary(); }
+  for (size_t i = 0; i < 6; i++) { record->time[i] = arbitrary(); }
   record->reserved_1 = arbitrary();
 }
 
@@ -2708,7 +2708,7 @@ static size_t encode_yield_message(const YieldMessage *record, uint8_t *wire, si
   for (size_t i = 0; i < 2; i++) { wire[at++] = record->reserved_2[i]; }
   at = encode_direct_yield(&record->direct_yield, wire, at);
   at = encode_final_yield(&record->final_yield, wire, at);
-  for (size_t i = 0; i < 6; i++) { wire[at++] = record->time_c_6[i]; }
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->time[i]; }
   wire[at++] = record->reserved_1;
 
   return at;
@@ -2719,7 +2719,7 @@ static size_t decode_yield_message(YieldMessage *record, const uint8_t *wire, si
   for (size_t i = 0; i < 2; i++) { record->reserved_2[i] = wire[at++]; }
   at = decode_direct_yield(&record->direct_yield, wire, at);
   at = decode_final_yield(&record->final_yield, wire, at);
-  for (size_t i = 0; i < 6; i++) { record->time_c_6[i] = wire[at++]; }
+  for (size_t i = 0; i < 6; i++) { record->time[i] = wire[at++]; }
   record->reserved_1 = wire[at++];
 
   return at;
@@ -2730,7 +2730,7 @@ static void equal_yield_message(const YieldMessage *read, const YieldMessage *wr
   for (size_t i = 0; i < 2; i++) { assert(read->reserved_2[i] == written->reserved_2[i]); }
   equal_direct_yield(&read->direct_yield, &written->direct_yield);
   equal_final_yield(&read->final_yield, &written->final_yield);
-  for (size_t i = 0; i < 6; i++) { assert(read->time_c_6[i] == written->time_c_6[i]); }
+  for (size_t i = 0; i < 6; i++) { assert(read->time[i] == written->time[i]); }
   assert(read->reserved_1 == written->reserved_1);
 }
 
@@ -2759,7 +2759,7 @@ typedef struct {
   uint8_t reserved_2[2];   /* bytes 0 to 1 */
   uint8_t test_mode_flag;  /* byte 2 */
   uint8_t start_end_flag;  /* byte 3 */
-  uint8_t time_c_6[6];     /* bytes 4 to 9 */
+  uint8_t time[6];         /* bytes 4 to 9 */
 } ControlMessage;
 
 /* any Control Message at all: every byte one the checker chooses */
@@ -2767,7 +2767,7 @@ static void any_control_message(ControlMessage *record) {
   for (size_t i = 0; i < 2; i++) { record->reserved_2[i] = arbitrary(); }
   record->test_mode_flag = arbitrary();
   record->start_end_flag = arbitrary();
-  for (size_t i = 0; i < 6; i++) { record->time_c_6[i] = arbitrary(); }
+  for (size_t i = 0; i < 6; i++) { record->time[i] = arbitrary(); }
 }
 
 /* Control Message to the wire: 10 bytes from at, returning where the next byte goes */
@@ -2775,7 +2775,7 @@ static size_t encode_control_message(const ControlMessage *record, uint8_t *wire
   for (size_t i = 0; i < 2; i++) { wire[at++] = record->reserved_2[i]; }
   wire[at++] = record->test_mode_flag;
   wire[at++] = record->start_end_flag;
-  for (size_t i = 0; i < 6; i++) { wire[at++] = record->time_c_6[i]; }
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->time[i]; }
 
   return at;
 }
@@ -2785,7 +2785,7 @@ static size_t decode_control_message(ControlMessage *record, const uint8_t *wire
   for (size_t i = 0; i < 2; i++) { record->reserved_2[i] = wire[at++]; }
   record->test_mode_flag = wire[at++];
   record->start_end_flag = wire[at++];
-  for (size_t i = 0; i < 6; i++) { record->time_c_6[i] = wire[at++]; }
+  for (size_t i = 0; i < 6; i++) { record->time[i] = wire[at++]; }
 
   return at;
 }
@@ -2795,7 +2795,7 @@ static void equal_control_message(const ControlMessage *read, const ControlMessa
   for (size_t i = 0; i < 2; i++) { assert(read->reserved_2[i] == written->reserved_2[i]); }
   assert(read->test_mode_flag == written->test_mode_flag);
   assert(read->start_end_flag == written->start_end_flag);
-  for (size_t i = 0; i < 6; i++) { assert(read->time_c_6[i] == written->time_c_6[i]); }
+  for (size_t i = 0; i < 6; i++) { assert(read->time[i] == written->time[i]); }
 }
 
 /* Control Message: written and read back, then read and written back */

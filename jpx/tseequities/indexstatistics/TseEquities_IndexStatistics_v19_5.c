@@ -298,19 +298,19 @@ static void check_c_b_issue_code(void) {
 /* Total market value */
 typedef struct {
   uint8_t trading_volume_turnover_unit_flag;  /* byte 0 */
-  uint8_t total_market_value_c_14[14];        /* bytes 1 to 14 */
+  uint8_t total_market_value_amount[14];      /* bytes 1 to 14 */
 } TotalMarketValue;
 
 /* any Total Market Value at all: every byte one the checker chooses */
 static void any_total_market_value(TotalMarketValue *record) {
   record->trading_volume_turnover_unit_flag = arbitrary();
-  for (size_t i = 0; i < 14; i++) { record->total_market_value_c_14[i] = arbitrary(); }
+  for (size_t i = 0; i < 14; i++) { record->total_market_value_amount[i] = arbitrary(); }
 }
 
 /* Total Market Value to the wire: 15 bytes from at, returning where the next byte goes */
 static size_t encode_total_market_value(const TotalMarketValue *record, uint8_t *wire, size_t at) {
   wire[at++] = record->trading_volume_turnover_unit_flag;
-  for (size_t i = 0; i < 14; i++) { wire[at++] = record->total_market_value_c_14[i]; }
+  for (size_t i = 0; i < 14; i++) { wire[at++] = record->total_market_value_amount[i]; }
 
   return at;
 }
@@ -318,7 +318,7 @@ static size_t encode_total_market_value(const TotalMarketValue *record, uint8_t 
 /* Total Market Value off the wire: 15 bytes from at, returning where the next byte lies */
 static size_t decode_total_market_value(TotalMarketValue *record, const uint8_t *wire, size_t at) {
   record->trading_volume_turnover_unit_flag = wire[at++];
-  for (size_t i = 0; i < 14; i++) { record->total_market_value_c_14[i] = wire[at++]; }
+  for (size_t i = 0; i < 14; i++) { record->total_market_value_amount[i] = wire[at++]; }
 
   return at;
 }
@@ -326,7 +326,7 @@ static size_t decode_total_market_value(TotalMarketValue *record, const uint8_t 
 /* what was read of Total Market Value is what was written, byte for byte */
 static void equal_total_market_value(const TotalMarketValue *read, const TotalMarketValue *written) {
   assert(read->trading_volume_turnover_unit_flag == written->trading_volume_turnover_unit_flag);
-  for (size_t i = 0; i < 14; i++) { assert(read->total_market_value_c_14[i] == written->total_market_value_c_14[i]); }
+  for (size_t i = 0; i < 14; i++) { assert(read->total_market_value_amount[i] == written->total_market_value_amount[i]); }
 }
 
 /* Total Market Value: written and read back, then read and written back */
@@ -352,21 +352,21 @@ static void check_total_market_value(void) {
 /* Market value Day-on-day comparison */
 typedef struct {
   uint8_t trading_volume_turnover_unit_flag;  /* byte 0 */
-  uint8_t day_on_day_comparison_c_14[14];     /* bytes 1 to 14 */
+  uint8_t day_on_day_comparison[14];          /* bytes 1 to 14 */
   uint8_t sign;                               /* byte 15 */
 } MarketValueDayOnDayComparison;
 
 /* any Market Value Day On Day Comparison at all: every byte one the checker chooses */
 static void any_market_value_day_on_day_comparison(MarketValueDayOnDayComparison *record) {
   record->trading_volume_turnover_unit_flag = arbitrary();
-  for (size_t i = 0; i < 14; i++) { record->day_on_day_comparison_c_14[i] = arbitrary(); }
+  for (size_t i = 0; i < 14; i++) { record->day_on_day_comparison[i] = arbitrary(); }
   record->sign = arbitrary();
 }
 
 /* Market Value Day On Day Comparison to the wire: 16 bytes from at, returning where the next byte goes */
 static size_t encode_market_value_day_on_day_comparison(const MarketValueDayOnDayComparison *record, uint8_t *wire, size_t at) {
   wire[at++] = record->trading_volume_turnover_unit_flag;
-  for (size_t i = 0; i < 14; i++) { wire[at++] = record->day_on_day_comparison_c_14[i]; }
+  for (size_t i = 0; i < 14; i++) { wire[at++] = record->day_on_day_comparison[i]; }
   wire[at++] = record->sign;
 
   return at;
@@ -375,7 +375,7 @@ static size_t encode_market_value_day_on_day_comparison(const MarketValueDayOnDa
 /* Market Value Day On Day Comparison off the wire: 16 bytes from at, returning where the next byte lies */
 static size_t decode_market_value_day_on_day_comparison(MarketValueDayOnDayComparison *record, const uint8_t *wire, size_t at) {
   record->trading_volume_turnover_unit_flag = wire[at++];
-  for (size_t i = 0; i < 14; i++) { record->day_on_day_comparison_c_14[i] = wire[at++]; }
+  for (size_t i = 0; i < 14; i++) { record->day_on_day_comparison[i] = wire[at++]; }
   record->sign = wire[at++];
 
   return at;
@@ -384,7 +384,7 @@ static size_t decode_market_value_day_on_day_comparison(MarketValueDayOnDayCompa
 /* what was read of Market Value Day On Day Comparison is what was written, byte for byte */
 static void equal_market_value_day_on_day_comparison(const MarketValueDayOnDayComparison *read, const MarketValueDayOnDayComparison *written) {
   assert(read->trading_volume_turnover_unit_flag == written->trading_volume_turnover_unit_flag);
-  for (size_t i = 0; i < 14; i++) { assert(read->day_on_day_comparison_c_14[i] == written->day_on_day_comparison_c_14[i]); }
+  for (size_t i = 0; i < 14; i++) { assert(read->day_on_day_comparison[i] == written->day_on_day_comparison[i]); }
   assert(read->sign == written->sign);
 }
 
@@ -479,19 +479,19 @@ static void check_market_value_message(void) {
 
 /* Simple yield */
 typedef struct {
-  uint8_t simple_yield_c_8[8];  /* bytes 0 to 7 */
-  uint8_t sign;                 /* byte 8 */
+  uint8_t simple_yield_value[8];  /* bytes 0 to 7 */
+  uint8_t sign;                   /* byte 8 */
 } SimpleYield;
 
 /* any Simple Yield at all: every byte one the checker chooses */
 static void any_simple_yield(SimpleYield *record) {
-  for (size_t i = 0; i < 8; i++) { record->simple_yield_c_8[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->simple_yield_value[i] = arbitrary(); }
   record->sign = arbitrary();
 }
 
 /* Simple Yield to the wire: 9 bytes from at, returning where the next byte goes */
 static size_t encode_simple_yield(const SimpleYield *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 8; i++) { wire[at++] = record->simple_yield_c_8[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->simple_yield_value[i]; }
   wire[at++] = record->sign;
 
   return at;
@@ -499,7 +499,7 @@ static size_t encode_simple_yield(const SimpleYield *record, uint8_t *wire, size
 
 /* Simple Yield off the wire: 9 bytes from at, returning where the next byte lies */
 static size_t decode_simple_yield(SimpleYield *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 8; i++) { record->simple_yield_c_8[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->simple_yield_value[i] = wire[at++]; }
   record->sign = wire[at++];
 
   return at;
@@ -507,7 +507,7 @@ static size_t decode_simple_yield(SimpleYield *record, const uint8_t *wire, size
 
 /* what was read of Simple Yield is what was written, byte for byte */
 static void equal_simple_yield(const SimpleYield *read, const SimpleYield *written) {
-  for (size_t i = 0; i < 8; i++) { assert(read->simple_yield_c_8[i] == written->simple_yield_c_8[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->simple_yield_value[i] == written->simple_yield_value[i]); }
   assert(read->sign == written->sign);
 }
 
@@ -533,19 +533,19 @@ static void check_simple_yield(void) {
 
 /* Yield Day-on-day comparison */
 typedef struct {
-  uint8_t day_on_day_comparison_c_8[8];  /* bytes 0 to 7 */
-  uint8_t sign;                          /* byte 8 */
+  uint8_t day_on_day_comparison_rate[8];  /* bytes 0 to 7 */
+  uint8_t sign;                           /* byte 8 */
 } YieldDayOnDayComparison;
 
 /* any Yield Day On Day Comparison at all: every byte one the checker chooses */
 static void any_yield_day_on_day_comparison(YieldDayOnDayComparison *record) {
-  for (size_t i = 0; i < 8; i++) { record->day_on_day_comparison_c_8[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->day_on_day_comparison_rate[i] = arbitrary(); }
   record->sign = arbitrary();
 }
 
 /* Yield Day On Day Comparison to the wire: 9 bytes from at, returning where the next byte goes */
 static size_t encode_yield_day_on_day_comparison(const YieldDayOnDayComparison *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 8; i++) { wire[at++] = record->day_on_day_comparison_c_8[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->day_on_day_comparison_rate[i]; }
   wire[at++] = record->sign;
 
   return at;
@@ -553,7 +553,7 @@ static size_t encode_yield_day_on_day_comparison(const YieldDayOnDayComparison *
 
 /* Yield Day On Day Comparison off the wire: 9 bytes from at, returning where the next byte lies */
 static size_t decode_yield_day_on_day_comparison(YieldDayOnDayComparison *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 8; i++) { record->day_on_day_comparison_c_8[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->day_on_day_comparison_rate[i] = wire[at++]; }
   record->sign = wire[at++];
 
   return at;
@@ -561,7 +561,7 @@ static size_t decode_yield_day_on_day_comparison(YieldDayOnDayComparison *record
 
 /* what was read of Yield Day On Day Comparison is what was written, byte for byte */
 static void equal_yield_day_on_day_comparison(const YieldDayOnDayComparison *read, const YieldDayOnDayComparison *written) {
-  for (size_t i = 0; i < 8; i++) { assert(read->day_on_day_comparison_c_8[i] == written->day_on_day_comparison_c_8[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->day_on_day_comparison_rate[i] == written->day_on_day_comparison_rate[i]); }
   assert(read->sign == written->sign);
 }
 
@@ -656,19 +656,19 @@ static void check_simple_yield_message(void) {
 
 /* Weighted yield */
 typedef struct {
-  uint8_t weighted_yield_c_8[8];  /* bytes 0 to 7 */
-  uint8_t sign;                   /* byte 8 */
+  uint8_t weighted_yield_value[8];  /* bytes 0 to 7 */
+  uint8_t sign;                     /* byte 8 */
 } WeightedYield;
 
 /* any Weighted Yield at all: every byte one the checker chooses */
 static void any_weighted_yield(WeightedYield *record) {
-  for (size_t i = 0; i < 8; i++) { record->weighted_yield_c_8[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->weighted_yield_value[i] = arbitrary(); }
   record->sign = arbitrary();
 }
 
 /* Weighted Yield to the wire: 9 bytes from at, returning where the next byte goes */
 static size_t encode_weighted_yield(const WeightedYield *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 8; i++) { wire[at++] = record->weighted_yield_c_8[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->weighted_yield_value[i]; }
   wire[at++] = record->sign;
 
   return at;
@@ -676,7 +676,7 @@ static size_t encode_weighted_yield(const WeightedYield *record, uint8_t *wire, 
 
 /* Weighted Yield off the wire: 9 bytes from at, returning where the next byte lies */
 static size_t decode_weighted_yield(WeightedYield *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 8; i++) { record->weighted_yield_c_8[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->weighted_yield_value[i] = wire[at++]; }
   record->sign = wire[at++];
 
   return at;
@@ -684,7 +684,7 @@ static size_t decode_weighted_yield(WeightedYield *record, const uint8_t *wire, 
 
 /* what was read of Weighted Yield is what was written, byte for byte */
 static void equal_weighted_yield(const WeightedYield *read, const WeightedYield *written) {
-  for (size_t i = 0; i < 8; i++) { assert(read->weighted_yield_c_8[i] == written->weighted_yield_c_8[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->weighted_yield_value[i] == written->weighted_yield_value[i]); }
   assert(read->sign == written->sign);
 }
 
@@ -779,22 +779,22 @@ static void check_weighted_yield_message(void) {
 
 /* Simple stock price average */
 typedef struct {
-  uint8_t unit_flag;                            /* byte 0 */
-  uint8_t simple_stock_price_average_c_14[14];  /* bytes 1 to 14 */
-  uint8_t sign;                                 /* byte 15 */
+  uint8_t unit_flag;                             /* byte 0 */
+  uint8_t simple_stock_price_average_value[14];  /* bytes 1 to 14 */
+  uint8_t sign;                                  /* byte 15 */
 } SimpleStockPriceAverage;
 
 /* any Simple Stock Price Average at all: every byte one the checker chooses */
 static void any_simple_stock_price_average(SimpleStockPriceAverage *record) {
   record->unit_flag = arbitrary();
-  for (size_t i = 0; i < 14; i++) { record->simple_stock_price_average_c_14[i] = arbitrary(); }
+  for (size_t i = 0; i < 14; i++) { record->simple_stock_price_average_value[i] = arbitrary(); }
   record->sign = arbitrary();
 }
 
 /* Simple Stock Price Average to the wire: 16 bytes from at, returning where the next byte goes */
 static size_t encode_simple_stock_price_average(const SimpleStockPriceAverage *record, uint8_t *wire, size_t at) {
   wire[at++] = record->unit_flag;
-  for (size_t i = 0; i < 14; i++) { wire[at++] = record->simple_stock_price_average_c_14[i]; }
+  for (size_t i = 0; i < 14; i++) { wire[at++] = record->simple_stock_price_average_value[i]; }
   wire[at++] = record->sign;
 
   return at;
@@ -803,7 +803,7 @@ static size_t encode_simple_stock_price_average(const SimpleStockPriceAverage *r
 /* Simple Stock Price Average off the wire: 16 bytes from at, returning where the next byte lies */
 static size_t decode_simple_stock_price_average(SimpleStockPriceAverage *record, const uint8_t *wire, size_t at) {
   record->unit_flag = wire[at++];
-  for (size_t i = 0; i < 14; i++) { record->simple_stock_price_average_c_14[i] = wire[at++]; }
+  for (size_t i = 0; i < 14; i++) { record->simple_stock_price_average_value[i] = wire[at++]; }
   record->sign = wire[at++];
 
   return at;
@@ -812,7 +812,7 @@ static size_t decode_simple_stock_price_average(SimpleStockPriceAverage *record,
 /* what was read of Simple Stock Price Average is what was written, byte for byte */
 static void equal_simple_stock_price_average(const SimpleStockPriceAverage *read, const SimpleStockPriceAverage *written) {
   assert(read->unit_flag == written->unit_flag);
-  for (size_t i = 0; i < 14; i++) { assert(read->simple_stock_price_average_c_14[i] == written->simple_stock_price_average_c_14[i]); }
+  for (size_t i = 0; i < 14; i++) { assert(read->simple_stock_price_average_value[i] == written->simple_stock_price_average_value[i]); }
   assert(read->sign == written->sign);
 }
 
@@ -838,22 +838,22 @@ static void check_simple_stock_price_average(void) {
 
 /* Stock price average Day-on-day comparison */
 typedef struct {
-  uint8_t unit_flag;                       /* byte 0 */
-  uint8_t day_on_day_comparison_c_14[14];  /* bytes 1 to 14 */
-  uint8_t sign;                            /* byte 15 */
+  uint8_t unit_flag;                  /* byte 0 */
+  uint8_t day_on_day_comparison[14];  /* bytes 1 to 14 */
+  uint8_t sign;                       /* byte 15 */
 } StockPriceAverageDayOnDayComparison;
 
 /* any Stock Price Average Day On Day Comparison at all: every byte one the checker chooses */
 static void any_stock_price_average_day_on_day_comparison(StockPriceAverageDayOnDayComparison *record) {
   record->unit_flag = arbitrary();
-  for (size_t i = 0; i < 14; i++) { record->day_on_day_comparison_c_14[i] = arbitrary(); }
+  for (size_t i = 0; i < 14; i++) { record->day_on_day_comparison[i] = arbitrary(); }
   record->sign = arbitrary();
 }
 
 /* Stock Price Average Day On Day Comparison to the wire: 16 bytes from at, returning where the next byte goes */
 static size_t encode_stock_price_average_day_on_day_comparison(const StockPriceAverageDayOnDayComparison *record, uint8_t *wire, size_t at) {
   wire[at++] = record->unit_flag;
-  for (size_t i = 0; i < 14; i++) { wire[at++] = record->day_on_day_comparison_c_14[i]; }
+  for (size_t i = 0; i < 14; i++) { wire[at++] = record->day_on_day_comparison[i]; }
   wire[at++] = record->sign;
 
   return at;
@@ -862,7 +862,7 @@ static size_t encode_stock_price_average_day_on_day_comparison(const StockPriceA
 /* Stock Price Average Day On Day Comparison off the wire: 16 bytes from at, returning where the next byte lies */
 static size_t decode_stock_price_average_day_on_day_comparison(StockPriceAverageDayOnDayComparison *record, const uint8_t *wire, size_t at) {
   record->unit_flag = wire[at++];
-  for (size_t i = 0; i < 14; i++) { record->day_on_day_comparison_c_14[i] = wire[at++]; }
+  for (size_t i = 0; i < 14; i++) { record->day_on_day_comparison[i] = wire[at++]; }
   record->sign = wire[at++];
 
   return at;
@@ -871,7 +871,7 @@ static size_t decode_stock_price_average_day_on_day_comparison(StockPriceAverage
 /* what was read of Stock Price Average Day On Day Comparison is what was written, byte for byte */
 static void equal_stock_price_average_day_on_day_comparison(const StockPriceAverageDayOnDayComparison *read, const StockPriceAverageDayOnDayComparison *written) {
   assert(read->unit_flag == written->unit_flag);
-  for (size_t i = 0; i < 14; i++) { assert(read->day_on_day_comparison_c_14[i] == written->day_on_day_comparison_c_14[i]); }
+  for (size_t i = 0; i < 14; i++) { assert(read->day_on_day_comparison[i] == written->day_on_day_comparison[i]); }
   assert(read->sign == written->sign);
 }
 
@@ -966,22 +966,22 @@ static void check_simple_stock_price_average_message(void) {
 
 /* Weighted stock price average */
 typedef struct {
-  uint8_t unit_flag;                              /* byte 0 */
-  uint8_t weighted_stock_price_average_c_14[14];  /* bytes 1 to 14 */
-  uint8_t sign;                                   /* byte 15 */
+  uint8_t unit_flag;                               /* byte 0 */
+  uint8_t weighted_stock_price_average_value[14];  /* bytes 1 to 14 */
+  uint8_t sign;                                    /* byte 15 */
 } WeightedStockPriceAverage;
 
 /* any Weighted Stock Price Average at all: every byte one the checker chooses */
 static void any_weighted_stock_price_average(WeightedStockPriceAverage *record) {
   record->unit_flag = arbitrary();
-  for (size_t i = 0; i < 14; i++) { record->weighted_stock_price_average_c_14[i] = arbitrary(); }
+  for (size_t i = 0; i < 14; i++) { record->weighted_stock_price_average_value[i] = arbitrary(); }
   record->sign = arbitrary();
 }
 
 /* Weighted Stock Price Average to the wire: 16 bytes from at, returning where the next byte goes */
 static size_t encode_weighted_stock_price_average(const WeightedStockPriceAverage *record, uint8_t *wire, size_t at) {
   wire[at++] = record->unit_flag;
-  for (size_t i = 0; i < 14; i++) { wire[at++] = record->weighted_stock_price_average_c_14[i]; }
+  for (size_t i = 0; i < 14; i++) { wire[at++] = record->weighted_stock_price_average_value[i]; }
   wire[at++] = record->sign;
 
   return at;
@@ -990,7 +990,7 @@ static size_t encode_weighted_stock_price_average(const WeightedStockPriceAverag
 /* Weighted Stock Price Average off the wire: 16 bytes from at, returning where the next byte lies */
 static size_t decode_weighted_stock_price_average(WeightedStockPriceAverage *record, const uint8_t *wire, size_t at) {
   record->unit_flag = wire[at++];
-  for (size_t i = 0; i < 14; i++) { record->weighted_stock_price_average_c_14[i] = wire[at++]; }
+  for (size_t i = 0; i < 14; i++) { record->weighted_stock_price_average_value[i] = wire[at++]; }
   record->sign = wire[at++];
 
   return at;
@@ -999,7 +999,7 @@ static size_t decode_weighted_stock_price_average(WeightedStockPriceAverage *rec
 /* what was read of Weighted Stock Price Average is what was written, byte for byte */
 static void equal_weighted_stock_price_average(const WeightedStockPriceAverage *read, const WeightedStockPriceAverage *written) {
   assert(read->unit_flag == written->unit_flag);
-  for (size_t i = 0; i < 14; i++) { assert(read->weighted_stock_price_average_c_14[i] == written->weighted_stock_price_average_c_14[i]); }
+  for (size_t i = 0; i < 14; i++) { assert(read->weighted_stock_price_average_value[i] == written->weighted_stock_price_average_value[i]); }
   assert(read->sign == written->sign);
 }
 
@@ -1163,31 +1163,31 @@ static void check_simple_stock_price_average_by_industry_message(void) {
 
 /* Overall Simple average */
 typedef struct {
-  uint8_t unit_flag;                       /* byte 0 */
-  uint8_t simple_average_c_14[14];         /* bytes 1 to 14 */
-  uint8_t sign;                            /* byte 15 */
-  uint8_t second_unit_flag;                /* byte 16 */
-  uint8_t day_on_day_comparison_c_14[14];  /* bytes 17 to 30 */
-  uint8_t second_sign;                     /* byte 31 */
+  uint8_t unit_flag;                  /* byte 0 */
+  uint8_t simple_average_value[14];   /* bytes 1 to 14 */
+  uint8_t sign;                       /* byte 15 */
+  uint8_t second_unit_flag;           /* byte 16 */
+  uint8_t day_on_day_comparison[14];  /* bytes 17 to 30 */
+  uint8_t second_sign;                /* byte 31 */
 } OverallSimpleAverage;
 
 /* any Overall Simple Average at all: every byte one the checker chooses */
 static void any_overall_simple_average(OverallSimpleAverage *record) {
   record->unit_flag = arbitrary();
-  for (size_t i = 0; i < 14; i++) { record->simple_average_c_14[i] = arbitrary(); }
+  for (size_t i = 0; i < 14; i++) { record->simple_average_value[i] = arbitrary(); }
   record->sign = arbitrary();
   record->second_unit_flag = arbitrary();
-  for (size_t i = 0; i < 14; i++) { record->day_on_day_comparison_c_14[i] = arbitrary(); }
+  for (size_t i = 0; i < 14; i++) { record->day_on_day_comparison[i] = arbitrary(); }
   record->second_sign = arbitrary();
 }
 
 /* Overall Simple Average to the wire: 32 bytes from at, returning where the next byte goes */
 static size_t encode_overall_simple_average(const OverallSimpleAverage *record, uint8_t *wire, size_t at) {
   wire[at++] = record->unit_flag;
-  for (size_t i = 0; i < 14; i++) { wire[at++] = record->simple_average_c_14[i]; }
+  for (size_t i = 0; i < 14; i++) { wire[at++] = record->simple_average_value[i]; }
   wire[at++] = record->sign;
   wire[at++] = record->second_unit_flag;
-  for (size_t i = 0; i < 14; i++) { wire[at++] = record->day_on_day_comparison_c_14[i]; }
+  for (size_t i = 0; i < 14; i++) { wire[at++] = record->day_on_day_comparison[i]; }
   wire[at++] = record->second_sign;
 
   return at;
@@ -1196,10 +1196,10 @@ static size_t encode_overall_simple_average(const OverallSimpleAverage *record, 
 /* Overall Simple Average off the wire: 32 bytes from at, returning where the next byte lies */
 static size_t decode_overall_simple_average(OverallSimpleAverage *record, const uint8_t *wire, size_t at) {
   record->unit_flag = wire[at++];
-  for (size_t i = 0; i < 14; i++) { record->simple_average_c_14[i] = wire[at++]; }
+  for (size_t i = 0; i < 14; i++) { record->simple_average_value[i] = wire[at++]; }
   record->sign = wire[at++];
   record->second_unit_flag = wire[at++];
-  for (size_t i = 0; i < 14; i++) { record->day_on_day_comparison_c_14[i] = wire[at++]; }
+  for (size_t i = 0; i < 14; i++) { record->day_on_day_comparison[i] = wire[at++]; }
   record->second_sign = wire[at++];
 
   return at;
@@ -1208,10 +1208,10 @@ static size_t decode_overall_simple_average(OverallSimpleAverage *record, const 
 /* what was read of Overall Simple Average is what was written, byte for byte */
 static void equal_overall_simple_average(const OverallSimpleAverage *read, const OverallSimpleAverage *written) {
   assert(read->unit_flag == written->unit_flag);
-  for (size_t i = 0; i < 14; i++) { assert(read->simple_average_c_14[i] == written->simple_average_c_14[i]); }
+  for (size_t i = 0; i < 14; i++) { assert(read->simple_average_value[i] == written->simple_average_value[i]); }
   assert(read->sign == written->sign);
   assert(read->second_unit_flag == written->second_unit_flag);
-  for (size_t i = 0; i < 14; i++) { assert(read->day_on_day_comparison_c_14[i] == written->day_on_day_comparison_c_14[i]); }
+  for (size_t i = 0; i < 14; i++) { assert(read->day_on_day_comparison[i] == written->day_on_day_comparison[i]); }
   assert(read->second_sign == written->second_sign);
 }
 
@@ -1237,25 +1237,25 @@ static void check_overall_simple_average(void) {
 
 /* Overall Divergence average */
 typedef struct {
-  uint8_t divergence_average_c_8[8];     /* bytes 0 to 7 */
-  uint8_t sign;                          /* byte 8 */
-  uint8_t day_on_day_comparison_c_8[8];  /* bytes 9 to 16 */
-  uint8_t second_sign;                   /* byte 17 */
+  uint8_t divergence_average_value[8];    /* bytes 0 to 7 */
+  uint8_t sign;                           /* byte 8 */
+  uint8_t day_on_day_comparison_rate[8];  /* bytes 9 to 16 */
+  uint8_t second_sign;                    /* byte 17 */
 } OverallDivergenceAverage;
 
 /* any Overall Divergence Average at all: every byte one the checker chooses */
 static void any_overall_divergence_average(OverallDivergenceAverage *record) {
-  for (size_t i = 0; i < 8; i++) { record->divergence_average_c_8[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->divergence_average_value[i] = arbitrary(); }
   record->sign = arbitrary();
-  for (size_t i = 0; i < 8; i++) { record->day_on_day_comparison_c_8[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->day_on_day_comparison_rate[i] = arbitrary(); }
   record->second_sign = arbitrary();
 }
 
 /* Overall Divergence Average to the wire: 18 bytes from at, returning where the next byte goes */
 static size_t encode_overall_divergence_average(const OverallDivergenceAverage *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 8; i++) { wire[at++] = record->divergence_average_c_8[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->divergence_average_value[i]; }
   wire[at++] = record->sign;
-  for (size_t i = 0; i < 8; i++) { wire[at++] = record->day_on_day_comparison_c_8[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->day_on_day_comparison_rate[i]; }
   wire[at++] = record->second_sign;
 
   return at;
@@ -1263,9 +1263,9 @@ static size_t encode_overall_divergence_average(const OverallDivergenceAverage *
 
 /* Overall Divergence Average off the wire: 18 bytes from at, returning where the next byte lies */
 static size_t decode_overall_divergence_average(OverallDivergenceAverage *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 8; i++) { record->divergence_average_c_8[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->divergence_average_value[i] = wire[at++]; }
   record->sign = wire[at++];
-  for (size_t i = 0; i < 8; i++) { record->day_on_day_comparison_c_8[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->day_on_day_comparison_rate[i] = wire[at++]; }
   record->second_sign = wire[at++];
 
   return at;
@@ -1273,9 +1273,9 @@ static size_t decode_overall_divergence_average(OverallDivergenceAverage *record
 
 /* what was read of Overall Divergence Average is what was written, byte for byte */
 static void equal_overall_divergence_average(const OverallDivergenceAverage *read, const OverallDivergenceAverage *written) {
-  for (size_t i = 0; i < 8; i++) { assert(read->divergence_average_c_8[i] == written->divergence_average_c_8[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->divergence_average_value[i] == written->divergence_average_value[i]); }
   assert(read->sign == written->sign);
-  for (size_t i = 0; i < 8; i++) { assert(read->day_on_day_comparison_c_8[i] == written->day_on_day_comparison_c_8[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->day_on_day_comparison_rate[i] == written->day_on_day_comparison_rate[i]); }
   assert(read->second_sign == written->second_sign);
 }
 
@@ -1301,31 +1301,31 @@ static void check_overall_divergence_average(void) {
 
 /* Overall Parity average */
 typedef struct {
-  uint8_t unit_flag;                       /* byte 0 */
-  uint8_t parity_average_c_14[14];         /* bytes 1 to 14 */
-  uint8_t sign;                            /* byte 15 */
-  uint8_t second_unit_flag;                /* byte 16 */
-  uint8_t day_on_day_comparison_c_14[14];  /* bytes 17 to 30 */
-  uint8_t second_sign;                     /* byte 31 */
+  uint8_t unit_flag;                  /* byte 0 */
+  uint8_t parity_average_value[14];   /* bytes 1 to 14 */
+  uint8_t sign;                       /* byte 15 */
+  uint8_t second_unit_flag;           /* byte 16 */
+  uint8_t day_on_day_comparison[14];  /* bytes 17 to 30 */
+  uint8_t second_sign;                /* byte 31 */
 } OverallParityAverage;
 
 /* any Overall Parity Average at all: every byte one the checker chooses */
 static void any_overall_parity_average(OverallParityAverage *record) {
   record->unit_flag = arbitrary();
-  for (size_t i = 0; i < 14; i++) { record->parity_average_c_14[i] = arbitrary(); }
+  for (size_t i = 0; i < 14; i++) { record->parity_average_value[i] = arbitrary(); }
   record->sign = arbitrary();
   record->second_unit_flag = arbitrary();
-  for (size_t i = 0; i < 14; i++) { record->day_on_day_comparison_c_14[i] = arbitrary(); }
+  for (size_t i = 0; i < 14; i++) { record->day_on_day_comparison[i] = arbitrary(); }
   record->second_sign = arbitrary();
 }
 
 /* Overall Parity Average to the wire: 32 bytes from at, returning where the next byte goes */
 static size_t encode_overall_parity_average(const OverallParityAverage *record, uint8_t *wire, size_t at) {
   wire[at++] = record->unit_flag;
-  for (size_t i = 0; i < 14; i++) { wire[at++] = record->parity_average_c_14[i]; }
+  for (size_t i = 0; i < 14; i++) { wire[at++] = record->parity_average_value[i]; }
   wire[at++] = record->sign;
   wire[at++] = record->second_unit_flag;
-  for (size_t i = 0; i < 14; i++) { wire[at++] = record->day_on_day_comparison_c_14[i]; }
+  for (size_t i = 0; i < 14; i++) { wire[at++] = record->day_on_day_comparison[i]; }
   wire[at++] = record->second_sign;
 
   return at;
@@ -1334,10 +1334,10 @@ static size_t encode_overall_parity_average(const OverallParityAverage *record, 
 /* Overall Parity Average off the wire: 32 bytes from at, returning where the next byte lies */
 static size_t decode_overall_parity_average(OverallParityAverage *record, const uint8_t *wire, size_t at) {
   record->unit_flag = wire[at++];
-  for (size_t i = 0; i < 14; i++) { record->parity_average_c_14[i] = wire[at++]; }
+  for (size_t i = 0; i < 14; i++) { record->parity_average_value[i] = wire[at++]; }
   record->sign = wire[at++];
   record->second_unit_flag = wire[at++];
-  for (size_t i = 0; i < 14; i++) { record->day_on_day_comparison_c_14[i] = wire[at++]; }
+  for (size_t i = 0; i < 14; i++) { record->day_on_day_comparison[i] = wire[at++]; }
   record->second_sign = wire[at++];
 
   return at;
@@ -1346,10 +1346,10 @@ static size_t decode_overall_parity_average(OverallParityAverage *record, const 
 /* what was read of Overall Parity Average is what was written, byte for byte */
 static void equal_overall_parity_average(const OverallParityAverage *read, const OverallParityAverage *written) {
   assert(read->unit_flag == written->unit_flag);
-  for (size_t i = 0; i < 14; i++) { assert(read->parity_average_c_14[i] == written->parity_average_c_14[i]); }
+  for (size_t i = 0; i < 14; i++) { assert(read->parity_average_value[i] == written->parity_average_value[i]); }
   assert(read->sign == written->sign);
   assert(read->second_unit_flag == written->second_unit_flag);
-  for (size_t i = 0; i < 14; i++) { assert(read->day_on_day_comparison_c_14[i] == written->day_on_day_comparison_c_14[i]); }
+  for (size_t i = 0; i < 14; i++) { assert(read->day_on_day_comparison[i] == written->day_on_day_comparison[i]); }
   assert(read->second_sign == written->second_sign);
 }
 
@@ -1375,25 +1375,25 @@ static void check_overall_parity_average(void) {
 
 /* Overall Direct yield average */
 typedef struct {
-  uint8_t direct_yield_average_c_8[8];   /* bytes 0 to 7 */
-  uint8_t sign;                          /* byte 8 */
-  uint8_t day_on_day_comparison_c_8[8];  /* bytes 9 to 16 */
-  uint8_t second_sign;                   /* byte 17 */
+  uint8_t direct_yield_average_value[8];  /* bytes 0 to 7 */
+  uint8_t sign;                           /* byte 8 */
+  uint8_t day_on_day_comparison_rate[8];  /* bytes 9 to 16 */
+  uint8_t second_sign;                    /* byte 17 */
 } OverallDirectYieldAverage;
 
 /* any Overall Direct Yield Average at all: every byte one the checker chooses */
 static void any_overall_direct_yield_average(OverallDirectYieldAverage *record) {
-  for (size_t i = 0; i < 8; i++) { record->direct_yield_average_c_8[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->direct_yield_average_value[i] = arbitrary(); }
   record->sign = arbitrary();
-  for (size_t i = 0; i < 8; i++) { record->day_on_day_comparison_c_8[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->day_on_day_comparison_rate[i] = arbitrary(); }
   record->second_sign = arbitrary();
 }
 
 /* Overall Direct Yield Average to the wire: 18 bytes from at, returning where the next byte goes */
 static size_t encode_overall_direct_yield_average(const OverallDirectYieldAverage *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 8; i++) { wire[at++] = record->direct_yield_average_c_8[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->direct_yield_average_value[i]; }
   wire[at++] = record->sign;
-  for (size_t i = 0; i < 8; i++) { wire[at++] = record->day_on_day_comparison_c_8[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->day_on_day_comparison_rate[i]; }
   wire[at++] = record->second_sign;
 
   return at;
@@ -1401,9 +1401,9 @@ static size_t encode_overall_direct_yield_average(const OverallDirectYieldAverag
 
 /* Overall Direct Yield Average off the wire: 18 bytes from at, returning where the next byte lies */
 static size_t decode_overall_direct_yield_average(OverallDirectYieldAverage *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 8; i++) { record->direct_yield_average_c_8[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->direct_yield_average_value[i] = wire[at++]; }
   record->sign = wire[at++];
-  for (size_t i = 0; i < 8; i++) { record->day_on_day_comparison_c_8[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->day_on_day_comparison_rate[i] = wire[at++]; }
   record->second_sign = wire[at++];
 
   return at;
@@ -1411,9 +1411,9 @@ static size_t decode_overall_direct_yield_average(OverallDirectYieldAverage *rec
 
 /* what was read of Overall Direct Yield Average is what was written, byte for byte */
 static void equal_overall_direct_yield_average(const OverallDirectYieldAverage *read, const OverallDirectYieldAverage *written) {
-  for (size_t i = 0; i < 8; i++) { assert(read->direct_yield_average_c_8[i] == written->direct_yield_average_c_8[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->direct_yield_average_value[i] == written->direct_yield_average_value[i]); }
   assert(read->sign == written->sign);
-  for (size_t i = 0; i < 8; i++) { assert(read->day_on_day_comparison_c_8[i] == written->day_on_day_comparison_c_8[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->day_on_day_comparison_rate[i] == written->day_on_day_comparison_rate[i]); }
   assert(read->second_sign == written->second_sign);
 }
 
@@ -1503,22 +1503,22 @@ static void check_overall(void) {
 
 /* Simple average */
 typedef struct {
-  uint8_t unit_flag;                /* byte 0 */
-  uint8_t simple_average_c_14[14];  /* bytes 1 to 14 */
-  uint8_t sign;                     /* byte 15 */
+  uint8_t unit_flag;                 /* byte 0 */
+  uint8_t simple_average_value[14];  /* bytes 1 to 14 */
+  uint8_t sign;                      /* byte 15 */
 } SimpleAverage;
 
 /* any Simple Average at all: every byte one the checker chooses */
 static void any_simple_average(SimpleAverage *record) {
   record->unit_flag = arbitrary();
-  for (size_t i = 0; i < 14; i++) { record->simple_average_c_14[i] = arbitrary(); }
+  for (size_t i = 0; i < 14; i++) { record->simple_average_value[i] = arbitrary(); }
   record->sign = arbitrary();
 }
 
 /* Simple Average to the wire: 16 bytes from at, returning where the next byte goes */
 static size_t encode_simple_average(const SimpleAverage *record, uint8_t *wire, size_t at) {
   wire[at++] = record->unit_flag;
-  for (size_t i = 0; i < 14; i++) { wire[at++] = record->simple_average_c_14[i]; }
+  for (size_t i = 0; i < 14; i++) { wire[at++] = record->simple_average_value[i]; }
   wire[at++] = record->sign;
 
   return at;
@@ -1527,7 +1527,7 @@ static size_t encode_simple_average(const SimpleAverage *record, uint8_t *wire, 
 /* Simple Average off the wire: 16 bytes from at, returning where the next byte lies */
 static size_t decode_simple_average(SimpleAverage *record, const uint8_t *wire, size_t at) {
   record->unit_flag = wire[at++];
-  for (size_t i = 0; i < 14; i++) { record->simple_average_c_14[i] = wire[at++]; }
+  for (size_t i = 0; i < 14; i++) { record->simple_average_value[i] = wire[at++]; }
   record->sign = wire[at++];
 
   return at;
@@ -1536,7 +1536,7 @@ static size_t decode_simple_average(SimpleAverage *record, const uint8_t *wire, 
 /* what was read of Simple Average is what was written, byte for byte */
 static void equal_simple_average(const SimpleAverage *read, const SimpleAverage *written) {
   assert(read->unit_flag == written->unit_flag);
-  for (size_t i = 0; i < 14; i++) { assert(read->simple_average_c_14[i] == written->simple_average_c_14[i]); }
+  for (size_t i = 0; i < 14; i++) { assert(read->simple_average_value[i] == written->simple_average_value[i]); }
   assert(read->sign == written->sign);
 }
 
@@ -1562,19 +1562,19 @@ static void check_simple_average(void) {
 
 /* Divergence average */
 typedef struct {
-  uint8_t divergence_average_c_8[8];  /* bytes 0 to 7 */
-  uint8_t sign;                       /* byte 8 */
+  uint8_t divergence_average_value[8];  /* bytes 0 to 7 */
+  uint8_t sign;                         /* byte 8 */
 } DivergenceAverage;
 
 /* any Divergence Average at all: every byte one the checker chooses */
 static void any_divergence_average(DivergenceAverage *record) {
-  for (size_t i = 0; i < 8; i++) { record->divergence_average_c_8[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->divergence_average_value[i] = arbitrary(); }
   record->sign = arbitrary();
 }
 
 /* Divergence Average to the wire: 9 bytes from at, returning where the next byte goes */
 static size_t encode_divergence_average(const DivergenceAverage *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 8; i++) { wire[at++] = record->divergence_average_c_8[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->divergence_average_value[i]; }
   wire[at++] = record->sign;
 
   return at;
@@ -1582,7 +1582,7 @@ static size_t encode_divergence_average(const DivergenceAverage *record, uint8_t
 
 /* Divergence Average off the wire: 9 bytes from at, returning where the next byte lies */
 static size_t decode_divergence_average(DivergenceAverage *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 8; i++) { record->divergence_average_c_8[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->divergence_average_value[i] = wire[at++]; }
   record->sign = wire[at++];
 
   return at;
@@ -1590,7 +1590,7 @@ static size_t decode_divergence_average(DivergenceAverage *record, const uint8_t
 
 /* what was read of Divergence Average is what was written, byte for byte */
 static void equal_divergence_average(const DivergenceAverage *read, const DivergenceAverage *written) {
-  for (size_t i = 0; i < 8; i++) { assert(read->divergence_average_c_8[i] == written->divergence_average_c_8[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->divergence_average_value[i] == written->divergence_average_value[i]); }
   assert(read->sign == written->sign);
 }
 
@@ -1616,22 +1616,22 @@ static void check_divergence_average(void) {
 
 /* Parity average */
 typedef struct {
-  uint8_t unit_flag;                /* byte 0 */
-  uint8_t parity_average_c_14[14];  /* bytes 1 to 14 */
-  uint8_t sign;                     /* byte 15 */
+  uint8_t unit_flag;                 /* byte 0 */
+  uint8_t parity_average_value[14];  /* bytes 1 to 14 */
+  uint8_t sign;                      /* byte 15 */
 } ParityAverage;
 
 /* any Parity Average at all: every byte one the checker chooses */
 static void any_parity_average(ParityAverage *record) {
   record->unit_flag = arbitrary();
-  for (size_t i = 0; i < 14; i++) { record->parity_average_c_14[i] = arbitrary(); }
+  for (size_t i = 0; i < 14; i++) { record->parity_average_value[i] = arbitrary(); }
   record->sign = arbitrary();
 }
 
 /* Parity Average to the wire: 16 bytes from at, returning where the next byte goes */
 static size_t encode_parity_average(const ParityAverage *record, uint8_t *wire, size_t at) {
   wire[at++] = record->unit_flag;
-  for (size_t i = 0; i < 14; i++) { wire[at++] = record->parity_average_c_14[i]; }
+  for (size_t i = 0; i < 14; i++) { wire[at++] = record->parity_average_value[i]; }
   wire[at++] = record->sign;
 
   return at;
@@ -1640,7 +1640,7 @@ static size_t encode_parity_average(const ParityAverage *record, uint8_t *wire, 
 /* Parity Average off the wire: 16 bytes from at, returning where the next byte lies */
 static size_t decode_parity_average(ParityAverage *record, const uint8_t *wire, size_t at) {
   record->unit_flag = wire[at++];
-  for (size_t i = 0; i < 14; i++) { record->parity_average_c_14[i] = wire[at++]; }
+  for (size_t i = 0; i < 14; i++) { record->parity_average_value[i] = wire[at++]; }
   record->sign = wire[at++];
 
   return at;
@@ -1649,7 +1649,7 @@ static size_t decode_parity_average(ParityAverage *record, const uint8_t *wire, 
 /* what was read of Parity Average is what was written, byte for byte */
 static void equal_parity_average(const ParityAverage *read, const ParityAverage *written) {
   assert(read->unit_flag == written->unit_flag);
-  for (size_t i = 0; i < 14; i++) { assert(read->parity_average_c_14[i] == written->parity_average_c_14[i]); }
+  for (size_t i = 0; i < 14; i++) { assert(read->parity_average_value[i] == written->parity_average_value[i]); }
   assert(read->sign == written->sign);
 }
 
@@ -1675,19 +1675,19 @@ static void check_parity_average(void) {
 
 /* Direct yield average */
 typedef struct {
-  uint8_t direct_yield_average_c_8[8];  /* bytes 0 to 7 */
-  uint8_t sign;                         /* byte 8 */
+  uint8_t direct_yield_average_value[8];  /* bytes 0 to 7 */
+  uint8_t sign;                           /* byte 8 */
 } DirectYieldAverage;
 
 /* any Direct Yield Average at all: every byte one the checker chooses */
 static void any_direct_yield_average(DirectYieldAverage *record) {
-  for (size_t i = 0; i < 8; i++) { record->direct_yield_average_c_8[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->direct_yield_average_value[i] = arbitrary(); }
   record->sign = arbitrary();
 }
 
 /* Direct Yield Average to the wire: 9 bytes from at, returning where the next byte goes */
 static size_t encode_direct_yield_average(const DirectYieldAverage *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 8; i++) { wire[at++] = record->direct_yield_average_c_8[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->direct_yield_average_value[i]; }
   wire[at++] = record->sign;
 
   return at;
@@ -1695,7 +1695,7 @@ static size_t encode_direct_yield_average(const DirectYieldAverage *record, uint
 
 /* Direct Yield Average off the wire: 9 bytes from at, returning where the next byte lies */
 static size_t decode_direct_yield_average(DirectYieldAverage *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 8; i++) { record->direct_yield_average_c_8[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->direct_yield_average_value[i] = wire[at++]; }
   record->sign = wire[at++];
 
   return at;
@@ -1703,7 +1703,7 @@ static size_t decode_direct_yield_average(DirectYieldAverage *record, const uint
 
 /* what was read of Direct Yield Average is what was written, byte for byte */
 static void equal_direct_yield_average(const DirectYieldAverage *read, const DirectYieldAverage *written) {
-  for (size_t i = 0; i < 8; i++) { assert(read->direct_yield_average_c_8[i] == written->direct_yield_average_c_8[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->direct_yield_average_value[i] == written->direct_yield_average_value[i]); }
   assert(read->sign == written->sign);
 }
 
@@ -2349,20 +2349,20 @@ static void check_number_of_gainers_decliners_message(void) {
 
 /* Estimated total trading volume */
 typedef struct {
-  uint8_t trading_volume_turnover_unit_flag;        /* byte 0 */
-  uint8_t estimated_total_trading_volume_c_14[14];  /* bytes 1 to 14 */
+  uint8_t trading_volume_turnover_unit_flag;         /* byte 0 */
+  uint8_t estimated_total_trading_volume_value[14];  /* bytes 1 to 14 */
 } EstimatedTotalTradingVolume;
 
 /* any Estimated Total Trading Volume at all: every byte one the checker chooses */
 static void any_estimated_total_trading_volume(EstimatedTotalTradingVolume *record) {
   record->trading_volume_turnover_unit_flag = arbitrary();
-  for (size_t i = 0; i < 14; i++) { record->estimated_total_trading_volume_c_14[i] = arbitrary(); }
+  for (size_t i = 0; i < 14; i++) { record->estimated_total_trading_volume_value[i] = arbitrary(); }
 }
 
 /* Estimated Total Trading Volume to the wire: 15 bytes from at, returning where the next byte goes */
 static size_t encode_estimated_total_trading_volume(const EstimatedTotalTradingVolume *record, uint8_t *wire, size_t at) {
   wire[at++] = record->trading_volume_turnover_unit_flag;
-  for (size_t i = 0; i < 14; i++) { wire[at++] = record->estimated_total_trading_volume_c_14[i]; }
+  for (size_t i = 0; i < 14; i++) { wire[at++] = record->estimated_total_trading_volume_value[i]; }
 
   return at;
 }
@@ -2370,7 +2370,7 @@ static size_t encode_estimated_total_trading_volume(const EstimatedTotalTradingV
 /* Estimated Total Trading Volume off the wire: 15 bytes from at, returning where the next byte lies */
 static size_t decode_estimated_total_trading_volume(EstimatedTotalTradingVolume *record, const uint8_t *wire, size_t at) {
   record->trading_volume_turnover_unit_flag = wire[at++];
-  for (size_t i = 0; i < 14; i++) { record->estimated_total_trading_volume_c_14[i] = wire[at++]; }
+  for (size_t i = 0; i < 14; i++) { record->estimated_total_trading_volume_value[i] = wire[at++]; }
 
   return at;
 }
@@ -2378,7 +2378,7 @@ static size_t decode_estimated_total_trading_volume(EstimatedTotalTradingVolume 
 /* what was read of Estimated Total Trading Volume is what was written, byte for byte */
 static void equal_estimated_total_trading_volume(const EstimatedTotalTradingVolume *read, const EstimatedTotalTradingVolume *written) {
   assert(read->trading_volume_turnover_unit_flag == written->trading_volume_turnover_unit_flag);
-  for (size_t i = 0; i < 14; i++) { assert(read->estimated_total_trading_volume_c_14[i] == written->estimated_total_trading_volume_c_14[i]); }
+  for (size_t i = 0; i < 14; i++) { assert(read->estimated_total_trading_volume_value[i] == written->estimated_total_trading_volume_value[i]); }
 }
 
 /* Estimated Total Trading Volume: written and read back, then read and written back */
@@ -2472,22 +2472,22 @@ static void check_estimated_total_trading_volume_message(void) {
 
 /* Estimated total turnover */
 typedef struct {
-  uint8_t trading_volume_turnover_unit_flag;  /* byte 0 */
-  uint8_t estimated_total_turnover_c_14[14];  /* bytes 1 to 14 */
-  uint8_t reserved_1;                         /* byte 15 */
+  uint8_t trading_volume_turnover_unit_flag;   /* byte 0 */
+  uint8_t estimated_total_turnover_value[14];  /* bytes 1 to 14 */
+  uint8_t reserved_1;                          /* byte 15 */
 } EstimatedTotalTurnover;
 
 /* any Estimated Total Turnover at all: every byte one the checker chooses */
 static void any_estimated_total_turnover(EstimatedTotalTurnover *record) {
   record->trading_volume_turnover_unit_flag = arbitrary();
-  for (size_t i = 0; i < 14; i++) { record->estimated_total_turnover_c_14[i] = arbitrary(); }
+  for (size_t i = 0; i < 14; i++) { record->estimated_total_turnover_value[i] = arbitrary(); }
   record->reserved_1 = arbitrary();
 }
 
 /* Estimated Total Turnover to the wire: 16 bytes from at, returning where the next byte goes */
 static size_t encode_estimated_total_turnover(const EstimatedTotalTurnover *record, uint8_t *wire, size_t at) {
   wire[at++] = record->trading_volume_turnover_unit_flag;
-  for (size_t i = 0; i < 14; i++) { wire[at++] = record->estimated_total_turnover_c_14[i]; }
+  for (size_t i = 0; i < 14; i++) { wire[at++] = record->estimated_total_turnover_value[i]; }
   wire[at++] = record->reserved_1;
 
   return at;
@@ -2496,7 +2496,7 @@ static size_t encode_estimated_total_turnover(const EstimatedTotalTurnover *reco
 /* Estimated Total Turnover off the wire: 16 bytes from at, returning where the next byte lies */
 static size_t decode_estimated_total_turnover(EstimatedTotalTurnover *record, const uint8_t *wire, size_t at) {
   record->trading_volume_turnover_unit_flag = wire[at++];
-  for (size_t i = 0; i < 14; i++) { record->estimated_total_turnover_c_14[i] = wire[at++]; }
+  for (size_t i = 0; i < 14; i++) { record->estimated_total_turnover_value[i] = wire[at++]; }
   record->reserved_1 = wire[at++];
 
   return at;
@@ -2505,7 +2505,7 @@ static size_t decode_estimated_total_turnover(EstimatedTotalTurnover *record, co
 /* what was read of Estimated Total Turnover is what was written, byte for byte */
 static void equal_estimated_total_turnover(const EstimatedTotalTurnover *read, const EstimatedTotalTurnover *written) {
   assert(read->trading_volume_turnover_unit_flag == written->trading_volume_turnover_unit_flag);
-  for (size_t i = 0; i < 14; i++) { assert(read->estimated_total_turnover_c_14[i] == written->estimated_total_turnover_c_14[i]); }
+  for (size_t i = 0; i < 14; i++) { assert(read->estimated_total_turnover_value[i] == written->estimated_total_turnover_value[i]); }
   assert(read->reserved_1 == written->reserved_1);
 }
 
@@ -2600,34 +2600,34 @@ static void check_estimated_total_turnover_message(void) {
 
 /* VWAP by market */
 typedef struct {
-  uint8_t unit_flag;                       /* byte 0 */
-  uint8_t vwap_by_market_c_14[14];         /* bytes 1 to 14 */
-  uint8_t sign;                            /* byte 15 */
-  uint8_t reserved_1;                      /* byte 16 */
-  uint8_t second_unit_flag;                /* byte 17 */
-  uint8_t day_on_day_comparison_c_14[14];  /* bytes 18 to 31 */
-  uint8_t second_sign;                     /* byte 32 */
+  uint8_t unit_flag;                  /* byte 0 */
+  uint8_t vwap_by_market_value[14];   /* bytes 1 to 14 */
+  uint8_t sign;                       /* byte 15 */
+  uint8_t reserved_1;                 /* byte 16 */
+  uint8_t second_unit_flag;           /* byte 17 */
+  uint8_t day_on_day_comparison[14];  /* bytes 18 to 31 */
+  uint8_t second_sign;                /* byte 32 */
 } VwapByMarket;
 
 /* any Vwap By Market at all: every byte one the checker chooses */
 static void any_vwap_by_market(VwapByMarket *record) {
   record->unit_flag = arbitrary();
-  for (size_t i = 0; i < 14; i++) { record->vwap_by_market_c_14[i] = arbitrary(); }
+  for (size_t i = 0; i < 14; i++) { record->vwap_by_market_value[i] = arbitrary(); }
   record->sign = arbitrary();
   record->reserved_1 = arbitrary();
   record->second_unit_flag = arbitrary();
-  for (size_t i = 0; i < 14; i++) { record->day_on_day_comparison_c_14[i] = arbitrary(); }
+  for (size_t i = 0; i < 14; i++) { record->day_on_day_comparison[i] = arbitrary(); }
   record->second_sign = arbitrary();
 }
 
 /* Vwap By Market to the wire: 33 bytes from at, returning where the next byte goes */
 static size_t encode_vwap_by_market(const VwapByMarket *record, uint8_t *wire, size_t at) {
   wire[at++] = record->unit_flag;
-  for (size_t i = 0; i < 14; i++) { wire[at++] = record->vwap_by_market_c_14[i]; }
+  for (size_t i = 0; i < 14; i++) { wire[at++] = record->vwap_by_market_value[i]; }
   wire[at++] = record->sign;
   wire[at++] = record->reserved_1;
   wire[at++] = record->second_unit_flag;
-  for (size_t i = 0; i < 14; i++) { wire[at++] = record->day_on_day_comparison_c_14[i]; }
+  for (size_t i = 0; i < 14; i++) { wire[at++] = record->day_on_day_comparison[i]; }
   wire[at++] = record->second_sign;
 
   return at;
@@ -2636,11 +2636,11 @@ static size_t encode_vwap_by_market(const VwapByMarket *record, uint8_t *wire, s
 /* Vwap By Market off the wire: 33 bytes from at, returning where the next byte lies */
 static size_t decode_vwap_by_market(VwapByMarket *record, const uint8_t *wire, size_t at) {
   record->unit_flag = wire[at++];
-  for (size_t i = 0; i < 14; i++) { record->vwap_by_market_c_14[i] = wire[at++]; }
+  for (size_t i = 0; i < 14; i++) { record->vwap_by_market_value[i] = wire[at++]; }
   record->sign = wire[at++];
   record->reserved_1 = wire[at++];
   record->second_unit_flag = wire[at++];
-  for (size_t i = 0; i < 14; i++) { record->day_on_day_comparison_c_14[i] = wire[at++]; }
+  for (size_t i = 0; i < 14; i++) { record->day_on_day_comparison[i] = wire[at++]; }
   record->second_sign = wire[at++];
 
   return at;
@@ -2649,11 +2649,11 @@ static size_t decode_vwap_by_market(VwapByMarket *record, const uint8_t *wire, s
 /* what was read of Vwap By Market is what was written, byte for byte */
 static void equal_vwap_by_market(const VwapByMarket *read, const VwapByMarket *written) {
   assert(read->unit_flag == written->unit_flag);
-  for (size_t i = 0; i < 14; i++) { assert(read->vwap_by_market_c_14[i] == written->vwap_by_market_c_14[i]); }
+  for (size_t i = 0; i < 14; i++) { assert(read->vwap_by_market_value[i] == written->vwap_by_market_value[i]); }
   assert(read->sign == written->sign);
   assert(read->reserved_1 == written->reserved_1);
   assert(read->second_unit_flag == written->second_unit_flag);
-  for (size_t i = 0; i < 14; i++) { assert(read->day_on_day_comparison_c_14[i] == written->day_on_day_comparison_c_14[i]); }
+  for (size_t i = 0; i < 14; i++) { assert(read->day_on_day_comparison[i] == written->day_on_day_comparison[i]); }
   assert(read->second_sign == written->second_sign);
 }
 
@@ -2744,11 +2744,11 @@ static void check_vwap_by_market_message(void) {
 /* Trading volume */
 typedef struct {
   uint8_t trading_volume_turnover_unit_flag;         /* byte 0 */
-  uint8_t single_issue_transaction_c_14[14];         /* bytes 1 to 14 */
+  uint8_t single_issue_transaction[14];              /* bytes 1 to 14 */
   uint8_t second_trading_volume_turnover_unit_flag;  /* byte 15 */
   uint8_t closing_price_transaction[14];             /* bytes 16 to 29 */
   uint8_t third_trading_volume_turnover_unit_flag;   /* byte 30 */
-  uint8_t basket_transaction_c_14[14];               /* bytes 31 to 44 */
+  uint8_t basket_transaction[14];                    /* bytes 31 to 44 */
   uint8_t fourth_trading_volume_turnover_unit_flag;  /* byte 45 */
   uint8_t aggregate_trading_volume[14];              /* bytes 46 to 59 */
 } TradingVolume;
@@ -2756,11 +2756,11 @@ typedef struct {
 /* any Trading Volume at all: every byte one the checker chooses */
 static void any_trading_volume(TradingVolume *record) {
   record->trading_volume_turnover_unit_flag = arbitrary();
-  for (size_t i = 0; i < 14; i++) { record->single_issue_transaction_c_14[i] = arbitrary(); }
+  for (size_t i = 0; i < 14; i++) { record->single_issue_transaction[i] = arbitrary(); }
   record->second_trading_volume_turnover_unit_flag = arbitrary();
   for (size_t i = 0; i < 14; i++) { record->closing_price_transaction[i] = arbitrary(); }
   record->third_trading_volume_turnover_unit_flag = arbitrary();
-  for (size_t i = 0; i < 14; i++) { record->basket_transaction_c_14[i] = arbitrary(); }
+  for (size_t i = 0; i < 14; i++) { record->basket_transaction[i] = arbitrary(); }
   record->fourth_trading_volume_turnover_unit_flag = arbitrary();
   for (size_t i = 0; i < 14; i++) { record->aggregate_trading_volume[i] = arbitrary(); }
 }
@@ -2768,11 +2768,11 @@ static void any_trading_volume(TradingVolume *record) {
 /* Trading Volume to the wire: 60 bytes from at, returning where the next byte goes */
 static size_t encode_trading_volume(const TradingVolume *record, uint8_t *wire, size_t at) {
   wire[at++] = record->trading_volume_turnover_unit_flag;
-  for (size_t i = 0; i < 14; i++) { wire[at++] = record->single_issue_transaction_c_14[i]; }
+  for (size_t i = 0; i < 14; i++) { wire[at++] = record->single_issue_transaction[i]; }
   wire[at++] = record->second_trading_volume_turnover_unit_flag;
   for (size_t i = 0; i < 14; i++) { wire[at++] = record->closing_price_transaction[i]; }
   wire[at++] = record->third_trading_volume_turnover_unit_flag;
-  for (size_t i = 0; i < 14; i++) { wire[at++] = record->basket_transaction_c_14[i]; }
+  for (size_t i = 0; i < 14; i++) { wire[at++] = record->basket_transaction[i]; }
   wire[at++] = record->fourth_trading_volume_turnover_unit_flag;
   for (size_t i = 0; i < 14; i++) { wire[at++] = record->aggregate_trading_volume[i]; }
 
@@ -2782,11 +2782,11 @@ static size_t encode_trading_volume(const TradingVolume *record, uint8_t *wire, 
 /* Trading Volume off the wire: 60 bytes from at, returning where the next byte lies */
 static size_t decode_trading_volume(TradingVolume *record, const uint8_t *wire, size_t at) {
   record->trading_volume_turnover_unit_flag = wire[at++];
-  for (size_t i = 0; i < 14; i++) { record->single_issue_transaction_c_14[i] = wire[at++]; }
+  for (size_t i = 0; i < 14; i++) { record->single_issue_transaction[i] = wire[at++]; }
   record->second_trading_volume_turnover_unit_flag = wire[at++];
   for (size_t i = 0; i < 14; i++) { record->closing_price_transaction[i] = wire[at++]; }
   record->third_trading_volume_turnover_unit_flag = wire[at++];
-  for (size_t i = 0; i < 14; i++) { record->basket_transaction_c_14[i] = wire[at++]; }
+  for (size_t i = 0; i < 14; i++) { record->basket_transaction[i] = wire[at++]; }
   record->fourth_trading_volume_turnover_unit_flag = wire[at++];
   for (size_t i = 0; i < 14; i++) { record->aggregate_trading_volume[i] = wire[at++]; }
 
@@ -2796,11 +2796,11 @@ static size_t decode_trading_volume(TradingVolume *record, const uint8_t *wire, 
 /* what was read of Trading Volume is what was written, byte for byte */
 static void equal_trading_volume(const TradingVolume *read, const TradingVolume *written) {
   assert(read->trading_volume_turnover_unit_flag == written->trading_volume_turnover_unit_flag);
-  for (size_t i = 0; i < 14; i++) { assert(read->single_issue_transaction_c_14[i] == written->single_issue_transaction_c_14[i]); }
+  for (size_t i = 0; i < 14; i++) { assert(read->single_issue_transaction[i] == written->single_issue_transaction[i]); }
   assert(read->second_trading_volume_turnover_unit_flag == written->second_trading_volume_turnover_unit_flag);
   for (size_t i = 0; i < 14; i++) { assert(read->closing_price_transaction[i] == written->closing_price_transaction[i]); }
   assert(read->third_trading_volume_turnover_unit_flag == written->third_trading_volume_turnover_unit_flag);
-  for (size_t i = 0; i < 14; i++) { assert(read->basket_transaction_c_14[i] == written->basket_transaction_c_14[i]); }
+  for (size_t i = 0; i < 14; i++) { assert(read->basket_transaction[i] == written->basket_transaction[i]); }
   assert(read->fourth_trading_volume_turnover_unit_flag == written->fourth_trading_volume_turnover_unit_flag);
   for (size_t i = 0; i < 14; i++) { assert(read->aggregate_trading_volume[i] == written->aggregate_trading_volume[i]); }
 }
@@ -2828,11 +2828,11 @@ static void check_trading_volume(void) {
 /* Turnover */
 typedef struct {
   uint8_t trading_volume_turnover_unit_flag;         /* byte 0 */
-  uint8_t single_issue_transaction_c_14[14];         /* bytes 1 to 14 */
+  uint8_t single_issue_transaction[14];              /* bytes 1 to 14 */
   uint8_t second_trading_volume_turnover_unit_flag;  /* byte 15 */
   uint8_t closing_price_transaction[14];             /* bytes 16 to 29 */
   uint8_t third_trading_volume_turnover_unit_flag;   /* byte 30 */
-  uint8_t basket_transaction_c_14[14];               /* bytes 31 to 44 */
+  uint8_t basket_transaction[14];                    /* bytes 31 to 44 */
   uint8_t fourth_trading_volume_turnover_unit_flag;  /* byte 45 */
   uint8_t aggregate_turnover[14];                    /* bytes 46 to 59 */
 } Turnover;
@@ -2840,11 +2840,11 @@ typedef struct {
 /* any Turnover at all: every byte one the checker chooses */
 static void any_turnover(Turnover *record) {
   record->trading_volume_turnover_unit_flag = arbitrary();
-  for (size_t i = 0; i < 14; i++) { record->single_issue_transaction_c_14[i] = arbitrary(); }
+  for (size_t i = 0; i < 14; i++) { record->single_issue_transaction[i] = arbitrary(); }
   record->second_trading_volume_turnover_unit_flag = arbitrary();
   for (size_t i = 0; i < 14; i++) { record->closing_price_transaction[i] = arbitrary(); }
   record->third_trading_volume_turnover_unit_flag = arbitrary();
-  for (size_t i = 0; i < 14; i++) { record->basket_transaction_c_14[i] = arbitrary(); }
+  for (size_t i = 0; i < 14; i++) { record->basket_transaction[i] = arbitrary(); }
   record->fourth_trading_volume_turnover_unit_flag = arbitrary();
   for (size_t i = 0; i < 14; i++) { record->aggregate_turnover[i] = arbitrary(); }
 }
@@ -2852,11 +2852,11 @@ static void any_turnover(Turnover *record) {
 /* Turnover to the wire: 60 bytes from at, returning where the next byte goes */
 static size_t encode_turnover(const Turnover *record, uint8_t *wire, size_t at) {
   wire[at++] = record->trading_volume_turnover_unit_flag;
-  for (size_t i = 0; i < 14; i++) { wire[at++] = record->single_issue_transaction_c_14[i]; }
+  for (size_t i = 0; i < 14; i++) { wire[at++] = record->single_issue_transaction[i]; }
   wire[at++] = record->second_trading_volume_turnover_unit_flag;
   for (size_t i = 0; i < 14; i++) { wire[at++] = record->closing_price_transaction[i]; }
   wire[at++] = record->third_trading_volume_turnover_unit_flag;
-  for (size_t i = 0; i < 14; i++) { wire[at++] = record->basket_transaction_c_14[i]; }
+  for (size_t i = 0; i < 14; i++) { wire[at++] = record->basket_transaction[i]; }
   wire[at++] = record->fourth_trading_volume_turnover_unit_flag;
   for (size_t i = 0; i < 14; i++) { wire[at++] = record->aggregate_turnover[i]; }
 
@@ -2866,11 +2866,11 @@ static size_t encode_turnover(const Turnover *record, uint8_t *wire, size_t at) 
 /* Turnover off the wire: 60 bytes from at, returning where the next byte lies */
 static size_t decode_turnover(Turnover *record, const uint8_t *wire, size_t at) {
   record->trading_volume_turnover_unit_flag = wire[at++];
-  for (size_t i = 0; i < 14; i++) { record->single_issue_transaction_c_14[i] = wire[at++]; }
+  for (size_t i = 0; i < 14; i++) { record->single_issue_transaction[i] = wire[at++]; }
   record->second_trading_volume_turnover_unit_flag = wire[at++];
   for (size_t i = 0; i < 14; i++) { record->closing_price_transaction[i] = wire[at++]; }
   record->third_trading_volume_turnover_unit_flag = wire[at++];
-  for (size_t i = 0; i < 14; i++) { record->basket_transaction_c_14[i] = wire[at++]; }
+  for (size_t i = 0; i < 14; i++) { record->basket_transaction[i] = wire[at++]; }
   record->fourth_trading_volume_turnover_unit_flag = wire[at++];
   for (size_t i = 0; i < 14; i++) { record->aggregate_turnover[i] = wire[at++]; }
 
@@ -2880,11 +2880,11 @@ static size_t decode_turnover(Turnover *record, const uint8_t *wire, size_t at) 
 /* what was read of Turnover is what was written, byte for byte */
 static void equal_turnover(const Turnover *read, const Turnover *written) {
   assert(read->trading_volume_turnover_unit_flag == written->trading_volume_turnover_unit_flag);
-  for (size_t i = 0; i < 14; i++) { assert(read->single_issue_transaction_c_14[i] == written->single_issue_transaction_c_14[i]); }
+  for (size_t i = 0; i < 14; i++) { assert(read->single_issue_transaction[i] == written->single_issue_transaction[i]); }
   assert(read->second_trading_volume_turnover_unit_flag == written->second_trading_volume_turnover_unit_flag);
   for (size_t i = 0; i < 14; i++) { assert(read->closing_price_transaction[i] == written->closing_price_transaction[i]); }
   assert(read->third_trading_volume_turnover_unit_flag == written->third_trading_volume_turnover_unit_flag);
-  for (size_t i = 0; i < 14; i++) { assert(read->basket_transaction_c_14[i] == written->basket_transaction_c_14[i]); }
+  for (size_t i = 0; i < 14; i++) { assert(read->basket_transaction[i] == written->basket_transaction[i]); }
   assert(read->fourth_trading_volume_turnover_unit_flag == written->fourth_trading_volume_turnover_unit_flag);
   for (size_t i = 0; i < 14; i++) { assert(read->aggregate_turnover[i] == written->aggregate_turnover[i]); }
 }
@@ -2911,36 +2911,36 @@ static void check_turnover(void) {
 
 /* Number of transactions */
 typedef struct {
-  uint8_t single_issue_transaction_c_8[8];  /* bytes 0 to 7 */
-  uint8_t basket_transaction_c_8[8];        /* bytes 8 to 15 */
+  uint8_t single_issue_transaction_count[8];  /* bytes 0 to 7 */
+  uint8_t basket_transaction_count[8];        /* bytes 8 to 15 */
 } NumberOfTransactions;
 
 /* any Number Of Transactions at all: every byte one the checker chooses */
 static void any_number_of_transactions(NumberOfTransactions *record) {
-  for (size_t i = 0; i < 8; i++) { record->single_issue_transaction_c_8[i] = arbitrary(); }
-  for (size_t i = 0; i < 8; i++) { record->basket_transaction_c_8[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->single_issue_transaction_count[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->basket_transaction_count[i] = arbitrary(); }
 }
 
 /* Number Of Transactions to the wire: 16 bytes from at, returning where the next byte goes */
 static size_t encode_number_of_transactions(const NumberOfTransactions *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 8; i++) { wire[at++] = record->single_issue_transaction_c_8[i]; }
-  for (size_t i = 0; i < 8; i++) { wire[at++] = record->basket_transaction_c_8[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->single_issue_transaction_count[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->basket_transaction_count[i]; }
 
   return at;
 }
 
 /* Number Of Transactions off the wire: 16 bytes from at, returning where the next byte lies */
 static size_t decode_number_of_transactions(NumberOfTransactions *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 8; i++) { record->single_issue_transaction_c_8[i] = wire[at++]; }
-  for (size_t i = 0; i < 8; i++) { record->basket_transaction_c_8[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->single_issue_transaction_count[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->basket_transaction_count[i] = wire[at++]; }
 
   return at;
 }
 
 /* what was read of Number Of Transactions is what was written, byte for byte */
 static void equal_number_of_transactions(const NumberOfTransactions *read, const NumberOfTransactions *written) {
-  for (size_t i = 0; i < 8; i++) { assert(read->single_issue_transaction_c_8[i] == written->single_issue_transaction_c_8[i]); }
-  for (size_t i = 0; i < 8; i++) { assert(read->basket_transaction_c_8[i] == written->basket_transaction_c_8[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->single_issue_transaction_count[i] == written->single_issue_transaction_count[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->basket_transaction_count[i] == written->basket_transaction_count[i]); }
 }
 
 /* Number Of Transactions: written and read back, then read and written back */

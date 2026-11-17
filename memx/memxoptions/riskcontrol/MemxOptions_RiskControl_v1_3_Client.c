@@ -449,25 +449,25 @@ static void check_risk_settings_query_message(void) {
 
 /* ActiveRiskThresholdChangeReqMessage */
 typedef struct {
-  uint8_t cl_ord_id[20];                                            /* bytes 0 to 19 */
-  uint8_t underlier_active_risk_threshold_change_req_underlier[6];  /* bytes 20 to 25 */
-  uint8_t efid_active_risk_threshold_change_req_efid[4];            /* bytes 26 to 29 */
-  uint8_t threshold_quantity[4];                                    /* bytes 30 to 33 */
+  uint8_t cl_ord_id[20];          /* bytes 0 to 19 */
+  uint8_t underlier[6];           /* bytes 20 to 25 */
+  uint8_t efid[4];                /* bytes 26 to 29 */
+  uint8_t threshold_quantity[4];  /* bytes 30 to 33 */
 } ActiveRiskThresholdChangeReqMessage;
 
 /* any Active Risk Threshold Change Req Message at all: every byte one the checker chooses */
 static void any_active_risk_threshold_change_req_message(ActiveRiskThresholdChangeReqMessage *record) {
   for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = arbitrary(); }
-  for (size_t i = 0; i < 6; i++) { record->underlier_active_risk_threshold_change_req_underlier[i] = arbitrary(); }
-  for (size_t i = 0; i < 4; i++) { record->efid_active_risk_threshold_change_req_efid[i] = arbitrary(); }
+  for (size_t i = 0; i < 6; i++) { record->underlier[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->efid[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->threshold_quantity[i] = arbitrary(); }
 }
 
 /* Active Risk Threshold Change Req Message to the wire: 34 bytes from at, returning where the next byte goes */
 static size_t encode_active_risk_threshold_change_req_message(const ActiveRiskThresholdChangeReqMessage *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id[i]; }
-  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier_active_risk_threshold_change_req_underlier[i]; }
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid_active_risk_threshold_change_req_efid[i]; }
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->underlier[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->efid[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->threshold_quantity[i]; }
 
   return at;
@@ -476,8 +476,8 @@ static size_t encode_active_risk_threshold_change_req_message(const ActiveRiskTh
 /* Active Risk Threshold Change Req Message off the wire: 34 bytes from at, returning where the next byte lies */
 static size_t decode_active_risk_threshold_change_req_message(ActiveRiskThresholdChangeReqMessage *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = wire[at++]; }
-  for (size_t i = 0; i < 6; i++) { record->underlier_active_risk_threshold_change_req_underlier[i] = wire[at++]; }
-  for (size_t i = 0; i < 4; i++) { record->efid_active_risk_threshold_change_req_efid[i] = wire[at++]; }
+  for (size_t i = 0; i < 6; i++) { record->underlier[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->efid[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->threshold_quantity[i] = wire[at++]; }
 
   return at;
@@ -486,8 +486,8 @@ static size_t decode_active_risk_threshold_change_req_message(ActiveRiskThreshol
 /* what was read of Active Risk Threshold Change Req Message is what was written, byte for byte */
 static void equal_active_risk_threshold_change_req_message(const ActiveRiskThresholdChangeReqMessage *read, const ActiveRiskThresholdChangeReqMessage *written) {
   for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id[i] == written->cl_ord_id[i]); }
-  for (size_t i = 0; i < 6; i++) { assert(read->underlier_active_risk_threshold_change_req_underlier[i] == written->underlier_active_risk_threshold_change_req_underlier[i]); }
-  for (size_t i = 0; i < 4; i++) { assert(read->efid_active_risk_threshold_change_req_efid[i] == written->efid_active_risk_threshold_change_req_efid[i]); }
+  for (size_t i = 0; i < 6; i++) { assert(read->underlier[i] == written->underlier[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->efid[i] == written->efid[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->threshold_quantity[i] == written->threshold_quantity[i]); }
 }
 

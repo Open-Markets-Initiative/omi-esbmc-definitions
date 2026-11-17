@@ -1307,7 +1307,7 @@ typedef struct {
   uint8_t transaction_time[8];  /* bytes 0 to 7 */
   uint8_t cl_ord_id[20];        /* bytes 8 to 27 */
   uint8_t broker_id[2];         /* bytes 28 to 29 */
-  uint8_t symbol_8[8];          /* bytes 30 to 37 */
+  uint8_t symbol_short[8];      /* bytes 30 to 37 */
 } DoneForDayCaEquitiesV1;
 
 /* any Done For Day Ca Equities V 1 at all: every byte one the checker chooses */
@@ -1315,7 +1315,7 @@ static void any_done_for_day_ca_equities_v1(DoneForDayCaEquitiesV1 *record) {
   for (size_t i = 0; i < 8; i++) { record->transaction_time[i] = arbitrary(); }
   for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = arbitrary(); }
   for (size_t i = 0; i < 2; i++) { record->broker_id[i] = arbitrary(); }
-  for (size_t i = 0; i < 8; i++) { record->symbol_8[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->symbol_short[i] = arbitrary(); }
 }
 
 /* Done For Day Ca Equities V 1 to the wire: 38 bytes from at, returning where the next byte goes */
@@ -1323,7 +1323,7 @@ static size_t encode_done_for_day_ca_equities_v1(const DoneForDayCaEquitiesV1 *r
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->transaction_time[i]; }
   for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id[i]; }
   for (size_t i = 0; i < 2; i++) { wire[at++] = record->broker_id[i]; }
-  for (size_t i = 0; i < 8; i++) { wire[at++] = record->symbol_8[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->symbol_short[i]; }
 
   return at;
 }
@@ -1333,7 +1333,7 @@ static size_t decode_done_for_day_ca_equities_v1(DoneForDayCaEquitiesV1 *record,
   for (size_t i = 0; i < 8; i++) { record->transaction_time[i] = wire[at++]; }
   for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = wire[at++]; }
   for (size_t i = 0; i < 2; i++) { record->broker_id[i] = wire[at++]; }
-  for (size_t i = 0; i < 8; i++) { record->symbol_8[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->symbol_short[i] = wire[at++]; }
 
   return at;
 }
@@ -1343,7 +1343,7 @@ static void equal_done_for_day_ca_equities_v1(const DoneForDayCaEquitiesV1 *read
   for (size_t i = 0; i < 8; i++) { assert(read->transaction_time[i] == written->transaction_time[i]); }
   for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id[i] == written->cl_ord_id[i]); }
   for (size_t i = 0; i < 2; i++) { assert(read->broker_id[i] == written->broker_id[i]); }
-  for (size_t i = 0; i < 8; i++) { assert(read->symbol_8[i] == written->symbol_8[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->symbol_short[i] == written->symbol_short[i]); }
 }
 
 /* Done For Day Ca Equities V 1: written and read back, then read and written back */

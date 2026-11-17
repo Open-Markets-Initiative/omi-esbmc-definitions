@@ -468,24 +468,24 @@ static void check_broker_reactivated_message(void) {
 
 /* ST_AUCTION_INQ_INFO */
 typedef struct {
-  uint8_t token_long_4[4];            /* bytes 0 to 3 */
-  uint8_t auction_number[2];          /* bytes 4 to 5 */
-  uint8_t auction_status_short_2[2];  /* bytes 6 to 7 */
-  uint8_t initiator_type[2];          /* bytes 8 to 9 */
-  uint8_t total_buy_qty[4];           /* bytes 10 to 13 */
-  uint8_t best_buy_price[4];          /* bytes 14 to 17 */
-  uint8_t total_sell_qty[4];          /* bytes 18 to 21 */
-  uint8_t best_sell_price[4];         /* bytes 22 to 25 */
-  uint8_t auction_price[4];           /* bytes 26 to 29 */
-  uint8_t auction_qty[4];             /* bytes 30 to 33 */
-  uint8_t settlement_period[2];       /* bytes 34 to 35 */
+  uint8_t token[4];              /* bytes 0 to 3 */
+  uint8_t auction_number[2];     /* bytes 4 to 5 */
+  uint8_t auction_status[2];     /* bytes 6 to 7 */
+  uint8_t initiator_type[2];     /* bytes 8 to 9 */
+  uint8_t total_buy_qty[4];      /* bytes 10 to 13 */
+  uint8_t best_buy_price[4];     /* bytes 14 to 17 */
+  uint8_t total_sell_qty[4];     /* bytes 18 to 21 */
+  uint8_t best_sell_price[4];    /* bytes 22 to 25 */
+  uint8_t auction_price[4];      /* bytes 26 to 29 */
+  uint8_t auction_qty[4];        /* bytes 30 to 33 */
+  uint8_t settlement_period[2];  /* bytes 34 to 35 */
 } StAuctionInqInfo;
 
 /* any St Auction Inq Info at all: every byte one the checker chooses */
 static void any_st_auction_inq_info(StAuctionInqInfo *record) {
-  for (size_t i = 0; i < 4; i++) { record->token_long_4[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->token[i] = arbitrary(); }
   for (size_t i = 0; i < 2; i++) { record->auction_number[i] = arbitrary(); }
-  for (size_t i = 0; i < 2; i++) { record->auction_status_short_2[i] = arbitrary(); }
+  for (size_t i = 0; i < 2; i++) { record->auction_status[i] = arbitrary(); }
   for (size_t i = 0; i < 2; i++) { record->initiator_type[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->total_buy_qty[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->best_buy_price[i] = arbitrary(); }
@@ -498,9 +498,9 @@ static void any_st_auction_inq_info(StAuctionInqInfo *record) {
 
 /* St Auction Inq Info to the wire: 36 bytes from at, returning where the next byte goes */
 static size_t encode_st_auction_inq_info(const StAuctionInqInfo *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->token_long_4[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->token[i]; }
   for (size_t i = 0; i < 2; i++) { wire[at++] = record->auction_number[i]; }
-  for (size_t i = 0; i < 2; i++) { wire[at++] = record->auction_status_short_2[i]; }
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->auction_status[i]; }
   for (size_t i = 0; i < 2; i++) { wire[at++] = record->initiator_type[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->total_buy_qty[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->best_buy_price[i]; }
@@ -515,9 +515,9 @@ static size_t encode_st_auction_inq_info(const StAuctionInqInfo *record, uint8_t
 
 /* St Auction Inq Info off the wire: 36 bytes from at, returning where the next byte lies */
 static size_t decode_st_auction_inq_info(StAuctionInqInfo *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 4; i++) { record->token_long_4[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->token[i] = wire[at++]; }
   for (size_t i = 0; i < 2; i++) { record->auction_number[i] = wire[at++]; }
-  for (size_t i = 0; i < 2; i++) { record->auction_status_short_2[i] = wire[at++]; }
+  for (size_t i = 0; i < 2; i++) { record->auction_status[i] = wire[at++]; }
   for (size_t i = 0; i < 2; i++) { record->initiator_type[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->total_buy_qty[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->best_buy_price[i] = wire[at++]; }
@@ -532,9 +532,9 @@ static size_t decode_st_auction_inq_info(StAuctionInqInfo *record, const uint8_t
 
 /* what was read of St Auction Inq Info is what was written, byte for byte */
 static void equal_st_auction_inq_info(const StAuctionInqInfo *read, const StAuctionInqInfo *written) {
-  for (size_t i = 0; i < 4; i++) { assert(read->token_long_4[i] == written->token_long_4[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->token[i] == written->token[i]); }
   for (size_t i = 0; i < 2; i++) { assert(read->auction_number[i] == written->auction_number[i]); }
-  for (size_t i = 0; i < 2; i++) { assert(read->auction_status_short_2[i] == written->auction_status_short_2[i]); }
+  for (size_t i = 0; i < 2; i++) { assert(read->auction_status[i] == written->auction_status[i]); }
   for (size_t i = 0; i < 2; i++) { assert(read->initiator_type[i] == written->initiator_type[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->total_buy_qty[i] == written->total_buy_qty[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->best_buy_price[i] == written->best_buy_price[i]); }
@@ -616,10 +616,10 @@ static void check_auction_inquiry_message(void) {
 
 /* Carries a security level trading or market status change */
 typedef struct {
-  SecInfo sec_info;                /* bytes 0 to 11 */
-  uint8_t market_type[2];          /* bytes 12 to 13 */
-  uint8_t reserved_2[2];           /* bytes 14 to 15 */
-  uint8_t action_code_short_2[2];  /* bytes 16 to 17 */
+  SecInfo sec_info;              /* bytes 0 to 11 */
+  uint8_t market_type[2];        /* bytes 12 to 13 */
+  uint8_t reserved_2[2];         /* bytes 14 to 15 */
+  uint8_t action_code_short[2];  /* bytes 16 to 17 */
 } SymbolStatusChangeActionMessage;
 
 /* any Symbol Status Change Action Message at all: every byte one the checker chooses */
@@ -627,7 +627,7 @@ static void any_symbol_status_change_action_message(SymbolStatusChangeActionMess
   any_sec_info(&record->sec_info);
   for (size_t i = 0; i < 2; i++) { record->market_type[i] = arbitrary(); }
   for (size_t i = 0; i < 2; i++) { record->reserved_2[i] = arbitrary(); }
-  for (size_t i = 0; i < 2; i++) { record->action_code_short_2[i] = arbitrary(); }
+  for (size_t i = 0; i < 2; i++) { record->action_code_short[i] = arbitrary(); }
 }
 
 /* Symbol Status Change Action Message to the wire: 18 bytes from at, returning where the next byte goes */
@@ -635,7 +635,7 @@ static size_t encode_symbol_status_change_action_message(const SymbolStatusChang
   at = encode_sec_info(&record->sec_info, wire, at);
   for (size_t i = 0; i < 2; i++) { wire[at++] = record->market_type[i]; }
   for (size_t i = 0; i < 2; i++) { wire[at++] = record->reserved_2[i]; }
-  for (size_t i = 0; i < 2; i++) { wire[at++] = record->action_code_short_2[i]; }
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->action_code_short[i]; }
 
   return at;
 }
@@ -645,7 +645,7 @@ static size_t decode_symbol_status_change_action_message(SymbolStatusChangeActio
   at = decode_sec_info(&record->sec_info, wire, at);
   for (size_t i = 0; i < 2; i++) { record->market_type[i] = wire[at++]; }
   for (size_t i = 0; i < 2; i++) { record->reserved_2[i] = wire[at++]; }
-  for (size_t i = 0; i < 2; i++) { record->action_code_short_2[i] = wire[at++]; }
+  for (size_t i = 0; i < 2; i++) { record->action_code_short[i] = wire[at++]; }
 
   return at;
 }
@@ -655,7 +655,7 @@ static void equal_symbol_status_change_action_message(const SymbolStatusChangeAc
   equal_sec_info(&read->sec_info, &written->sec_info);
   for (size_t i = 0; i < 2; i++) { assert(read->market_type[i] == written->market_type[i]); }
   for (size_t i = 0; i < 2; i++) { assert(read->reserved_2[i] == written->reserved_2[i]); }
-  for (size_t i = 0; i < 2; i++) { assert(read->action_code_short_2[i] == written->action_code_short_2[i]); }
+  for (size_t i = 0; i < 2; i++) { assert(read->action_code_short[i] == written->action_code_short[i]); }
 }
 
 /* Symbol Status Change Action Message: written and read back, then read and written back */
@@ -681,21 +681,21 @@ static void check_symbol_status_change_action_message(void) {
 /* Carries the open price of a security when the market opens. The document states this transaction code is not sent by the exchange */
 typedef struct {
   SecInfo sec_info;          /* bytes 0 to 11 */
-  uint8_t token_short_2[2];  /* bytes 12 to 13 */
+  uint8_t token_short[2];    /* bytes 12 to 13 */
   uint8_t opening_price[4];  /* bytes 14 to 17 */
 } SecurityOpenPriceMessage;
 
 /* any Security Open Price Message at all: every byte one the checker chooses */
 static void any_security_open_price_message(SecurityOpenPriceMessage *record) {
   any_sec_info(&record->sec_info);
-  for (size_t i = 0; i < 2; i++) { record->token_short_2[i] = arbitrary(); }
+  for (size_t i = 0; i < 2; i++) { record->token_short[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->opening_price[i] = arbitrary(); }
 }
 
 /* Security Open Price Message to the wire: 18 bytes from at, returning where the next byte goes */
 static size_t encode_security_open_price_message(const SecurityOpenPriceMessage *record, uint8_t *wire, size_t at) {
   at = encode_sec_info(&record->sec_info, wire, at);
-  for (size_t i = 0; i < 2; i++) { wire[at++] = record->token_short_2[i]; }
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->token_short[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->opening_price[i]; }
 
   return at;
@@ -704,7 +704,7 @@ static size_t encode_security_open_price_message(const SecurityOpenPriceMessage 
 /* Security Open Price Message off the wire: 18 bytes from at, returning where the next byte lies */
 static size_t decode_security_open_price_message(SecurityOpenPriceMessage *record, const uint8_t *wire, size_t at) {
   at = decode_sec_info(&record->sec_info, wire, at);
-  for (size_t i = 0; i < 2; i++) { record->token_short_2[i] = wire[at++]; }
+  for (size_t i = 0; i < 2; i++) { record->token_short[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->opening_price[i] = wire[at++]; }
 
   return at;
@@ -713,7 +713,7 @@ static size_t decode_security_open_price_message(SecurityOpenPriceMessage *recor
 /* what was read of Security Open Price Message is what was written, byte for byte */
 static void equal_security_open_price_message(const SecurityOpenPriceMessage *read, const SecurityOpenPriceMessage *written) {
   equal_sec_info(&read->sec_info, &written->sec_info);
-  for (size_t i = 0; i < 2; i++) { assert(read->token_short_2[i] == written->token_short_2[i]); }
+  for (size_t i = 0; i < 2; i++) { assert(read->token_short[i] == written->token_short[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->opening_price[i] == written->opening_price[i]); }
 }
 

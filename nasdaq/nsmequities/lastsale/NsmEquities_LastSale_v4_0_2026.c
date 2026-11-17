@@ -1079,7 +1079,7 @@ static void check_ipo_quoting_period_update_message(void) {
 typedef struct {
   uint8_t tracking_number[2];       /* bytes 0 to 1 */
   uint8_t timestamp[6];             /* bytes 2 to 7 */
-  uint8_t stock_alpha_8[8];         /* bytes 8 to 15 */
+  uint8_t stock[8];                 /* bytes 8 to 15 */
   uint8_t market_code;              /* byte 16 */
   uint8_t operational_halt_action;  /* byte 17 */
 } OperationalHaltMessage;
@@ -1088,7 +1088,7 @@ typedef struct {
 static void any_operational_halt_message(OperationalHaltMessage *record) {
   for (size_t i = 0; i < 2; i++) { record->tracking_number[i] = arbitrary(); }
   for (size_t i = 0; i < 6; i++) { record->timestamp[i] = arbitrary(); }
-  for (size_t i = 0; i < 8; i++) { record->stock_alpha_8[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->stock[i] = arbitrary(); }
   record->market_code = arbitrary();
   record->operational_halt_action = arbitrary();
 }
@@ -1097,7 +1097,7 @@ static void any_operational_halt_message(OperationalHaltMessage *record) {
 static size_t encode_operational_halt_message(const OperationalHaltMessage *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 2; i++) { wire[at++] = record->tracking_number[i]; }
   for (size_t i = 0; i < 6; i++) { wire[at++] = record->timestamp[i]; }
-  for (size_t i = 0; i < 8; i++) { wire[at++] = record->stock_alpha_8[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->stock[i]; }
   wire[at++] = record->market_code;
   wire[at++] = record->operational_halt_action;
 
@@ -1108,7 +1108,7 @@ static size_t encode_operational_halt_message(const OperationalHaltMessage *reco
 static size_t decode_operational_halt_message(OperationalHaltMessage *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 2; i++) { record->tracking_number[i] = wire[at++]; }
   for (size_t i = 0; i < 6; i++) { record->timestamp[i] = wire[at++]; }
-  for (size_t i = 0; i < 8; i++) { record->stock_alpha_8[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->stock[i] = wire[at++]; }
   record->market_code = wire[at++];
   record->operational_halt_action = wire[at++];
 
@@ -1119,7 +1119,7 @@ static size_t decode_operational_halt_message(OperationalHaltMessage *record, co
 static void equal_operational_halt_message(const OperationalHaltMessage *read, const OperationalHaltMessage *written) {
   for (size_t i = 0; i < 2; i++) { assert(read->tracking_number[i] == written->tracking_number[i]); }
   for (size_t i = 0; i < 6; i++) { assert(read->timestamp[i] == written->timestamp[i]); }
-  for (size_t i = 0; i < 8; i++) { assert(read->stock_alpha_8[i] == written->stock_alpha_8[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->stock[i] == written->stock[i]); }
   assert(read->market_code == written->market_code);
   assert(read->operational_halt_action == written->operational_halt_action);
 }

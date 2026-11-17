@@ -614,20 +614,20 @@ static void check_collar_group(void) {
 
 /* The message contains a list of underlyings not traded in WATS. It concerns underlyings for derivatives and structured products */
 typedef struct {
-  uint8_t external_underlying_id[4];                          /* bytes 0 to 3 */
-  uint8_t product_identification_product_identification[30];  /* bytes 4 to 33 */
-  uint8_t product_identification_type;                        /* byte 34 */
-  uint8_t product_code[20];                                   /* bytes 35 to 54 */
-  uint8_t product_name[50];                                   /* bytes 55 to 104 */
-  uint8_t mic[4];                                             /* bytes 105 to 108 */
-  uint8_t nominal_currency[2];                                /* bytes 109 to 110 */
-  uint8_t trading_currency[2];                                /* bytes 111 to 112 */
+  uint8_t external_underlying_id[4];    /* bytes 0 to 3 */
+  uint8_t product_identification[30];   /* bytes 4 to 33 */
+  uint8_t product_identification_type;  /* byte 34 */
+  uint8_t product_code[20];             /* bytes 35 to 54 */
+  uint8_t product_name[50];             /* bytes 55 to 104 */
+  uint8_t mic[4];                       /* bytes 105 to 108 */
+  uint8_t nominal_currency[2];          /* bytes 109 to 110 */
+  uint8_t trading_currency[2];          /* bytes 111 to 112 */
 } ExternalUnderlying;
 
 /* any External Underlying at all: every byte one the checker chooses */
 static void any_external_underlying(ExternalUnderlying *record) {
   for (size_t i = 0; i < 4; i++) { record->external_underlying_id[i] = arbitrary(); }
-  for (size_t i = 0; i < 30; i++) { record->product_identification_product_identification[i] = arbitrary(); }
+  for (size_t i = 0; i < 30; i++) { record->product_identification[i] = arbitrary(); }
   record->product_identification_type = arbitrary();
   for (size_t i = 0; i < 20; i++) { record->product_code[i] = arbitrary(); }
   for (size_t i = 0; i < 50; i++) { record->product_name[i] = arbitrary(); }
@@ -639,7 +639,7 @@ static void any_external_underlying(ExternalUnderlying *record) {
 /* External Underlying to the wire: 113 bytes from at, returning where the next byte goes */
 static size_t encode_external_underlying(const ExternalUnderlying *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->external_underlying_id[i]; }
-  for (size_t i = 0; i < 30; i++) { wire[at++] = record->product_identification_product_identification[i]; }
+  for (size_t i = 0; i < 30; i++) { wire[at++] = record->product_identification[i]; }
   wire[at++] = record->product_identification_type;
   for (size_t i = 0; i < 20; i++) { wire[at++] = record->product_code[i]; }
   for (size_t i = 0; i < 50; i++) { wire[at++] = record->product_name[i]; }
@@ -653,7 +653,7 @@ static size_t encode_external_underlying(const ExternalUnderlying *record, uint8
 /* External Underlying off the wire: 113 bytes from at, returning where the next byte lies */
 static size_t decode_external_underlying(ExternalUnderlying *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 4; i++) { record->external_underlying_id[i] = wire[at++]; }
-  for (size_t i = 0; i < 30; i++) { record->product_identification_product_identification[i] = wire[at++]; }
+  for (size_t i = 0; i < 30; i++) { record->product_identification[i] = wire[at++]; }
   record->product_identification_type = wire[at++];
   for (size_t i = 0; i < 20; i++) { record->product_code[i] = wire[at++]; }
   for (size_t i = 0; i < 50; i++) { record->product_name[i] = wire[at++]; }
@@ -667,7 +667,7 @@ static size_t decode_external_underlying(ExternalUnderlying *record, const uint8
 /* what was read of External Underlying is what was written, byte for byte */
 static void equal_external_underlying(const ExternalUnderlying *read, const ExternalUnderlying *written) {
   for (size_t i = 0; i < 4; i++) { assert(read->external_underlying_id[i] == written->external_underlying_id[i]); }
-  for (size_t i = 0; i < 30; i++) { assert(read->product_identification_product_identification[i] == written->product_identification_product_identification[i]); }
+  for (size_t i = 0; i < 30; i++) { assert(read->product_identification[i] == written->product_identification[i]); }
   assert(read->product_identification_type == written->product_identification_type);
   for (size_t i = 0; i < 20; i++) { assert(read->product_code[i] == written->product_code[i]); }
   for (size_t i = 0; i < 50; i++) { assert(read->product_name[i] == written->product_name[i]); }
@@ -698,67 +698,67 @@ static void check_external_underlying(void) {
 
 /* Definition of a financial instrument */
 typedef struct {
-  uint8_t instrument_id[4];                                   /* bytes 0 to 3 */
-  uint8_t product_type;                                       /* byte 4 */
-  uint8_t product_subtype;                                    /* byte 5 */
-  uint8_t first_trading_date[4];                              /* bytes 6 to 9 */
-  uint8_t last_trading_date[4];                               /* bytes 10 to 13 */
-  uint8_t product_id[4];                                      /* bytes 14 to 17 */
-  uint8_t currency[2];                                        /* bytes 18 to 19 */
-  uint8_t iceberg_min_value[8];                               /* bytes 20 to 27 */
-  uint8_t lot_size[4];                                        /* bytes 28 to 31 */
-  uint8_t price_expression_type;                              /* byte 32 */
-  uint8_t calendar_id[4];                                     /* bytes 33 to 36 */
-  uint8_t market_structure_id[4];                             /* bytes 37 to 40 */
-  uint8_t tick_table_id[4];                                   /* bytes 41 to 44 */
-  uint8_t reference_instrument_id[4];                         /* bytes 45 to 48 */
-  uint8_t collar_group_id[4];                                 /* bytes 49 to 52 */
-  uint8_t trading_schedule_id[4];                             /* bytes 53 to 56 */
-  uint8_t description[64];                                    /* bytes 57 to 120 */
-  uint8_t mic[4];                                             /* bytes 121 to 124 */
-  uint8_t nominal_value_price[8];                             /* bytes 125 to 132 */
-  uint8_t nominal_value_type;                                 /* byte 133 */
-  uint8_t multiplier_multiplier[8];                           /* bytes 134 to 141 */
-  uint8_t strike_price[8];                                    /* bytes 142 to 149 */
-  uint8_t strike_price_currency[2];                           /* bytes 150 to 151 */
-  uint8_t product_identification_product_identification[30];  /* bytes 152 to 181 */
-  uint8_t product_identification_type;                        /* byte 182 */
-  uint8_t settlement_calendar_id[4];                          /* bytes 183 to 186 */
-  uint8_t bond_coupon_type;                                   /* byte 187 */
-  uint8_t pre_trade_check_min_price[8];                       /* bytes 188 to 195 */
-  uint8_t pre_trade_check_max_price[8];                       /* bytes 196 to 203 */
-  uint8_t pre_trade_check_min_quantity[8];                    /* bytes 204 to 211 */
-  uint8_t pre_trade_check_max_quantity[8];                    /* bytes 212 to 219 */
-  uint8_t pre_trade_check_max_value[8];                       /* bytes 220 to 227 */
-  uint8_t pre_trade_check_min_value[8];                       /* bytes 228 to 235 */
-  uint8_t liquidity;                                          /* byte 236 */
-  uint8_t market_model_type;                                  /* byte 237 */
-  uint8_t issuer[150];                                        /* bytes 238 to 387 */
-  uint8_t issuer_reg_country[2];                              /* bytes 388 to 389 */
-  uint8_t underlying_instrument_id[4];                        /* bytes 390 to 393 */
-  uint8_t product_code[20];                                   /* bytes 394 to 413 */
-  uint8_t cfi[6];                                             /* bytes 414 to 419 */
-  uint8_t fisn[35];                                           /* bytes 420 to 454 */
-  uint8_t issue_size[8];                                      /* bytes 455 to 462 */
-  uint8_t nominal_currency[2];                                /* bytes 463 to 464 */
-  uint8_t us_indicator;                                       /* byte 465 */
-  uint8_t expiry_date[4];                                     /* bytes 466 to 469 */
-  uint8_t version_number;                                     /* byte 470 */
-  uint8_t settlement_type;                                    /* byte 471 */
-  uint8_t option_type;                                        /* byte 472 */
-  uint8_t exercise_type;                                      /* byte 473 */
-  uint8_t product_name[50];                                   /* bytes 474 to 523 */
-  uint8_t reference_price[8];                                 /* bytes 524 to 531 */
-  uint8_t status;                                             /* byte 532 */
-  uint8_t initial_phase_id[4];                                /* bytes 533 to 536 */
-  uint8_t threshold_max[8];                                   /* bytes 537 to 544 */
-  uint8_t threshold_min[8];                                   /* bytes 545 to 552 */
-  uint8_t is_leverage;                                        /* byte 553 */
-  uint8_t accrued_interest_value[8];                          /* bytes 554 to 561 */
-  uint8_t kid[128];                                           /* bytes 562 to 689 */
-  uint8_t kid_issue_date[4];                                  /* bytes 690 to 693 */
-  uint8_t value_at_risk;                                      /* byte 694 */
-  uint8_t external_underlying_id[4];                          /* bytes 695 to 698 */
+  uint8_t instrument_id[4];                 /* bytes 0 to 3 */
+  uint8_t product_type;                     /* byte 4 */
+  uint8_t product_subtype;                  /* byte 5 */
+  uint8_t first_trading_date[4];            /* bytes 6 to 9 */
+  uint8_t last_trading_date[4];             /* bytes 10 to 13 */
+  uint8_t product_id[4];                    /* bytes 14 to 17 */
+  uint8_t currency[2];                      /* bytes 18 to 19 */
+  uint8_t iceberg_min_value[8];             /* bytes 20 to 27 */
+  uint8_t lot_size[4];                      /* bytes 28 to 31 */
+  uint8_t price_expression_type;            /* byte 32 */
+  uint8_t calendar_id[4];                   /* bytes 33 to 36 */
+  uint8_t market_structure_id[4];           /* bytes 37 to 40 */
+  uint8_t tick_table_id[4];                 /* bytes 41 to 44 */
+  uint8_t reference_instrument_id[4];       /* bytes 45 to 48 */
+  uint8_t collar_group_id[4];               /* bytes 49 to 52 */
+  uint8_t trading_schedule_id[4];           /* bytes 53 to 56 */
+  uint8_t description[64];                  /* bytes 57 to 120 */
+  uint8_t mic[4];                           /* bytes 121 to 124 */
+  uint8_t nominal_value[8];                 /* bytes 125 to 132 */
+  uint8_t nominal_value_type;               /* byte 133 */
+  uint8_t multiplier[8];                    /* bytes 134 to 141 */
+  uint8_t strike_price[8];                  /* bytes 142 to 149 */
+  uint8_t strike_price_currency[2];         /* bytes 150 to 151 */
+  uint8_t product_identification[30];       /* bytes 152 to 181 */
+  uint8_t product_identification_type;      /* byte 182 */
+  uint8_t settlement_calendar_id[4];        /* bytes 183 to 186 */
+  uint8_t bond_coupon_type;                 /* byte 187 */
+  uint8_t pre_trade_check_min_price[8];     /* bytes 188 to 195 */
+  uint8_t pre_trade_check_max_price[8];     /* bytes 196 to 203 */
+  uint8_t pre_trade_check_min_quantity[8];  /* bytes 204 to 211 */
+  uint8_t pre_trade_check_max_quantity[8];  /* bytes 212 to 219 */
+  uint8_t pre_trade_check_max_value[8];     /* bytes 220 to 227 */
+  uint8_t pre_trade_check_min_value[8];     /* bytes 228 to 235 */
+  uint8_t liquidity;                        /* byte 236 */
+  uint8_t market_model_type;                /* byte 237 */
+  uint8_t issuer[150];                      /* bytes 238 to 387 */
+  uint8_t issuer_reg_country[2];            /* bytes 388 to 389 */
+  uint8_t underlying_instrument_id[4];      /* bytes 390 to 393 */
+  uint8_t product_code[20];                 /* bytes 394 to 413 */
+  uint8_t cfi[6];                           /* bytes 414 to 419 */
+  uint8_t fisn[35];                         /* bytes 420 to 454 */
+  uint8_t issue_size[8];                    /* bytes 455 to 462 */
+  uint8_t nominal_currency[2];              /* bytes 463 to 464 */
+  uint8_t us_indicator;                     /* byte 465 */
+  uint8_t expiry_date[4];                   /* bytes 466 to 469 */
+  uint8_t version_number;                   /* byte 470 */
+  uint8_t settlement_type;                  /* byte 471 */
+  uint8_t option_type;                      /* byte 472 */
+  uint8_t exercise_type;                    /* byte 473 */
+  uint8_t product_name[50];                 /* bytes 474 to 523 */
+  uint8_t reference_price[8];               /* bytes 524 to 531 */
+  uint8_t status;                           /* byte 532 */
+  uint8_t initial_phase_id[4];              /* bytes 533 to 536 */
+  uint8_t threshold_max[8];                 /* bytes 537 to 544 */
+  uint8_t threshold_min[8];                 /* bytes 545 to 552 */
+  uint8_t is_leverage;                      /* byte 553 */
+  uint8_t accrued_interest_value[8];        /* bytes 554 to 561 */
+  uint8_t kid[128];                         /* bytes 562 to 689 */
+  uint8_t kid_issue_date[4];                /* bytes 690 to 693 */
+  uint8_t value_at_risk;                    /* byte 694 */
+  uint8_t external_underlying_id[4];        /* bytes 695 to 698 */
 } Instrument;
 
 /* any Instrument at all: every byte one the checker chooses */
@@ -781,12 +781,12 @@ static void any_instrument(Instrument *record) {
   for (size_t i = 0; i < 4; i++) { record->trading_schedule_id[i] = arbitrary(); }
   for (size_t i = 0; i < 64; i++) { record->description[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->mic[i] = arbitrary(); }
-  for (size_t i = 0; i < 8; i++) { record->nominal_value_price[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->nominal_value[i] = arbitrary(); }
   record->nominal_value_type = arbitrary();
-  for (size_t i = 0; i < 8; i++) { record->multiplier_multiplier[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->multiplier[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->strike_price[i] = arbitrary(); }
   for (size_t i = 0; i < 2; i++) { record->strike_price_currency[i] = arbitrary(); }
-  for (size_t i = 0; i < 30; i++) { record->product_identification_product_identification[i] = arbitrary(); }
+  for (size_t i = 0; i < 30; i++) { record->product_identification[i] = arbitrary(); }
   record->product_identification_type = arbitrary();
   for (size_t i = 0; i < 4; i++) { record->settlement_calendar_id[i] = arbitrary(); }
   record->bond_coupon_type = arbitrary();
@@ -846,12 +846,12 @@ static size_t encode_instrument(const Instrument *record, uint8_t *wire, size_t 
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->trading_schedule_id[i]; }
   for (size_t i = 0; i < 64; i++) { wire[at++] = record->description[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->mic[i]; }
-  for (size_t i = 0; i < 8; i++) { wire[at++] = record->nominal_value_price[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->nominal_value[i]; }
   wire[at++] = record->nominal_value_type;
-  for (size_t i = 0; i < 8; i++) { wire[at++] = record->multiplier_multiplier[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->multiplier[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->strike_price[i]; }
   for (size_t i = 0; i < 2; i++) { wire[at++] = record->strike_price_currency[i]; }
-  for (size_t i = 0; i < 30; i++) { wire[at++] = record->product_identification_product_identification[i]; }
+  for (size_t i = 0; i < 30; i++) { wire[at++] = record->product_identification[i]; }
   wire[at++] = record->product_identification_type;
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->settlement_calendar_id[i]; }
   wire[at++] = record->bond_coupon_type;
@@ -913,12 +913,12 @@ static size_t decode_instrument(Instrument *record, const uint8_t *wire, size_t 
   for (size_t i = 0; i < 4; i++) { record->trading_schedule_id[i] = wire[at++]; }
   for (size_t i = 0; i < 64; i++) { record->description[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->mic[i] = wire[at++]; }
-  for (size_t i = 0; i < 8; i++) { record->nominal_value_price[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->nominal_value[i] = wire[at++]; }
   record->nominal_value_type = wire[at++];
-  for (size_t i = 0; i < 8; i++) { record->multiplier_multiplier[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->multiplier[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->strike_price[i] = wire[at++]; }
   for (size_t i = 0; i < 2; i++) { record->strike_price_currency[i] = wire[at++]; }
-  for (size_t i = 0; i < 30; i++) { record->product_identification_product_identification[i] = wire[at++]; }
+  for (size_t i = 0; i < 30; i++) { record->product_identification[i] = wire[at++]; }
   record->product_identification_type = wire[at++];
   for (size_t i = 0; i < 4; i++) { record->settlement_calendar_id[i] = wire[at++]; }
   record->bond_coupon_type = wire[at++];
@@ -980,12 +980,12 @@ static void equal_instrument(const Instrument *read, const Instrument *written) 
   for (size_t i = 0; i < 4; i++) { assert(read->trading_schedule_id[i] == written->trading_schedule_id[i]); }
   for (size_t i = 0; i < 64; i++) { assert(read->description[i] == written->description[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->mic[i] == written->mic[i]); }
-  for (size_t i = 0; i < 8; i++) { assert(read->nominal_value_price[i] == written->nominal_value_price[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->nominal_value[i] == written->nominal_value[i]); }
   assert(read->nominal_value_type == written->nominal_value_type);
-  for (size_t i = 0; i < 8; i++) { assert(read->multiplier_multiplier[i] == written->multiplier_multiplier[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->multiplier[i] == written->multiplier[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->strike_price[i] == written->strike_price[i]); }
   for (size_t i = 0; i < 2; i++) { assert(read->strike_price_currency[i] == written->strike_price_currency[i]); }
-  for (size_t i = 0; i < 30; i++) { assert(read->product_identification_product_identification[i] == written->product_identification_product_identification[i]); }
+  for (size_t i = 0; i < 30; i++) { assert(read->product_identification[i] == written->product_identification[i]); }
   assert(read->product_identification_type == written->product_identification_type);
   for (size_t i = 0; i < 4; i++) { assert(read->settlement_calendar_id[i] == written->settlement_calendar_id[i]); }
   assert(read->bond_coupon_type == written->bond_coupon_type);
@@ -1165,19 +1165,19 @@ static void check_indexation_table_entry(void) {
 
 /* PublicProductIdentification */
 typedef struct {
-  uint8_t product_identification_product_identification[30];  /* bytes 0 to 29 */
-  uint8_t product_identification_type;                        /* byte 30 */
+  uint8_t product_identification[30];   /* bytes 0 to 29 */
+  uint8_t product_identification_type;  /* byte 30 */
 } ProductIdentificationPublicProductIdentification;
 
 /* any Product Identification Public Product Identification at all: every byte one the checker chooses */
 static void any_product_identification_public_product_identification(ProductIdentificationPublicProductIdentification *record) {
-  for (size_t i = 0; i < 30; i++) { record->product_identification_product_identification[i] = arbitrary(); }
+  for (size_t i = 0; i < 30; i++) { record->product_identification[i] = arbitrary(); }
   record->product_identification_type = arbitrary();
 }
 
 /* Product Identification Public Product Identification to the wire: 31 bytes from at, returning where the next byte goes */
 static size_t encode_product_identification_public_product_identification(const ProductIdentificationPublicProductIdentification *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 30; i++) { wire[at++] = record->product_identification_product_identification[i]; }
+  for (size_t i = 0; i < 30; i++) { wire[at++] = record->product_identification[i]; }
   wire[at++] = record->product_identification_type;
 
   return at;
@@ -1185,7 +1185,7 @@ static size_t encode_product_identification_public_product_identification(const 
 
 /* Product Identification Public Product Identification off the wire: 31 bytes from at, returning where the next byte lies */
 static size_t decode_product_identification_public_product_identification(ProductIdentificationPublicProductIdentification *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 30; i++) { record->product_identification_product_identification[i] = wire[at++]; }
+  for (size_t i = 0; i < 30; i++) { record->product_identification[i] = wire[at++]; }
   record->product_identification_type = wire[at++];
 
   return at;
@@ -1193,7 +1193,7 @@ static size_t decode_product_identification_public_product_identification(Produc
 
 /* what was read of Product Identification Public Product Identification is what was written, byte for byte */
 static void equal_product_identification_public_product_identification(const ProductIdentificationPublicProductIdentification *read, const ProductIdentificationPublicProductIdentification *written) {
-  for (size_t i = 0; i < 30; i++) { assert(read->product_identification_product_identification[i] == written->product_identification_product_identification[i]); }
+  for (size_t i = 0; i < 30; i++) { assert(read->product_identification[i] == written->product_identification[i]); }
   assert(read->product_identification_type == written->product_identification_type);
 }
 
@@ -1273,19 +1273,19 @@ static void check_index_underlying(void) {
 
 /* PublicProductIdentification */
 typedef struct {
-  uint8_t product_identification_product_identification[30];  /* bytes 0 to 29 */
-  uint8_t product_identification_type;                        /* byte 30 */
+  uint8_t product_identification[30];   /* bytes 0 to 29 */
+  uint8_t product_identification_type;  /* byte 30 */
 } PublicProductIdentification;
 
 /* any Public Product Identification at all: every byte one the checker chooses */
 static void any_public_product_identification(PublicProductIdentification *record) {
-  for (size_t i = 0; i < 30; i++) { record->product_identification_product_identification[i] = arbitrary(); }
+  for (size_t i = 0; i < 30; i++) { record->product_identification[i] = arbitrary(); }
   record->product_identification_type = arbitrary();
 }
 
 /* Public Product Identification to the wire: 31 bytes from at, returning where the next byte goes */
 static size_t encode_public_product_identification(const PublicProductIdentification *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 30; i++) { wire[at++] = record->product_identification_product_identification[i]; }
+  for (size_t i = 0; i < 30; i++) { wire[at++] = record->product_identification[i]; }
   wire[at++] = record->product_identification_type;
 
   return at;
@@ -1293,7 +1293,7 @@ static size_t encode_public_product_identification(const PublicProductIdentifica
 
 /* Public Product Identification off the wire: 31 bytes from at, returning where the next byte lies */
 static size_t decode_public_product_identification(PublicProductIdentification *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 30; i++) { record->product_identification_product_identification[i] = wire[at++]; }
+  for (size_t i = 0; i < 30; i++) { record->product_identification[i] = wire[at++]; }
   record->product_identification_type = wire[at++];
 
   return at;
@@ -1301,7 +1301,7 @@ static size_t decode_public_product_identification(PublicProductIdentification *
 
 /* what was read of Public Product Identification is what was written, byte for byte */
 static void equal_public_product_identification(const PublicProductIdentification *read, const PublicProductIdentification *written) {
-  for (size_t i = 0; i < 30; i++) { assert(read->product_identification_product_identification[i] == written->product_identification_product_identification[i]); }
+  for (size_t i = 0; i < 30; i++) { assert(read->product_identification[i] == written->product_identification[i]); }
   assert(read->product_identification_type == written->product_identification_type);
 }
 
@@ -1624,7 +1624,7 @@ static void check_top_price_level_update(void) {
 /* Enriched trade report */
 typedef struct {
   uint8_t instrument_id[4];                                   /* bytes 0 to 3 */
-  uint8_t settlement_value_value[8];                          /* bytes 4 to 11 */
+  uint8_t trade_settlement_value[8];                          /* bytes 4 to 11 */
   uint8_t settlement_date[4];                                 /* bytes 12 to 15 */
   uint8_t trading_timestamp[8];                               /* bytes 16 to 23 */
   PublicProductIdentification public_product_identification;  /* bytes 24 to 54 */
@@ -1632,7 +1632,7 @@ typedef struct {
   uint8_t price_currency[2];                                  /* bytes 63 to 64 */
   uint8_t price_notation;                                     /* byte 65 */
   uint8_t quantity[8];                                        /* bytes 66 to 73 */
-  uint8_t nominal_value_value[8];                             /* bytes 74 to 81 */
+  uint8_t trade_nominal_value[8];                             /* bytes 74 to 81 */
   uint8_t nominal_currency[2];                                /* bytes 82 to 83 */
   uint8_t mic[4];                                             /* bytes 84 to 87 */
   uint8_t publication_timestamp[8];                           /* bytes 88 to 95 */
@@ -1664,7 +1664,7 @@ typedef struct {
 /* any Trade at all: every byte one the checker chooses */
 static void any_trade(Trade *record) {
   for (size_t i = 0; i < 4; i++) { record->instrument_id[i] = arbitrary(); }
-  for (size_t i = 0; i < 8; i++) { record->settlement_value_value[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->trade_settlement_value[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->settlement_date[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->trading_timestamp[i] = arbitrary(); }
   any_public_product_identification(&record->public_product_identification);
@@ -1672,7 +1672,7 @@ static void any_trade(Trade *record) {
   for (size_t i = 0; i < 2; i++) { record->price_currency[i] = arbitrary(); }
   record->price_notation = arbitrary();
   for (size_t i = 0; i < 8; i++) { record->quantity[i] = arbitrary(); }
-  for (size_t i = 0; i < 8; i++) { record->nominal_value_value[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->trade_nominal_value[i] = arbitrary(); }
   for (size_t i = 0; i < 2; i++) { record->nominal_currency[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->mic[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->publication_timestamp[i] = arbitrary(); }
@@ -1704,7 +1704,7 @@ static void any_trade(Trade *record) {
 /* Trade to the wire: 178 bytes from at, returning where the next byte goes */
 static size_t encode_trade(const Trade *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->instrument_id[i]; }
-  for (size_t i = 0; i < 8; i++) { wire[at++] = record->settlement_value_value[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->trade_settlement_value[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->settlement_date[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->trading_timestamp[i]; }
   at = encode_public_product_identification(&record->public_product_identification, wire, at);
@@ -1712,7 +1712,7 @@ static size_t encode_trade(const Trade *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 2; i++) { wire[at++] = record->price_currency[i]; }
   wire[at++] = record->price_notation;
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->quantity[i]; }
-  for (size_t i = 0; i < 8; i++) { wire[at++] = record->nominal_value_value[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->trade_nominal_value[i]; }
   for (size_t i = 0; i < 2; i++) { wire[at++] = record->nominal_currency[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->mic[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->publication_timestamp[i]; }
@@ -1746,7 +1746,7 @@ static size_t encode_trade(const Trade *record, uint8_t *wire, size_t at) {
 /* Trade off the wire: 178 bytes from at, returning where the next byte lies */
 static size_t decode_trade(Trade *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 4; i++) { record->instrument_id[i] = wire[at++]; }
-  for (size_t i = 0; i < 8; i++) { record->settlement_value_value[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->trade_settlement_value[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->settlement_date[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->trading_timestamp[i] = wire[at++]; }
   at = decode_public_product_identification(&record->public_product_identification, wire, at);
@@ -1754,7 +1754,7 @@ static size_t decode_trade(Trade *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 2; i++) { record->price_currency[i] = wire[at++]; }
   record->price_notation = wire[at++];
   for (size_t i = 0; i < 8; i++) { record->quantity[i] = wire[at++]; }
-  for (size_t i = 0; i < 8; i++) { record->nominal_value_value[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->trade_nominal_value[i] = wire[at++]; }
   for (size_t i = 0; i < 2; i++) { record->nominal_currency[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->mic[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->publication_timestamp[i] = wire[at++]; }
@@ -1788,7 +1788,7 @@ static size_t decode_trade(Trade *record, const uint8_t *wire, size_t at) {
 /* what was read of Trade is what was written, byte for byte */
 static void equal_trade(const Trade *read, const Trade *written) {
   for (size_t i = 0; i < 4; i++) { assert(read->instrument_id[i] == written->instrument_id[i]); }
-  for (size_t i = 0; i < 8; i++) { assert(read->settlement_value_value[i] == written->settlement_value_value[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->trade_settlement_value[i] == written->trade_settlement_value[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->settlement_date[i] == written->settlement_date[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->trading_timestamp[i] == written->trading_timestamp[i]); }
   equal_public_product_identification(&read->public_product_identification, &written->public_product_identification);
@@ -1796,7 +1796,7 @@ static void equal_trade(const Trade *read, const Trade *written) {
   for (size_t i = 0; i < 2; i++) { assert(read->price_currency[i] == written->price_currency[i]); }
   assert(read->price_notation == written->price_notation);
   for (size_t i = 0; i < 8; i++) { assert(read->quantity[i] == written->quantity[i]); }
-  for (size_t i = 0; i < 8; i++) { assert(read->nominal_value_value[i] == written->nominal_value_value[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->trade_nominal_value[i] == written->trade_nominal_value[i]); }
   for (size_t i = 0; i < 2; i++) { assert(read->nominal_currency[i] == written->nominal_currency[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->mic[i] == written->mic[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->publication_timestamp[i] == written->publication_timestamp[i]); }
@@ -2263,7 +2263,7 @@ typedef struct {
   uint8_t max_price[8];                   /* bytes 79 to 86 */
   uint8_t min_price[8];                   /* bytes 87 to 94 */
   uint8_t settlement_price[8];            /* bytes 95 to 102 */
-  uint8_t settlement_value_price[8];      /* bytes 103 to 110 */
+  uint8_t settlement_value[8];            /* bytes 103 to 110 */
   uint8_t end_trading_date[4];            /* bytes 111 to 114 */
   uint8_t last_trade_date[4];             /* bytes 115 to 118 */
 } ClobInstrument;
@@ -2286,7 +2286,7 @@ static void any_clob_instrument(ClobInstrument *record) {
   for (size_t i = 0; i < 8; i++) { record->max_price[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->min_price[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->settlement_price[i] = arbitrary(); }
-  for (size_t i = 0; i < 8; i++) { record->settlement_value_price[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->settlement_value[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->end_trading_date[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->last_trade_date[i] = arbitrary(); }
 }
@@ -2309,7 +2309,7 @@ static size_t encode_clob_instrument(const ClobInstrument *record, uint8_t *wire
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->max_price[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->min_price[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->settlement_price[i]; }
-  for (size_t i = 0; i < 8; i++) { wire[at++] = record->settlement_value_price[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->settlement_value[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->end_trading_date[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->last_trade_date[i]; }
 
@@ -2334,7 +2334,7 @@ static size_t decode_clob_instrument(ClobInstrument *record, const uint8_t *wire
   for (size_t i = 0; i < 8; i++) { record->max_price[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->min_price[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->settlement_price[i] = wire[at++]; }
-  for (size_t i = 0; i < 8; i++) { record->settlement_value_price[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->settlement_value[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->end_trading_date[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->last_trade_date[i] = wire[at++]; }
 
@@ -2359,7 +2359,7 @@ static void equal_clob_instrument(const ClobInstrument *read, const ClobInstrume
   for (size_t i = 0; i < 8; i++) { assert(read->max_price[i] == written->max_price[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->min_price[i] == written->min_price[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->settlement_price[i] == written->settlement_price[i]); }
-  for (size_t i = 0; i < 8; i++) { assert(read->settlement_value_price[i] == written->settlement_value_price[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->settlement_value[i] == written->settlement_value[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->end_trading_date[i] == written->end_trading_date[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->last_trade_date[i] == written->last_trade_date[i]); }
 }
@@ -2402,7 +2402,7 @@ typedef struct {
   uint8_t max_price[8];                   /* bytes 79 to 86 */
   uint8_t min_price[8];                   /* bytes 87 to 94 */
   uint8_t settlement_price[8];            /* bytes 95 to 102 */
-  uint8_t settlement_value_price[8];      /* bytes 103 to 110 */
+  uint8_t settlement_value[8];            /* bytes 103 to 110 */
   uint8_t end_trading_date[4];            /* bytes 111 to 114 */
   uint8_t last_trade_date[4];             /* bytes 115 to 118 */
 } CrossInstrument;
@@ -2425,7 +2425,7 @@ static void any_cross_instrument(CrossInstrument *record) {
   for (size_t i = 0; i < 8; i++) { record->max_price[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->min_price[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->settlement_price[i] = arbitrary(); }
-  for (size_t i = 0; i < 8; i++) { record->settlement_value_price[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->settlement_value[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->end_trading_date[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->last_trade_date[i] = arbitrary(); }
 }
@@ -2448,7 +2448,7 @@ static size_t encode_cross_instrument(const CrossInstrument *record, uint8_t *wi
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->max_price[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->min_price[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->settlement_price[i]; }
-  for (size_t i = 0; i < 8; i++) { wire[at++] = record->settlement_value_price[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->settlement_value[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->end_trading_date[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->last_trade_date[i]; }
 
@@ -2473,7 +2473,7 @@ static size_t decode_cross_instrument(CrossInstrument *record, const uint8_t *wi
   for (size_t i = 0; i < 8; i++) { record->max_price[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->min_price[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->settlement_price[i] = wire[at++]; }
-  for (size_t i = 0; i < 8; i++) { record->settlement_value_price[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->settlement_value[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->end_trading_date[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->last_trade_date[i] = wire[at++]; }
 
@@ -2498,7 +2498,7 @@ static void equal_cross_instrument(const CrossInstrument *read, const CrossInstr
   for (size_t i = 0; i < 8; i++) { assert(read->max_price[i] == written->max_price[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->min_price[i] == written->min_price[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->settlement_price[i] == written->settlement_price[i]); }
-  for (size_t i = 0; i < 8; i++) { assert(read->settlement_value_price[i] == written->settlement_value_price[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->settlement_value[i] == written->settlement_value[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->end_trading_date[i] == written->end_trading_date[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->last_trade_date[i] == written->last_trade_date[i]); }
 }
@@ -2541,7 +2541,7 @@ typedef struct {
   uint8_t max_price[8];                   /* bytes 79 to 86 */
   uint8_t min_price[8];                   /* bytes 87 to 94 */
   uint8_t settlement_price[8];            /* bytes 95 to 102 */
-  uint8_t settlement_value_price[8];      /* bytes 103 to 110 */
+  uint8_t settlement_value[8];            /* bytes 103 to 110 */
   uint8_t end_trading_date[4];            /* bytes 111 to 114 */
   uint8_t last_trade_date[4];             /* bytes 115 to 118 */
 } BlockInstrument;
@@ -2564,7 +2564,7 @@ static void any_block_instrument(BlockInstrument *record) {
   for (size_t i = 0; i < 8; i++) { record->max_price[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->min_price[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->settlement_price[i] = arbitrary(); }
-  for (size_t i = 0; i < 8; i++) { record->settlement_value_price[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->settlement_value[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->end_trading_date[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->last_trade_date[i] = arbitrary(); }
 }
@@ -2587,7 +2587,7 @@ static size_t encode_block_instrument(const BlockInstrument *record, uint8_t *wi
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->max_price[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->min_price[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->settlement_price[i]; }
-  for (size_t i = 0; i < 8; i++) { wire[at++] = record->settlement_value_price[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->settlement_value[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->end_trading_date[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->last_trade_date[i]; }
 
@@ -2612,7 +2612,7 @@ static size_t decode_block_instrument(BlockInstrument *record, const uint8_t *wi
   for (size_t i = 0; i < 8; i++) { record->max_price[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->min_price[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->settlement_price[i] = wire[at++]; }
-  for (size_t i = 0; i < 8; i++) { record->settlement_value_price[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->settlement_value[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->end_trading_date[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->last_trade_date[i] = wire[at++]; }
 
@@ -2637,7 +2637,7 @@ static void equal_block_instrument(const BlockInstrument *read, const BlockInstr
   for (size_t i = 0; i < 8; i++) { assert(read->max_price[i] == written->max_price[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->min_price[i] == written->min_price[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->settlement_price[i] == written->settlement_price[i]); }
-  for (size_t i = 0; i < 8; i++) { assert(read->settlement_value_price[i] == written->settlement_value_price[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->settlement_value[i] == written->settlement_value[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->end_trading_date[i] == written->end_trading_date[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->last_trade_date[i] == written->last_trade_date[i]); }
 }
@@ -2680,7 +2680,7 @@ typedef struct {
   uint8_t max_price[8];                   /* bytes 79 to 86 */
   uint8_t min_price[8];                   /* bytes 87 to 94 */
   uint8_t settlement_price[8];            /* bytes 95 to 102 */
-  uint8_t settlement_value_price[8];      /* bytes 103 to 110 */
+  uint8_t settlement_value[8];            /* bytes 103 to 110 */
   uint8_t end_trading_date[4];            /* bytes 111 to 114 */
   uint8_t last_trade_date[4];             /* bytes 115 to 118 */
 } HybridInstrument;
@@ -2703,7 +2703,7 @@ static void any_hybrid_instrument(HybridInstrument *record) {
   for (size_t i = 0; i < 8; i++) { record->max_price[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->min_price[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->settlement_price[i] = arbitrary(); }
-  for (size_t i = 0; i < 8; i++) { record->settlement_value_price[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->settlement_value[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->end_trading_date[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->last_trade_date[i] = arbitrary(); }
 }
@@ -2726,7 +2726,7 @@ static size_t encode_hybrid_instrument(const HybridInstrument *record, uint8_t *
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->max_price[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->min_price[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->settlement_price[i]; }
-  for (size_t i = 0; i < 8; i++) { wire[at++] = record->settlement_value_price[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->settlement_value[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->end_trading_date[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->last_trade_date[i]; }
 
@@ -2751,7 +2751,7 @@ static size_t decode_hybrid_instrument(HybridInstrument *record, const uint8_t *
   for (size_t i = 0; i < 8; i++) { record->max_price[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->min_price[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->settlement_price[i] = wire[at++]; }
-  for (size_t i = 0; i < 8; i++) { record->settlement_value_price[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->settlement_value[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->end_trading_date[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->last_trade_date[i] = wire[at++]; }
 
@@ -2776,7 +2776,7 @@ static void equal_hybrid_instrument(const HybridInstrument *read, const HybridIn
   for (size_t i = 0; i < 8; i++) { assert(read->max_price[i] == written->max_price[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->min_price[i] == written->min_price[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->settlement_price[i] == written->settlement_price[i]); }
-  for (size_t i = 0; i < 8; i++) { assert(read->settlement_value_price[i] == written->settlement_value_price[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->settlement_value[i] == written->settlement_value[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->end_trading_date[i] == written->end_trading_date[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->last_trade_date[i] == written->last_trade_date[i]); }
 }
@@ -2803,39 +2803,39 @@ static void check_hybrid_instrument(void) {
 
 /* Session day product summary */
 typedef struct {
-  ClobInstrument clob_instrument;                             /* bytes 0 to 118 */
-  CrossInstrument cross_instrument;                           /* bytes 119 to 237 */
-  BlockInstrument block_instrument;                           /* bytes 238 to 356 */
-  HybridInstrument hybrid_instrument;                         /* bytes 357 to 475 */
-  uint8_t product_identification_type;                        /* byte 476 */
-  uint8_t product_identification_product_identification[30];  /* bytes 477 to 506 */
-  uint8_t product_id[4];                                      /* bytes 507 to 510 */
-  uint8_t mic[4];                                             /* bytes 511 to 514 */
-  uint8_t accumulated_interest[8];                            /* bytes 515 to 522 */
-  uint8_t interest_rate[8];                                   /* bytes 523 to 530 */
-  uint8_t currency[2];                                        /* bytes 531 to 532 */
-  uint8_t session_date[4];                                    /* bytes 533 to 536 */
-  uint8_t trading_value_currency[8];                          /* bytes 537 to 544 */
-  uint8_t status;                                             /* byte 545 */
-  uint8_t sector[2];                                          /* bytes 546 to 547 */
-  uint8_t market;                                             /* byte 548 */
-  uint8_t marker_price_change;                                /* byte 549 */
-  uint8_t lower_liquidity;                                    /* byte 550 */
-  uint8_t multiplier_number[8];                               /* bytes 551 to 558 */
-  uint8_t dividend_rate[8];                                   /* bytes 559 to 566 */
-  uint8_t delta[8];                                           /* bytes 567 to 574 */
-  uint8_t gamma[8];                                           /* bytes 575 to 582 */
-  uint8_t rho[8];                                             /* bytes 583 to 590 */
-  uint8_t theta[8];                                           /* bytes 591 to 598 */
-  uint8_t vega[8];                                            /* bytes 599 to 606 */
-  uint8_t volatility[8];                                      /* bytes 607 to 614 */
-  uint8_t options_strike_price[8];                            /* bytes 615 to 622 */
-  uint8_t dividend;                                           /* byte 623 */
-  uint8_t subscription_right;                                 /* byte 624 */
-  uint8_t interim_dividend_right;                             /* byte 625 */
-  uint8_t split;                                              /* byte 626 */
-  uint8_t quotation_system;                                   /* byte 627 */
-  uint8_t liquidity_support_pge;                              /* byte 628 */
+  ClobInstrument clob_instrument;         /* bytes 0 to 118 */
+  CrossInstrument cross_instrument;       /* bytes 119 to 237 */
+  BlockInstrument block_instrument;       /* bytes 238 to 356 */
+  HybridInstrument hybrid_instrument;     /* bytes 357 to 475 */
+  uint8_t product_identification_type;    /* byte 476 */
+  uint8_t product_identification[30];     /* bytes 477 to 506 */
+  uint8_t product_id[4];                  /* bytes 507 to 510 */
+  uint8_t mic[4];                         /* bytes 511 to 514 */
+  uint8_t accumulated_interest[8];        /* bytes 515 to 522 */
+  uint8_t interest_rate[8];               /* bytes 523 to 530 */
+  uint8_t currency[2];                    /* bytes 531 to 532 */
+  uint8_t session_date[4];                /* bytes 533 to 536 */
+  uint8_t trading_value_currency[8];      /* bytes 537 to 544 */
+  uint8_t status;                         /* byte 545 */
+  uint8_t sector[2];                      /* bytes 546 to 547 */
+  uint8_t market;                         /* byte 548 */
+  uint8_t marker_price_change;            /* byte 549 */
+  uint8_t lower_liquidity;                /* byte 550 */
+  uint8_t product_summary_multiplier[8];  /* bytes 551 to 558 */
+  uint8_t dividend_rate[8];               /* bytes 559 to 566 */
+  uint8_t delta[8];                       /* bytes 567 to 574 */
+  uint8_t gamma[8];                       /* bytes 575 to 582 */
+  uint8_t rho[8];                         /* bytes 583 to 590 */
+  uint8_t theta[8];                       /* bytes 591 to 598 */
+  uint8_t vega[8];                        /* bytes 599 to 606 */
+  uint8_t volatility[8];                  /* bytes 607 to 614 */
+  uint8_t options_strike_price[8];        /* bytes 615 to 622 */
+  uint8_t dividend;                       /* byte 623 */
+  uint8_t subscription_right;             /* byte 624 */
+  uint8_t interim_dividend_right;         /* byte 625 */
+  uint8_t split;                          /* byte 626 */
+  uint8_t quotation_system;               /* byte 627 */
+  uint8_t liquidity_support_pge;          /* byte 628 */
 } ProductSummary;
 
 /* any Product Summary at all: every byte one the checker chooses */
@@ -2845,7 +2845,7 @@ static void any_product_summary(ProductSummary *record) {
   any_block_instrument(&record->block_instrument);
   any_hybrid_instrument(&record->hybrid_instrument);
   record->product_identification_type = arbitrary();
-  for (size_t i = 0; i < 30; i++) { record->product_identification_product_identification[i] = arbitrary(); }
+  for (size_t i = 0; i < 30; i++) { record->product_identification[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->product_id[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->mic[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->accumulated_interest[i] = arbitrary(); }
@@ -2858,7 +2858,7 @@ static void any_product_summary(ProductSummary *record) {
   record->market = arbitrary();
   record->marker_price_change = arbitrary();
   record->lower_liquidity = arbitrary();
-  for (size_t i = 0; i < 8; i++) { record->multiplier_number[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->product_summary_multiplier[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->dividend_rate[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->delta[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->gamma[i] = arbitrary(); }
@@ -2882,7 +2882,7 @@ static size_t encode_product_summary(const ProductSummary *record, uint8_t *wire
   at = encode_block_instrument(&record->block_instrument, wire, at);
   at = encode_hybrid_instrument(&record->hybrid_instrument, wire, at);
   wire[at++] = record->product_identification_type;
-  for (size_t i = 0; i < 30; i++) { wire[at++] = record->product_identification_product_identification[i]; }
+  for (size_t i = 0; i < 30; i++) { wire[at++] = record->product_identification[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->product_id[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->mic[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->accumulated_interest[i]; }
@@ -2895,7 +2895,7 @@ static size_t encode_product_summary(const ProductSummary *record, uint8_t *wire
   wire[at++] = record->market;
   wire[at++] = record->marker_price_change;
   wire[at++] = record->lower_liquidity;
-  for (size_t i = 0; i < 8; i++) { wire[at++] = record->multiplier_number[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->product_summary_multiplier[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->dividend_rate[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->delta[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->gamma[i]; }
@@ -2921,7 +2921,7 @@ static size_t decode_product_summary(ProductSummary *record, const uint8_t *wire
   at = decode_block_instrument(&record->block_instrument, wire, at);
   at = decode_hybrid_instrument(&record->hybrid_instrument, wire, at);
   record->product_identification_type = wire[at++];
-  for (size_t i = 0; i < 30; i++) { record->product_identification_product_identification[i] = wire[at++]; }
+  for (size_t i = 0; i < 30; i++) { record->product_identification[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->product_id[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->mic[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->accumulated_interest[i] = wire[at++]; }
@@ -2934,7 +2934,7 @@ static size_t decode_product_summary(ProductSummary *record, const uint8_t *wire
   record->market = wire[at++];
   record->marker_price_change = wire[at++];
   record->lower_liquidity = wire[at++];
-  for (size_t i = 0; i < 8; i++) { record->multiplier_number[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->product_summary_multiplier[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->dividend_rate[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->delta[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->gamma[i] = wire[at++]; }
@@ -2960,7 +2960,7 @@ static void equal_product_summary(const ProductSummary *read, const ProductSumma
   equal_block_instrument(&read->block_instrument, &written->block_instrument);
   equal_hybrid_instrument(&read->hybrid_instrument, &written->hybrid_instrument);
   assert(read->product_identification_type == written->product_identification_type);
-  for (size_t i = 0; i < 30; i++) { assert(read->product_identification_product_identification[i] == written->product_identification_product_identification[i]); }
+  for (size_t i = 0; i < 30; i++) { assert(read->product_identification[i] == written->product_identification[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->product_id[i] == written->product_id[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->mic[i] == written->mic[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->accumulated_interest[i] == written->accumulated_interest[i]); }
@@ -2973,7 +2973,7 @@ static void equal_product_summary(const ProductSummary *read, const ProductSumma
   assert(read->market == written->market);
   assert(read->marker_price_change == written->marker_price_change);
   assert(read->lower_liquidity == written->lower_liquidity);
-  for (size_t i = 0; i < 8; i++) { assert(read->multiplier_number[i] == written->multiplier_number[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->product_summary_multiplier[i] == written->product_summary_multiplier[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->dividend_rate[i] == written->dividend_rate[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->delta[i] == written->delta[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->gamma[i] == written->gamma[i]); }
@@ -3150,20 +3150,20 @@ static void check_trading_session_status(void) {
 
 /* Test event */
 typedef struct {
-  uint8_t scenario_name[200];     /* bytes 0 to 199 */
-  uint8_t event_type_event_type;  /* byte 200 */
+  uint8_t scenario_name[200];  /* bytes 0 to 199 */
+  uint8_t event_type;          /* byte 200 */
 } TestEvent;
 
 /* any Test Event at all: every byte one the checker chooses */
 static void any_test_event(TestEvent *record) {
   for (size_t i = 0; i < 200; i++) { record->scenario_name[i] = arbitrary(); }
-  record->event_type_event_type = arbitrary();
+  record->event_type = arbitrary();
 }
 
 /* Test Event to the wire: 201 bytes from at, returning where the next byte goes */
 static size_t encode_test_event(const TestEvent *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 200; i++) { wire[at++] = record->scenario_name[i]; }
-  wire[at++] = record->event_type_event_type;
+  wire[at++] = record->event_type;
 
   return at;
 }
@@ -3171,7 +3171,7 @@ static size_t encode_test_event(const TestEvent *record, uint8_t *wire, size_t a
 /* Test Event off the wire: 201 bytes from at, returning where the next byte lies */
 static size_t decode_test_event(TestEvent *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 200; i++) { record->scenario_name[i] = wire[at++]; }
-  record->event_type_event_type = wire[at++];
+  record->event_type = wire[at++];
 
   return at;
 }
@@ -3179,7 +3179,7 @@ static size_t decode_test_event(TestEvent *record, const uint8_t *wire, size_t a
 /* what was read of Test Event is what was written, byte for byte */
 static void equal_test_event(const TestEvent *read, const TestEvent *written) {
   for (size_t i = 0; i < 200; i++) { assert(read->scenario_name[i] == written->scenario_name[i]); }
-  assert(read->event_type_event_type == written->event_type_event_type);
+  assert(read->event_type == written->event_type);
 }
 
 /* Test Event: written and read back, then read and written back */
@@ -3490,20 +3490,20 @@ static void check_order_execute(void) {
 
 /* Order book event for given instrument */
 typedef struct {
-  uint8_t instrument_id[4];                  /* bytes 0 to 3 */
-  uint8_t event_type_order_book_event_type;  /* byte 4 */
+  uint8_t instrument_id[4];       /* bytes 0 to 3 */
+  uint8_t order_book_event_type;  /* byte 4 */
 } OrderBookEvent;
 
 /* any Order Book Event at all: every byte one the checker chooses */
 static void any_order_book_event(OrderBookEvent *record) {
   for (size_t i = 0; i < 4; i++) { record->instrument_id[i] = arbitrary(); }
-  record->event_type_order_book_event_type = arbitrary();
+  record->order_book_event_type = arbitrary();
 }
 
 /* Order Book Event to the wire: 5 bytes from at, returning where the next byte goes */
 static size_t encode_order_book_event(const OrderBookEvent *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->instrument_id[i]; }
-  wire[at++] = record->event_type_order_book_event_type;
+  wire[at++] = record->order_book_event_type;
 
   return at;
 }
@@ -3511,7 +3511,7 @@ static size_t encode_order_book_event(const OrderBookEvent *record, uint8_t *wir
 /* Order Book Event off the wire: 5 bytes from at, returning where the next byte lies */
 static size_t decode_order_book_event(OrderBookEvent *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 4; i++) { record->instrument_id[i] = wire[at++]; }
-  record->event_type_order_book_event_type = wire[at++];
+  record->order_book_event_type = wire[at++];
 
   return at;
 }
@@ -3519,7 +3519,7 @@ static size_t decode_order_book_event(OrderBookEvent *record, const uint8_t *wir
 /* what was read of Order Book Event is what was written, byte for byte */
 static void equal_order_book_event(const OrderBookEvent *read, const OrderBookEvent *written) {
   for (size_t i = 0; i < 4; i++) { assert(read->instrument_id[i] == written->instrument_id[i]); }
-  assert(read->event_type_order_book_event_type == written->event_type_order_book_event_type);
+  assert(read->order_book_event_type == written->order_book_event_type);
 }
 
 /* Order Book Event: written and read back, then read and written back */

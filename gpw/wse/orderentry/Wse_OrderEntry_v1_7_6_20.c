@@ -204,7 +204,7 @@ static void check_login(void) {
 
 /* The login response message. The result field describes the login status, indicating whether the login was successful or not (i.e. successful login) */
 typedef struct {
-  uint8_t result_login_result;       /* byte 0 */
+  uint8_t login_result;              /* byte 0 */
   uint8_t next_expected_seq_num[4];  /* bytes 1 to 4 */
   uint8_t last_replay_seq_num[4];    /* bytes 5 to 8 */
   uint8_t session_id[2];             /* bytes 9 to 10 */
@@ -212,7 +212,7 @@ typedef struct {
 
 /* any Login Response at all: every byte one the checker chooses */
 static void any_login_response(LoginResponse *record) {
-  record->result_login_result = arbitrary();
+  record->login_result = arbitrary();
   for (size_t i = 0; i < 4; i++) { record->next_expected_seq_num[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->last_replay_seq_num[i] = arbitrary(); }
   for (size_t i = 0; i < 2; i++) { record->session_id[i] = arbitrary(); }
@@ -220,7 +220,7 @@ static void any_login_response(LoginResponse *record) {
 
 /* Login Response to the wire: 11 bytes from at, returning where the next byte goes */
 static size_t encode_login_response(const LoginResponse *record, uint8_t *wire, size_t at) {
-  wire[at++] = record->result_login_result;
+  wire[at++] = record->login_result;
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->next_expected_seq_num[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->last_replay_seq_num[i]; }
   for (size_t i = 0; i < 2; i++) { wire[at++] = record->session_id[i]; }
@@ -230,7 +230,7 @@ static size_t encode_login_response(const LoginResponse *record, uint8_t *wire, 
 
 /* Login Response off the wire: 11 bytes from at, returning where the next byte lies */
 static size_t decode_login_response(LoginResponse *record, const uint8_t *wire, size_t at) {
-  record->result_login_result = wire[at++];
+  record->login_result = wire[at++];
   for (size_t i = 0; i < 4; i++) { record->next_expected_seq_num[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->last_replay_seq_num[i] = wire[at++]; }
   for (size_t i = 0; i < 2; i++) { record->session_id[i] = wire[at++]; }
@@ -240,7 +240,7 @@ static size_t decode_login_response(LoginResponse *record, const uint8_t *wire, 
 
 /* what was read of Login Response is what was written, byte for byte */
 static void equal_login_response(const LoginResponse *read, const LoginResponse *written) {
-  assert(read->result_login_result == written->result_login_result);
+  assert(read->login_result == written->login_result);
   for (size_t i = 0; i < 4; i++) { assert(read->next_expected_seq_num[i] == written->next_expected_seq_num[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->last_replay_seq_num[i] == written->last_replay_seq_num[i]); }
   for (size_t i = 0; i < 2; i++) { assert(read->session_id[i] == written->session_id[i]); }
@@ -268,31 +268,31 @@ static void check_login_response(void) {
 
 /* The ConnectionClose message confirms the termination of a session through the trading port service */
 typedef struct {
-  uint8_t reason_connection_close_reason;  /* byte 0 */
+  uint8_t connection_close_reason;  /* byte 0 */
 } ConnectionClose;
 
 /* any Connection Close at all: every byte one the checker chooses */
 static void any_connection_close(ConnectionClose *record) {
-  record->reason_connection_close_reason = arbitrary();
+  record->connection_close_reason = arbitrary();
 }
 
 /* Connection Close to the wire: 1 byte from at, returning where the next byte goes */
 static size_t encode_connection_close(const ConnectionClose *record, uint8_t *wire, size_t at) {
-  wire[at++] = record->reason_connection_close_reason;
+  wire[at++] = record->connection_close_reason;
 
   return at;
 }
 
 /* Connection Close off the wire: 1 byte from at, returning where the next byte lies */
 static size_t decode_connection_close(ConnectionClose *record, const uint8_t *wire, size_t at) {
-  record->reason_connection_close_reason = wire[at++];
+  record->connection_close_reason = wire[at++];
 
   return at;
 }
 
 /* what was read of Connection Close is what was written, byte for byte */
 static void equal_connection_close(const ConnectionClose *read, const ConnectionClose *written) {
-  assert(read->reason_connection_close_reason == written->reason_connection_close_reason);
+  assert(read->connection_close_reason == written->connection_close_reason);
 }
 
 /* Connection Close: written and read back, then read and written back */
@@ -1054,22 +1054,22 @@ static void check_market_maker_command(void) {
 
 /* The response to the Market Maker command */
 typedef struct {
-  uint8_t ref_id[4];              /* bytes 0 to 3 */
-  uint8_t result_command_result;  /* byte 4 */
-  uint8_t rejection_code[2];      /* bytes 5 to 6 */
+  uint8_t ref_id[4];          /* bytes 0 to 3 */
+  uint8_t command_result;     /* byte 4 */
+  uint8_t rejection_code[2];  /* bytes 5 to 6 */
 } MarketMakerCommandResponse;
 
 /* any Market Maker Command Response at all: every byte one the checker chooses */
 static void any_market_maker_command_response(MarketMakerCommandResponse *record) {
   for (size_t i = 0; i < 4; i++) { record->ref_id[i] = arbitrary(); }
-  record->result_command_result = arbitrary();
+  record->command_result = arbitrary();
   for (size_t i = 0; i < 2; i++) { record->rejection_code[i] = arbitrary(); }
 }
 
 /* Market Maker Command Response to the wire: 7 bytes from at, returning where the next byte goes */
 static size_t encode_market_maker_command_response(const MarketMakerCommandResponse *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->ref_id[i]; }
-  wire[at++] = record->result_command_result;
+  wire[at++] = record->command_result;
   for (size_t i = 0; i < 2; i++) { wire[at++] = record->rejection_code[i]; }
 
   return at;
@@ -1078,7 +1078,7 @@ static size_t encode_market_maker_command_response(const MarketMakerCommandRespo
 /* Market Maker Command Response off the wire: 7 bytes from at, returning where the next byte lies */
 static size_t decode_market_maker_command_response(MarketMakerCommandResponse *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 4; i++) { record->ref_id[i] = wire[at++]; }
-  record->result_command_result = wire[at++];
+  record->command_result = wire[at++];
   for (size_t i = 0; i < 2; i++) { record->rejection_code[i] = wire[at++]; }
 
   return at;
@@ -1087,7 +1087,7 @@ static size_t decode_market_maker_command_response(MarketMakerCommandResponse *r
 /* what was read of Market Maker Command Response is what was written, byte for byte */
 static void equal_market_maker_command_response(const MarketMakerCommandResponse *read, const MarketMakerCommandResponse *written) {
   for (size_t i = 0; i < 4; i++) { assert(read->ref_id[i] == written->ref_id[i]); }
-  assert(read->result_command_result == written->result_command_result);
+  assert(read->command_result == written->command_result);
   for (size_t i = 0; i < 2; i++) { assert(read->rejection_code[i] == written->rejection_code[i]); }
 }
 
@@ -1113,20 +1113,20 @@ static void check_market_maker_command_response(void) {
 
 /* The information for the MM that one of the quotes has been crossed */
 typedef struct {
-  uint8_t instrument_id[4];                     /* bytes 0 to 3 */
-  uint8_t reason_request_for_execution_reason;  /* byte 4 */
+  uint8_t instrument_id[4];              /* bytes 0 to 3 */
+  uint8_t request_for_execution_reason;  /* byte 4 */
 } RequestForExecution;
 
 /* any Request For Execution at all: every byte one the checker chooses */
 static void any_request_for_execution(RequestForExecution *record) {
   for (size_t i = 0; i < 4; i++) { record->instrument_id[i] = arbitrary(); }
-  record->reason_request_for_execution_reason = arbitrary();
+  record->request_for_execution_reason = arbitrary();
 }
 
 /* Request For Execution to the wire: 5 bytes from at, returning where the next byte goes */
 static size_t encode_request_for_execution(const RequestForExecution *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->instrument_id[i]; }
-  wire[at++] = record->reason_request_for_execution_reason;
+  wire[at++] = record->request_for_execution_reason;
 
   return at;
 }
@@ -1134,7 +1134,7 @@ static size_t encode_request_for_execution(const RequestForExecution *record, ui
 /* Request For Execution off the wire: 5 bytes from at, returning where the next byte lies */
 static size_t decode_request_for_execution(RequestForExecution *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 4; i++) { record->instrument_id[i] = wire[at++]; }
-  record->reason_request_for_execution_reason = wire[at++];
+  record->request_for_execution_reason = wire[at++];
 
   return at;
 }
@@ -1142,7 +1142,7 @@ static size_t decode_request_for_execution(RequestForExecution *record, const ui
 /* what was read of Request For Execution is what was written, byte for byte */
 static void equal_request_for_execution(const RequestForExecution *read, const RequestForExecution *written) {
   for (size_t i = 0; i < 4; i++) { assert(read->instrument_id[i] == written->instrument_id[i]); }
-  assert(read->reason_request_for_execution_reason == written->reason_request_for_execution_reason);
+  assert(read->request_for_execution_reason == written->request_for_execution_reason);
 }
 
 /* Request For Execution: written and read back, then read and written back */
