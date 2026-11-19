@@ -942,7 +942,7 @@ static void check_stream_id_message(void) {
   for (size_t i = 0; i < 4; i++) { assert(again[i] == wire[i]); }
 }
 
-/* ---- Sequence Number Reset Message: 10 bytes --------------------------------- */
+/* ---- Sequence Number Reset Message: 12 bytes --------------------------------- */
 
 /* This message is sent to reset the Message Sequence Number at start of day, or in response to failures. */
 typedef struct {
@@ -950,6 +950,7 @@ typedef struct {
   uint8_t source_time_ns[4];  /* bytes 4 to 7 */
   uint8_t product_id;         /* byte 8 */
   uint8_t channel_id;         /* byte 9 */
+  uint8_t reserved_2[2];      /* bytes 10 to 11 */
 } SequenceNumberResetMessage;
 
 /* any Sequence Number Reset Message at all: every byte one the checker chooses */
@@ -958,24 +959,27 @@ static void any_sequence_number_reset_message(SequenceNumberResetMessage *record
   for (size_t i = 0; i < 4; i++) { record->source_time_ns[i] = arbitrary(); }
   record->product_id = arbitrary();
   record->channel_id = arbitrary();
+  for (size_t i = 0; i < 2; i++) { record->reserved_2[i] = arbitrary(); }
 }
 
-/* Sequence Number Reset Message to the wire: 10 bytes from at, returning where the next byte goes */
+/* Sequence Number Reset Message to the wire: 12 bytes from at, returning where the next byte goes */
 static size_t encode_sequence_number_reset_message(const SequenceNumberResetMessage *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->source_time[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->source_time_ns[i]; }
   wire[at++] = record->product_id;
   wire[at++] = record->channel_id;
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->reserved_2[i]; }
 
   return at;
 }
 
-/* Sequence Number Reset Message off the wire: 10 bytes from at, returning where the next byte lies */
+/* Sequence Number Reset Message off the wire: 12 bytes from at, returning where the next byte lies */
 static size_t decode_sequence_number_reset_message(SequenceNumberResetMessage *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 4; i++) { record->source_time[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->source_time_ns[i] = wire[at++]; }
   record->product_id = wire[at++];
   record->channel_id = wire[at++];
+  for (size_t i = 0; i < 2; i++) { record->reserved_2[i] = wire[at++]; }
 
   return at;
 }
@@ -986,24 +990,25 @@ static void equal_sequence_number_reset_message(const SequenceNumberResetMessage
   for (size_t i = 0; i < 4; i++) { assert(read->source_time_ns[i] == written->source_time_ns[i]); }
   assert(read->product_id == written->product_id);
   assert(read->channel_id == written->channel_id);
+  for (size_t i = 0; i < 2; i++) { assert(read->reserved_2[i] == written->reserved_2[i]); }
 }
 
 /* Sequence Number Reset Message: written and read back, then read and written back */
 static void check_sequence_number_reset_message(void) {
   SequenceNumberResetMessage sent;
   SequenceNumberResetMessage got;
-  uint8_t wire[10];
-  uint8_t again[10];
+  uint8_t wire[12];
+  uint8_t again[12];
 
   any_sequence_number_reset_message(&sent);
-  assert(encode_sequence_number_reset_message(&sent, wire, 0) == 10);
-  assert(decode_sequence_number_reset_message(&got, wire, 0) == 10);
+  assert(encode_sequence_number_reset_message(&sent, wire, 0) == 12);
+  assert(decode_sequence_number_reset_message(&got, wire, 0) == 12);
   equal_sequence_number_reset_message(&got, &sent);
 
-  for (size_t i = 0; i < 10; i++) { wire[i] = arbitrary(); }
-  assert(decode_sequence_number_reset_message(&got, wire, 0) == 10);
-  assert(encode_sequence_number_reset_message(&got, again, 0) == 10);
-  for (size_t i = 0; i < 10; i++) { assert(again[i] == wire[i]); }
+  for (size_t i = 0; i < 12; i++) { wire[i] = arbitrary(); }
+  assert(decode_sequence_number_reset_message(&got, wire, 0) == 12);
+  assert(encode_sequence_number_reset_message(&got, again, 0) == 12);
+  for (size_t i = 0; i < 12; i++) { assert(again[i] == wire[i]); }
 }
 
 /* ---- What esbmc checks ------------------------------------------------------- */
