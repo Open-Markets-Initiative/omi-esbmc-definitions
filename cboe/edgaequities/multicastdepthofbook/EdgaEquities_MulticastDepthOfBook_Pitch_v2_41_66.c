@@ -1000,21 +1000,23 @@ static void check_trading_status_message(void) {
   for (size_t i = 0; i < 16; i++) { assert(again[i] == wire[i]); }
 }
 
-/* ---- Auction Update Message: 41 bytes ---------------------------------------- */
+/* ---- Auction Update Message: 45 bytes ---------------------------------------- */
 
 /* BYX and BZX Equities Only. Auction Update messages are used to disseminate Cboe price and size information during auctions for Cboe listed securities and for Cboe Market Close (CMC) crosses on BZX, and for Periodic Auctions on BYX. Cboe Auction Update messages support the Cboe Opening, Closing, Halt and IPO Auctions on the BZX Exchange. On the BYX Exchange, Auction Update messages will be sent out at a randomized time between the start of an auction period and the end of the auction period minus 1 millisecond to inform participants that a Periodic Auction is taking place. */
 typedef struct {
-  uint8_t stock_symbol[8];        /* bytes 0 to 7 */
-  uint8_t auction_type;           /* byte 8 */
-  uint8_t reference_price[8];     /* bytes 9 to 16 */
-  uint8_t buy_shares[4];          /* bytes 17 to 20 */
-  uint8_t sell_shares[4];         /* bytes 21 to 24 */
-  uint8_t indicative_price[8];    /* bytes 25 to 32 */
-  uint8_t auction_only_price[8];  /* bytes 33 to 40 */
+  uint8_t time_offset[4];         /* bytes 0 to 3 */
+  uint8_t stock_symbol[8];        /* bytes 4 to 11 */
+  uint8_t auction_type;           /* byte 12 */
+  uint8_t reference_price[8];     /* bytes 13 to 20 */
+  uint8_t buy_shares[4];          /* bytes 21 to 24 */
+  uint8_t sell_shares[4];         /* bytes 25 to 28 */
+  uint8_t indicative_price[8];    /* bytes 29 to 36 */
+  uint8_t auction_only_price[8];  /* bytes 37 to 44 */
 } AuctionUpdateMessage;
 
 /* any Auction Update Message at all: every byte one the checker chooses */
 static void any_auction_update_message(AuctionUpdateMessage *record) {
+  for (size_t i = 0; i < 4; i++) { record->time_offset[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->stock_symbol[i] = arbitrary(); }
   record->auction_type = arbitrary();
   for (size_t i = 0; i < 8; i++) { record->reference_price[i] = arbitrary(); }
@@ -1024,8 +1026,9 @@ static void any_auction_update_message(AuctionUpdateMessage *record) {
   for (size_t i = 0; i < 8; i++) { record->auction_only_price[i] = arbitrary(); }
 }
 
-/* Auction Update Message to the wire: 41 bytes from at, returning where the next byte goes */
+/* Auction Update Message to the wire: 45 bytes from at, returning where the next byte goes */
 static size_t encode_auction_update_message(const AuctionUpdateMessage *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->time_offset[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->stock_symbol[i]; }
   wire[at++] = record->auction_type;
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->reference_price[i]; }
@@ -1037,8 +1040,9 @@ static size_t encode_auction_update_message(const AuctionUpdateMessage *record, 
   return at;
 }
 
-/* Auction Update Message off the wire: 41 bytes from at, returning where the next byte lies */
+/* Auction Update Message off the wire: 45 bytes from at, returning where the next byte lies */
 static size_t decode_auction_update_message(AuctionUpdateMessage *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 4; i++) { record->time_offset[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->stock_symbol[i] = wire[at++]; }
   record->auction_type = wire[at++];
   for (size_t i = 0; i < 8; i++) { record->reference_price[i] = wire[at++]; }
@@ -1052,6 +1056,7 @@ static size_t decode_auction_update_message(AuctionUpdateMessage *record, const 
 
 /* what was read of Auction Update Message is what was written, byte for byte */
 static void equal_auction_update_message(const AuctionUpdateMessage *read, const AuctionUpdateMessage *written) {
+  for (size_t i = 0; i < 4; i++) { assert(read->time_offset[i] == written->time_offset[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->stock_symbol[i] == written->stock_symbol[i]); }
   assert(read->auction_type == written->auction_type);
   for (size_t i = 0; i < 8; i++) { assert(read->reference_price[i] == written->reference_price[i]); }
@@ -1065,18 +1070,18 @@ static void equal_auction_update_message(const AuctionUpdateMessage *read, const
 static void check_auction_update_message(void) {
   AuctionUpdateMessage sent;
   AuctionUpdateMessage got;
-  uint8_t wire[41];
-  uint8_t again[41];
+  uint8_t wire[45];
+  uint8_t again[45];
 
   any_auction_update_message(&sent);
-  assert(encode_auction_update_message(&sent, wire, 0) == 41);
-  assert(decode_auction_update_message(&got, wire, 0) == 41);
+  assert(encode_auction_update_message(&sent, wire, 0) == 45);
+  assert(decode_auction_update_message(&got, wire, 0) == 45);
   equal_auction_update_message(&got, &sent);
 
-  for (size_t i = 0; i < 41; i++) { wire[i] = arbitrary(); }
-  assert(decode_auction_update_message(&got, wire, 0) == 41);
-  assert(encode_auction_update_message(&got, again, 0) == 41);
-  for (size_t i = 0; i < 41; i++) { assert(again[i] == wire[i]); }
+  for (size_t i = 0; i < 45; i++) { wire[i] = arbitrary(); }
+  assert(decode_auction_update_message(&got, wire, 0) == 45);
+  assert(encode_auction_update_message(&got, again, 0) == 45);
+  for (size_t i = 0; i < 45; i++) { assert(again[i] == wire[i]); }
 }
 
 /* ---- Auction Summary Message: 25 bytes --------------------------------------- */

@@ -21,6 +21,7 @@
  * What this definition does not state, and the model does:
  *   - a run filling what frames it
  *   - the dispatch that chooses a message by its type
+ *   - a Composite rule
  *   - a run counted by a field
  *
  * License: MIT No Attribution
@@ -2712,149 +2713,6 @@ static void check_fixed_rate_numeric_pair(void) {
   assert(decode_fixed_rate_numeric_pair(&got, wire, 0) == 6);
   assert(encode_fixed_rate_numeric_pair(&got, again, 0) == 6);
   for (size_t i = 0; i < 6; i++) { assert(again[i] == wire[i]); }
-}
-
-/* ---- Futures Rfq Message: 21 bytes ------------------------------------------- */
-
-/* Futures Request for Quote message */
-typedef struct {
-  uint8_t exchange_id;               /* byte 0 */
-  uint8_t root_symbol[6];            /* bytes 1 to 6 */
-  uint8_t delivery_month;            /* byte 7 */
-  uint8_t delivery_year_futures[2];  /* bytes 8 to 9 */
-  uint8_t delivery_day[2];           /* bytes 10 to 11 */
-  uint8_t requested_size[8];         /* bytes 12 to 19 */
-  uint8_t requested_market_side;     /* byte 20 */
-} FuturesRfqMessage;
-
-/* any Futures Rfq Message at all: every byte one the checker chooses */
-static void any_futures_rfq_message(FuturesRfqMessage *record) {
-  record->exchange_id = arbitrary();
-  for (size_t i = 0; i < 6; i++) { record->root_symbol[i] = arbitrary(); }
-  record->delivery_month = arbitrary();
-  for (size_t i = 0; i < 2; i++) { record->delivery_year_futures[i] = arbitrary(); }
-  for (size_t i = 0; i < 2; i++) { record->delivery_day[i] = arbitrary(); }
-  for (size_t i = 0; i < 8; i++) { record->requested_size[i] = arbitrary(); }
-  record->requested_market_side = arbitrary();
-}
-
-/* Futures Rfq Message to the wire: 21 bytes from at, returning where the next byte goes */
-static size_t encode_futures_rfq_message(const FuturesRfqMessage *record, uint8_t *wire, size_t at) {
-  wire[at++] = record->exchange_id;
-  for (size_t i = 0; i < 6; i++) { wire[at++] = record->root_symbol[i]; }
-  wire[at++] = record->delivery_month;
-  for (size_t i = 0; i < 2; i++) { wire[at++] = record->delivery_year_futures[i]; }
-  for (size_t i = 0; i < 2; i++) { wire[at++] = record->delivery_day[i]; }
-  for (size_t i = 0; i < 8; i++) { wire[at++] = record->requested_size[i]; }
-  wire[at++] = record->requested_market_side;
-
-  return at;
-}
-
-/* Futures Rfq Message off the wire: 21 bytes from at, returning where the next byte lies */
-static size_t decode_futures_rfq_message(FuturesRfqMessage *record, const uint8_t *wire, size_t at) {
-  record->exchange_id = wire[at++];
-  for (size_t i = 0; i < 6; i++) { record->root_symbol[i] = wire[at++]; }
-  record->delivery_month = wire[at++];
-  for (size_t i = 0; i < 2; i++) { record->delivery_year_futures[i] = wire[at++]; }
-  for (size_t i = 0; i < 2; i++) { record->delivery_day[i] = wire[at++]; }
-  for (size_t i = 0; i < 8; i++) { record->requested_size[i] = wire[at++]; }
-  record->requested_market_side = wire[at++];
-
-  return at;
-}
-
-/* what was read of Futures Rfq Message is what was written, byte for byte */
-static void equal_futures_rfq_message(const FuturesRfqMessage *read, const FuturesRfqMessage *written) {
-  assert(read->exchange_id == written->exchange_id);
-  for (size_t i = 0; i < 6; i++) { assert(read->root_symbol[i] == written->root_symbol[i]); }
-  assert(read->delivery_month == written->delivery_month);
-  for (size_t i = 0; i < 2; i++) { assert(read->delivery_year_futures[i] == written->delivery_year_futures[i]); }
-  for (size_t i = 0; i < 2; i++) { assert(read->delivery_day[i] == written->delivery_day[i]); }
-  for (size_t i = 0; i < 8; i++) { assert(read->requested_size[i] == written->requested_size[i]); }
-  assert(read->requested_market_side == written->requested_market_side);
-}
-
-/* Futures Rfq Message: written and read back, then read and written back */
-static void check_futures_rfq_message(void) {
-  FuturesRfqMessage sent;
-  FuturesRfqMessage got;
-  uint8_t wire[21];
-  uint8_t again[21];
-
-  any_futures_rfq_message(&sent);
-  assert(encode_futures_rfq_message(&sent, wire, 0) == 21);
-  assert(decode_futures_rfq_message(&got, wire, 0) == 21);
-  equal_futures_rfq_message(&got, &sent);
-
-  for (size_t i = 0; i < 21; i++) { wire[i] = arbitrary(); }
-  assert(decode_futures_rfq_message(&got, wire, 0) == 21);
-  assert(encode_futures_rfq_message(&got, again, 0) == 21);
-  for (size_t i = 0; i < 21; i++) { assert(again[i] == wire[i]); }
-}
-
-/* ---- Strategy Rfq Message: 40 bytes ------------------------------------------ */
-
-/* Strategy Request for Quote message */
-typedef struct {
-  uint8_t exchange_id;            /* byte 0 */
-  uint8_t symbol[30];             /* bytes 1 to 30 */
-  uint8_t requested_size[8];      /* bytes 31 to 38 */
-  uint8_t requested_market_side;  /* byte 39 */
-} StrategyRfqMessage;
-
-/* any Strategy Rfq Message at all: every byte one the checker chooses */
-static void any_strategy_rfq_message(StrategyRfqMessage *record) {
-  record->exchange_id = arbitrary();
-  for (size_t i = 0; i < 30; i++) { record->symbol[i] = arbitrary(); }
-  for (size_t i = 0; i < 8; i++) { record->requested_size[i] = arbitrary(); }
-  record->requested_market_side = arbitrary();
-}
-
-/* Strategy Rfq Message to the wire: 40 bytes from at, returning where the next byte goes */
-static size_t encode_strategy_rfq_message(const StrategyRfqMessage *record, uint8_t *wire, size_t at) {
-  wire[at++] = record->exchange_id;
-  for (size_t i = 0; i < 30; i++) { wire[at++] = record->symbol[i]; }
-  for (size_t i = 0; i < 8; i++) { wire[at++] = record->requested_size[i]; }
-  wire[at++] = record->requested_market_side;
-
-  return at;
-}
-
-/* Strategy Rfq Message off the wire: 40 bytes from at, returning where the next byte lies */
-static size_t decode_strategy_rfq_message(StrategyRfqMessage *record, const uint8_t *wire, size_t at) {
-  record->exchange_id = wire[at++];
-  for (size_t i = 0; i < 30; i++) { record->symbol[i] = wire[at++]; }
-  for (size_t i = 0; i < 8; i++) { record->requested_size[i] = wire[at++]; }
-  record->requested_market_side = wire[at++];
-
-  return at;
-}
-
-/* what was read of Strategy Rfq Message is what was written, byte for byte */
-static void equal_strategy_rfq_message(const StrategyRfqMessage *read, const StrategyRfqMessage *written) {
-  assert(read->exchange_id == written->exchange_id);
-  for (size_t i = 0; i < 30; i++) { assert(read->symbol[i] == written->symbol[i]); }
-  for (size_t i = 0; i < 8; i++) { assert(read->requested_size[i] == written->requested_size[i]); }
-  assert(read->requested_market_side == written->requested_market_side);
-}
-
-/* Strategy Rfq Message: written and read back, then read and written back */
-static void check_strategy_rfq_message(void) {
-  StrategyRfqMessage sent;
-  StrategyRfqMessage got;
-  uint8_t wire[40];
-  uint8_t again[40];
-
-  any_strategy_rfq_message(&sent);
-  assert(encode_strategy_rfq_message(&sent, wire, 0) == 40);
-  assert(decode_strategy_rfq_message(&got, wire, 0) == 40);
-  equal_strategy_rfq_message(&got, &sent);
-
-  for (size_t i = 0; i < 40; i++) { wire[i] = arbitrary(); }
-  assert(decode_strategy_rfq_message(&got, wire, 0) == 40);
-  assert(encode_strategy_rfq_message(&got, again, 0) == 40);
-  for (size_t i = 0; i < 40; i++) { assert(again[i] == wire[i]); }
 }
 
 /* ---- Strike Price Schedule Notice Negative Whole Pair: 8 bytes --------------- */
@@ -21236,8 +21094,6 @@ static void checks(void) {
   check_fixed_rate_negative_hundred_thousand_pair();
   check_fixed_rate_negative_million_pair();
   check_fixed_rate_numeric_pair();
-  check_futures_rfq_message();
-  check_strategy_rfq_message();
   check_strike_price_schedule_notice_negative_whole_pair();
   check_strike_price_schedule_notice_negative_ten_pair();
   check_strike_price_schedule_notice_negative_hundred_pair();

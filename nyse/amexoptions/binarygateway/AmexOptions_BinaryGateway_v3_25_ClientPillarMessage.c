@@ -334,6 +334,234 @@ static void check_sub_msg_header(void) {
   for (size_t i = 0; i < 4; i++) { assert(again[i] == wire[i]); }
 }
 
+/* ---- Exposed: 100 bytes ------------------------------------------------------ */
+
+/* Exposed */
+typedef struct {
+  SubMsgHeader sub_msg_header;              /* bytes 0 to 3 */
+  uint8_t symbol_id[4];                     /* bytes 4 to 7 */
+  uint8_t mpid[4];                          /* bytes 8 to 11 */
+  uint8_t market_maker[10];                 /* bytes 12 to 21 */
+  uint8_t mp_sub_id[4];                     /* bytes 22 to 25 */
+  uint8_t cl_ord_id[8];                     /* bytes 26 to 33 */
+  uint8_t orig_cl_ord_id[8];                /* bytes 34 to 41 */
+  uint8_t bitfield_order_instructions[16];  /* bytes 42 to 57 */
+  uint8_t price[8];                         /* bytes 58 to 65 */
+  uint8_t order_qty[4];                     /* bytes 66 to 69 */
+  uint8_t min_qty[4];                       /* bytes 70 to 73 */
+  uint8_t user_data[10];                    /* bytes 74 to 83 */
+  uint8_t leg_open_close[8];                /* bytes 84 to 91 */
+  uint8_t auction_id[8];                    /* bytes 92 to 99 */
+} Exposed;
+
+/* any Exposed at all: every byte one the checker chooses */
+static void any_exposed(Exposed *record) {
+  any_sub_msg_header(&record->sub_msg_header);
+  for (size_t i = 0; i < 4; i++) { record->symbol_id[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->mpid[i] = arbitrary(); }
+  for (size_t i = 0; i < 10; i++) { record->market_maker[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->mp_sub_id[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->cl_ord_id[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->orig_cl_ord_id[i] = arbitrary(); }
+  for (size_t i = 0; i < 16; i++) { record->bitfield_order_instructions[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->price[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->order_qty[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->min_qty[i] = arbitrary(); }
+  for (size_t i = 0; i < 10; i++) { record->user_data[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->leg_open_close[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->auction_id[i] = arbitrary(); }
+}
+
+/* Exposed to the wire: 100 bytes from at, returning where the next byte goes */
+static size_t encode_exposed(const Exposed *record, uint8_t *wire, size_t at) {
+  at = encode_sub_msg_header(&record->sub_msg_header, wire, at);
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->symbol_id[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->mpid[i]; }
+  for (size_t i = 0; i < 10; i++) { wire[at++] = record->market_maker[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->mp_sub_id[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->cl_ord_id[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->orig_cl_ord_id[i]; }
+  for (size_t i = 0; i < 16; i++) { wire[at++] = record->bitfield_order_instructions[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->price[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->order_qty[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->min_qty[i]; }
+  for (size_t i = 0; i < 10; i++) { wire[at++] = record->user_data[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->leg_open_close[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->auction_id[i]; }
+
+  return at;
+}
+
+/* Exposed off the wire: 100 bytes from at, returning where the next byte lies */
+static size_t decode_exposed(Exposed *record, const uint8_t *wire, size_t at) {
+  at = decode_sub_msg_header(&record->sub_msg_header, wire, at);
+  for (size_t i = 0; i < 4; i++) { record->symbol_id[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->mpid[i] = wire[at++]; }
+  for (size_t i = 0; i < 10; i++) { record->market_maker[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->mp_sub_id[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->cl_ord_id[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->orig_cl_ord_id[i] = wire[at++]; }
+  for (size_t i = 0; i < 16; i++) { record->bitfield_order_instructions[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->price[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->order_qty[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->min_qty[i] = wire[at++]; }
+  for (size_t i = 0; i < 10; i++) { record->user_data[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->leg_open_close[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->auction_id[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Exposed is what was written, byte for byte */
+static void equal_exposed(const Exposed *read, const Exposed *written) {
+  equal_sub_msg_header(&read->sub_msg_header, &written->sub_msg_header);
+  for (size_t i = 0; i < 4; i++) { assert(read->symbol_id[i] == written->symbol_id[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->mpid[i] == written->mpid[i]); }
+  for (size_t i = 0; i < 10; i++) { assert(read->market_maker[i] == written->market_maker[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->mp_sub_id[i] == written->mp_sub_id[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->cl_ord_id[i] == written->cl_ord_id[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->orig_cl_ord_id[i] == written->orig_cl_ord_id[i]); }
+  for (size_t i = 0; i < 16; i++) { assert(read->bitfield_order_instructions[i] == written->bitfield_order_instructions[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->price[i] == written->price[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->order_qty[i] == written->order_qty[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->min_qty[i] == written->min_qty[i]); }
+  for (size_t i = 0; i < 10; i++) { assert(read->user_data[i] == written->user_data[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->leg_open_close[i] == written->leg_open_close[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->auction_id[i] == written->auction_id[i]); }
+}
+
+/* Exposed: written and read back, then read and written back */
+static void check_exposed(void) {
+  Exposed sent;
+  Exposed got;
+  uint8_t wire[100];
+  uint8_t again[100];
+
+  any_exposed(&sent);
+  assert(encode_exposed(&sent, wire, 0) == 100);
+  assert(decode_exposed(&got, wire, 0) == 100);
+  equal_exposed(&got, &sent);
+
+  for (size_t i = 0; i < 100; i++) { wire[i] = arbitrary(); }
+  assert(decode_exposed(&got, wire, 0) == 100);
+  assert(encode_exposed(&got, again, 0) == 100);
+  for (size_t i = 0; i < 100; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Covered: 100 bytes ------------------------------------------------------ */
+
+/* Covered */
+typedef struct {
+  SubMsgHeader sub_msg_header;              /* bytes 0 to 3 */
+  uint8_t symbol_id[4];                     /* bytes 4 to 7 */
+  uint8_t mpid[4];                          /* bytes 8 to 11 */
+  uint8_t market_maker[10];                 /* bytes 12 to 21 */
+  uint8_t mp_sub_id[4];                     /* bytes 22 to 25 */
+  uint8_t cl_ord_id[8];                     /* bytes 26 to 33 */
+  uint8_t orig_cl_ord_id[8];                /* bytes 34 to 41 */
+  uint8_t bitfield_order_instructions[16];  /* bytes 42 to 57 */
+  uint8_t price[8];                         /* bytes 58 to 65 */
+  uint8_t order_qty[4];                     /* bytes 66 to 69 */
+  uint8_t min_qty[4];                       /* bytes 70 to 73 */
+  uint8_t user_data[10];                    /* bytes 74 to 83 */
+  uint8_t leg_open_close[8];                /* bytes 84 to 91 */
+  uint8_t auction_id[8];                    /* bytes 92 to 99 */
+} Covered;
+
+/* any Covered at all: every byte one the checker chooses */
+static void any_covered(Covered *record) {
+  any_sub_msg_header(&record->sub_msg_header);
+  for (size_t i = 0; i < 4; i++) { record->symbol_id[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->mpid[i] = arbitrary(); }
+  for (size_t i = 0; i < 10; i++) { record->market_maker[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->mp_sub_id[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->cl_ord_id[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->orig_cl_ord_id[i] = arbitrary(); }
+  for (size_t i = 0; i < 16; i++) { record->bitfield_order_instructions[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->price[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->order_qty[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->min_qty[i] = arbitrary(); }
+  for (size_t i = 0; i < 10; i++) { record->user_data[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->leg_open_close[i] = arbitrary(); }
+  for (size_t i = 0; i < 8; i++) { record->auction_id[i] = arbitrary(); }
+}
+
+/* Covered to the wire: 100 bytes from at, returning where the next byte goes */
+static size_t encode_covered(const Covered *record, uint8_t *wire, size_t at) {
+  at = encode_sub_msg_header(&record->sub_msg_header, wire, at);
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->symbol_id[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->mpid[i]; }
+  for (size_t i = 0; i < 10; i++) { wire[at++] = record->market_maker[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->mp_sub_id[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->cl_ord_id[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->orig_cl_ord_id[i]; }
+  for (size_t i = 0; i < 16; i++) { wire[at++] = record->bitfield_order_instructions[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->price[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->order_qty[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->min_qty[i]; }
+  for (size_t i = 0; i < 10; i++) { wire[at++] = record->user_data[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->leg_open_close[i]; }
+  for (size_t i = 0; i < 8; i++) { wire[at++] = record->auction_id[i]; }
+
+  return at;
+}
+
+/* Covered off the wire: 100 bytes from at, returning where the next byte lies */
+static size_t decode_covered(Covered *record, const uint8_t *wire, size_t at) {
+  at = decode_sub_msg_header(&record->sub_msg_header, wire, at);
+  for (size_t i = 0; i < 4; i++) { record->symbol_id[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->mpid[i] = wire[at++]; }
+  for (size_t i = 0; i < 10; i++) { record->market_maker[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->mp_sub_id[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->cl_ord_id[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->orig_cl_ord_id[i] = wire[at++]; }
+  for (size_t i = 0; i < 16; i++) { record->bitfield_order_instructions[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->price[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->order_qty[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->min_qty[i] = wire[at++]; }
+  for (size_t i = 0; i < 10; i++) { record->user_data[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->leg_open_close[i] = wire[at++]; }
+  for (size_t i = 0; i < 8; i++) { record->auction_id[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Covered is what was written, byte for byte */
+static void equal_covered(const Covered *read, const Covered *written) {
+  equal_sub_msg_header(&read->sub_msg_header, &written->sub_msg_header);
+  for (size_t i = 0; i < 4; i++) { assert(read->symbol_id[i] == written->symbol_id[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->mpid[i] == written->mpid[i]); }
+  for (size_t i = 0; i < 10; i++) { assert(read->market_maker[i] == written->market_maker[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->mp_sub_id[i] == written->mp_sub_id[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->cl_ord_id[i] == written->cl_ord_id[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->orig_cl_ord_id[i] == written->orig_cl_ord_id[i]); }
+  for (size_t i = 0; i < 16; i++) { assert(read->bitfield_order_instructions[i] == written->bitfield_order_instructions[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->price[i] == written->price[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->order_qty[i] == written->order_qty[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->min_qty[i] == written->min_qty[i]); }
+  for (size_t i = 0; i < 10; i++) { assert(read->user_data[i] == written->user_data[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->leg_open_close[i] == written->leg_open_close[i]); }
+  for (size_t i = 0; i < 8; i++) { assert(read->auction_id[i] == written->auction_id[i]); }
+}
+
+/* Covered: written and read back, then read and written back */
+static void check_covered(void) {
+  Covered sent;
+  Covered got;
+  uint8_t wire[100];
+  uint8_t again[100];
+
+  any_covered(&sent);
+  assert(encode_covered(&sent, wire, 0) == 100);
+  assert(decode_covered(&got, wire, 0) == 100);
+  equal_covered(&got, &sent);
+
+  for (size_t i = 0; i < 100; i++) { wire[i] = arbitrary(); }
+  assert(decode_covered(&got, wire, 0) == 100);
+  assert(encode_covered(&got, again, 0) == 100);
+  for (size_t i = 0; i < 100; i++) { assert(again[i] == wire[i]); }
+}
+
 /* ---- What esbmc checks ------------------------------------------------------- */
 
 /* every record of the protocol, each on its own buffers */
@@ -343,6 +571,8 @@ static void checks(void) {
   check_seq_msg_id();
   check_seq_msg_header();
   check_sub_msg_header();
+  check_exposed();
+  check_covered();
 }
 
 int main(void) {

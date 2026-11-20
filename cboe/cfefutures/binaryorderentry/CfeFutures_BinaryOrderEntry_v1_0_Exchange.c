@@ -247,7 +247,7 @@ static void check_prevent_match(void) {
   for (size_t i = 0; i < 3; i++) { assert(again[i] == wire[i]); }
 }
 
-/* ---- Order Acknowledgement Message: 161 bytes -------------------------------- */
+/* ---- Order Acknowledgement: 161 bytes ---------------------------------------- */
 
 /* Order Acknowledgement messages are sent in response to a new order message */
 typedef struct {
@@ -281,10 +281,10 @@ typedef struct {
   uint8_t frequent_trader_id[6];     /* bytes 146 to 151 */
   uint8_t cust_order_handling_inst;  /* byte 152 */
   uint8_t request_received_time[8];  /* bytes 153 to 160 */
-} OrderAcknowledgementMessage;
+} OrderAcknowledgement;
 
-/* any Order Acknowledgement Message at all: every byte one the checker chooses */
-static void any_order_acknowledgement_message(OrderAcknowledgementMessage *record) {
+/* any Order Acknowledgement at all: every byte one the checker chooses */
+static void any_order_acknowledgement(OrderAcknowledgement *record) {
   for (size_t i = 0; i < 8; i++) { record->transaction_time[i] = arbitrary(); }
   for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->order_id[i] = arbitrary(); }
@@ -317,8 +317,8 @@ static void any_order_acknowledgement_message(OrderAcknowledgementMessage *recor
   for (size_t i = 0; i < 8; i++) { record->request_received_time[i] = arbitrary(); }
 }
 
-/* Order Acknowledgement Message to the wire: 161 bytes from at, returning where the next byte goes */
-static size_t encode_order_acknowledgement_message(const OrderAcknowledgementMessage *record, uint8_t *wire, size_t at) {
+/* Order Acknowledgement to the wire: 161 bytes from at, returning where the next byte goes */
+static size_t encode_order_acknowledgement(const OrderAcknowledgement *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->transaction_time[i]; }
   for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->order_id[i]; }
@@ -353,8 +353,8 @@ static size_t encode_order_acknowledgement_message(const OrderAcknowledgementMes
   return at;
 }
 
-/* Order Acknowledgement Message off the wire: 161 bytes from at, returning where the next byte lies */
-static size_t decode_order_acknowledgement_message(OrderAcknowledgementMessage *record, const uint8_t *wire, size_t at) {
+/* Order Acknowledgement off the wire: 161 bytes from at, returning where the next byte lies */
+static size_t decode_order_acknowledgement(OrderAcknowledgement *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 8; i++) { record->transaction_time[i] = wire[at++]; }
   for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->order_id[i] = wire[at++]; }
@@ -389,8 +389,8 @@ static size_t decode_order_acknowledgement_message(OrderAcknowledgementMessage *
   return at;
 }
 
-/* what was read of Order Acknowledgement Message is what was written, byte for byte */
-static void equal_order_acknowledgement_message(const OrderAcknowledgementMessage *read, const OrderAcknowledgementMessage *written) {
+/* what was read of Order Acknowledgement is what was written, byte for byte */
+static void equal_order_acknowledgement(const OrderAcknowledgement *read, const OrderAcknowledgement *written) {
   for (size_t i = 0; i < 8; i++) { assert(read->transaction_time[i] == written->transaction_time[i]); }
   for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id[i] == written->cl_ord_id[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->order_id[i] == written->order_id[i]); }
@@ -423,25 +423,25 @@ static void equal_order_acknowledgement_message(const OrderAcknowledgementMessag
   for (size_t i = 0; i < 8; i++) { assert(read->request_received_time[i] == written->request_received_time[i]); }
 }
 
-/* Order Acknowledgement Message: written and read back, then read and written back */
-static void check_order_acknowledgement_message(void) {
-  OrderAcknowledgementMessage sent;
-  OrderAcknowledgementMessage got;
+/* Order Acknowledgement: written and read back, then read and written back */
+static void check_order_acknowledgement(void) {
+  OrderAcknowledgement sent;
+  OrderAcknowledgement got;
   uint8_t wire[161];
   uint8_t again[161];
 
-  any_order_acknowledgement_message(&sent);
-  assert(encode_order_acknowledgement_message(&sent, wire, 0) == 161);
-  assert(decode_order_acknowledgement_message(&got, wire, 0) == 161);
-  equal_order_acknowledgement_message(&got, &sent);
+  any_order_acknowledgement(&sent);
+  assert(encode_order_acknowledgement(&sent, wire, 0) == 161);
+  assert(decode_order_acknowledgement(&got, wire, 0) == 161);
+  equal_order_acknowledgement(&got, &sent);
 
   for (size_t i = 0; i < 161; i++) { wire[i] = arbitrary(); }
-  assert(decode_order_acknowledgement_message(&got, wire, 0) == 161);
-  assert(encode_order_acknowledgement_message(&got, again, 0) == 161);
+  assert(decode_order_acknowledgement(&got, wire, 0) == 161);
+  assert(encode_order_acknowledgement(&got, again, 0) == 161);
   for (size_t i = 0; i < 161; i++) { assert(again[i] == wire[i]); }
 }
 
-/* ---- Order Rejected Message: 93 bytes ---------------------------------------- */
+/* ---- Order Rejected: 93 bytes ------------------------------------------------ */
 
 /* Order Rejected messages are sent in response to a New Order which must be rejected */
 typedef struct {
@@ -450,10 +450,10 @@ typedef struct {
   uint8_t clearing_firm[4];     /* bytes 28 to 31 */
   uint8_t order_reject_reason;  /* byte 32 */
   uint8_t text[60];             /* bytes 33 to 92 */
-} OrderRejectedMessage;
+} OrderRejected;
 
-/* any Order Rejected Message at all: every byte one the checker chooses */
-static void any_order_rejected_message(OrderRejectedMessage *record) {
+/* any Order Rejected at all: every byte one the checker chooses */
+static void any_order_rejected(OrderRejected *record) {
   for (size_t i = 0; i < 8; i++) { record->transaction_time[i] = arbitrary(); }
   for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->clearing_firm[i] = arbitrary(); }
@@ -461,8 +461,8 @@ static void any_order_rejected_message(OrderRejectedMessage *record) {
   for (size_t i = 0; i < 60; i++) { record->text[i] = arbitrary(); }
 }
 
-/* Order Rejected Message to the wire: 93 bytes from at, returning where the next byte goes */
-static size_t encode_order_rejected_message(const OrderRejectedMessage *record, uint8_t *wire, size_t at) {
+/* Order Rejected to the wire: 93 bytes from at, returning where the next byte goes */
+static size_t encode_order_rejected(const OrderRejected *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->transaction_time[i]; }
   for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->clearing_firm[i]; }
@@ -472,8 +472,8 @@ static size_t encode_order_rejected_message(const OrderRejectedMessage *record, 
   return at;
 }
 
-/* Order Rejected Message off the wire: 93 bytes from at, returning where the next byte lies */
-static size_t decode_order_rejected_message(OrderRejectedMessage *record, const uint8_t *wire, size_t at) {
+/* Order Rejected off the wire: 93 bytes from at, returning where the next byte lies */
+static size_t decode_order_rejected(OrderRejected *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 8; i++) { record->transaction_time[i] = wire[at++]; }
   for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->clearing_firm[i] = wire[at++]; }
@@ -483,8 +483,8 @@ static size_t decode_order_rejected_message(OrderRejectedMessage *record, const 
   return at;
 }
 
-/* what was read of Order Rejected Message is what was written, byte for byte */
-static void equal_order_rejected_message(const OrderRejectedMessage *read, const OrderRejectedMessage *written) {
+/* what was read of Order Rejected is what was written, byte for byte */
+static void equal_order_rejected(const OrderRejected *read, const OrderRejected *written) {
   for (size_t i = 0; i < 8; i++) { assert(read->transaction_time[i] == written->transaction_time[i]); }
   for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id[i] == written->cl_ord_id[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->clearing_firm[i] == written->clearing_firm[i]); }
@@ -492,25 +492,25 @@ static void equal_order_rejected_message(const OrderRejectedMessage *read, const
   for (size_t i = 0; i < 60; i++) { assert(read->text[i] == written->text[i]); }
 }
 
-/* Order Rejected Message: written and read back, then read and written back */
-static void check_order_rejected_message(void) {
-  OrderRejectedMessage sent;
-  OrderRejectedMessage got;
+/* Order Rejected: written and read back, then read and written back */
+static void check_order_rejected(void) {
+  OrderRejected sent;
+  OrderRejected got;
   uint8_t wire[93];
   uint8_t again[93];
 
-  any_order_rejected_message(&sent);
-  assert(encode_order_rejected_message(&sent, wire, 0) == 93);
-  assert(decode_order_rejected_message(&got, wire, 0) == 93);
-  equal_order_rejected_message(&got, &sent);
+  any_order_rejected(&sent);
+  assert(encode_order_rejected(&sent, wire, 0) == 93);
+  assert(decode_order_rejected(&got, wire, 0) == 93);
+  equal_order_rejected(&got, &sent);
 
   for (size_t i = 0; i < 93; i++) { wire[i] = arbitrary(); }
-  assert(decode_order_rejected_message(&got, wire, 0) == 93);
-  assert(encode_order_rejected_message(&got, again, 0) == 93);
+  assert(decode_order_rejected(&got, wire, 0) == 93);
+  assert(encode_order_rejected(&got, again, 0) == 93);
   for (size_t i = 0; i < 93; i++) { assert(again[i] == wire[i]); }
 }
 
-/* ---- Order Modified Message: 101 bytes --------------------------------------- */
+/* ---- Order Modified: 101 bytes ----------------------------------------------- */
 
 /* Order Modified messages are sent in response to a Modify Order to indicate that the orderhas been successfully modified */
 typedef struct {
@@ -528,10 +528,10 @@ typedef struct {
   uint8_t frequent_trader_id[6];     /* bytes 86 to 91 */
   uint8_t cust_order_handling_inst;  /* byte 92 */
   uint8_t request_received_time[8];  /* bytes 93 to 100 */
-} OrderModifiedMessage;
+} OrderModified;
 
-/* any Order Modified Message at all: every byte one the checker chooses */
-static void any_order_modified_message(OrderModifiedMessage *record) {
+/* any Order Modified at all: every byte one the checker chooses */
+static void any_order_modified(OrderModified *record) {
   for (size_t i = 0; i < 8; i++) { record->transaction_time[i] = arbitrary(); }
   for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = arbitrary(); }
   for (size_t i = 0; i < 20; i++) { record->orig_cl_ord_id[i] = arbitrary(); }
@@ -548,8 +548,8 @@ static void any_order_modified_message(OrderModifiedMessage *record) {
   for (size_t i = 0; i < 8; i++) { record->request_received_time[i] = arbitrary(); }
 }
 
-/* Order Modified Message to the wire: 101 bytes from at, returning where the next byte goes */
-static size_t encode_order_modified_message(const OrderModifiedMessage *record, uint8_t *wire, size_t at) {
+/* Order Modified to the wire: 101 bytes from at, returning where the next byte goes */
+static size_t encode_order_modified(const OrderModified *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->transaction_time[i]; }
   for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id[i]; }
   for (size_t i = 0; i < 20; i++) { wire[at++] = record->orig_cl_ord_id[i]; }
@@ -568,8 +568,8 @@ static size_t encode_order_modified_message(const OrderModifiedMessage *record, 
   return at;
 }
 
-/* Order Modified Message off the wire: 101 bytes from at, returning where the next byte lies */
-static size_t decode_order_modified_message(OrderModifiedMessage *record, const uint8_t *wire, size_t at) {
+/* Order Modified off the wire: 101 bytes from at, returning where the next byte lies */
+static size_t decode_order_modified(OrderModified *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 8; i++) { record->transaction_time[i] = wire[at++]; }
   for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = wire[at++]; }
   for (size_t i = 0; i < 20; i++) { record->orig_cl_ord_id[i] = wire[at++]; }
@@ -588,8 +588,8 @@ static size_t decode_order_modified_message(OrderModifiedMessage *record, const 
   return at;
 }
 
-/* what was read of Order Modified Message is what was written, byte for byte */
-static void equal_order_modified_message(const OrderModifiedMessage *read, const OrderModifiedMessage *written) {
+/* what was read of Order Modified is what was written, byte for byte */
+static void equal_order_modified(const OrderModified *read, const OrderModified *written) {
   for (size_t i = 0; i < 8; i++) { assert(read->transaction_time[i] == written->transaction_time[i]); }
   for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id[i] == written->cl_ord_id[i]); }
   for (size_t i = 0; i < 20; i++) { assert(read->orig_cl_ord_id[i] == written->orig_cl_ord_id[i]); }
@@ -606,25 +606,25 @@ static void equal_order_modified_message(const OrderModifiedMessage *read, const
   for (size_t i = 0; i < 8; i++) { assert(read->request_received_time[i] == written->request_received_time[i]); }
 }
 
-/* Order Modified Message: written and read back, then read and written back */
-static void check_order_modified_message(void) {
-  OrderModifiedMessage sent;
-  OrderModifiedMessage got;
+/* Order Modified: written and read back, then read and written back */
+static void check_order_modified(void) {
+  OrderModified sent;
+  OrderModified got;
   uint8_t wire[101];
   uint8_t again[101];
 
-  any_order_modified_message(&sent);
-  assert(encode_order_modified_message(&sent, wire, 0) == 101);
-  assert(decode_order_modified_message(&got, wire, 0) == 101);
-  equal_order_modified_message(&got, &sent);
+  any_order_modified(&sent);
+  assert(encode_order_modified(&sent, wire, 0) == 101);
+  assert(decode_order_modified(&got, wire, 0) == 101);
+  equal_order_modified(&got, &sent);
 
   for (size_t i = 0; i < 101; i++) { wire[i] = arbitrary(); }
-  assert(decode_order_modified_message(&got, wire, 0) == 101);
-  assert(encode_order_modified_message(&got, again, 0) == 101);
+  assert(decode_order_modified(&got, wire, 0) == 101);
+  assert(encode_order_modified(&got, again, 0) == 101);
   for (size_t i = 0; i < 101; i++) { assert(again[i] == wire[i]); }
 }
 
-/* ---- Modify Rejected Message: 113 bytes -------------------------------------- */
+/* ---- Modify Rejected: 113 bytes ---------------------------------------------- */
 
 /* Modify Rejected messages are sent in response to a Modify Order for an order which cannot be modified */
 typedef struct {
@@ -634,10 +634,10 @@ typedef struct {
   uint8_t clearing_firm[4];      /* bytes 48 to 51 */
   uint8_t modify_reject_reason;  /* byte 52 */
   uint8_t text[60];              /* bytes 53 to 112 */
-} ModifyRejectedMessage;
+} ModifyRejected;
 
-/* any Modify Rejected Message at all: every byte one the checker chooses */
-static void any_modify_rejected_message(ModifyRejectedMessage *record) {
+/* any Modify Rejected at all: every byte one the checker chooses */
+static void any_modify_rejected(ModifyRejected *record) {
   for (size_t i = 0; i < 8; i++) { record->transaction_time[i] = arbitrary(); }
   for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = arbitrary(); }
   for (size_t i = 0; i < 20; i++) { record->orig_cl_ord_id[i] = arbitrary(); }
@@ -646,8 +646,8 @@ static void any_modify_rejected_message(ModifyRejectedMessage *record) {
   for (size_t i = 0; i < 60; i++) { record->text[i] = arbitrary(); }
 }
 
-/* Modify Rejected Message to the wire: 113 bytes from at, returning where the next byte goes */
-static size_t encode_modify_rejected_message(const ModifyRejectedMessage *record, uint8_t *wire, size_t at) {
+/* Modify Rejected to the wire: 113 bytes from at, returning where the next byte goes */
+static size_t encode_modify_rejected(const ModifyRejected *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->transaction_time[i]; }
   for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id[i]; }
   for (size_t i = 0; i < 20; i++) { wire[at++] = record->orig_cl_ord_id[i]; }
@@ -658,8 +658,8 @@ static size_t encode_modify_rejected_message(const ModifyRejectedMessage *record
   return at;
 }
 
-/* Modify Rejected Message off the wire: 113 bytes from at, returning where the next byte lies */
-static size_t decode_modify_rejected_message(ModifyRejectedMessage *record, const uint8_t *wire, size_t at) {
+/* Modify Rejected off the wire: 113 bytes from at, returning where the next byte lies */
+static size_t decode_modify_rejected(ModifyRejected *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 8; i++) { record->transaction_time[i] = wire[at++]; }
   for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = wire[at++]; }
   for (size_t i = 0; i < 20; i++) { record->orig_cl_ord_id[i] = wire[at++]; }
@@ -670,8 +670,8 @@ static size_t decode_modify_rejected_message(ModifyRejectedMessage *record, cons
   return at;
 }
 
-/* what was read of Modify Rejected Message is what was written, byte for byte */
-static void equal_modify_rejected_message(const ModifyRejectedMessage *read, const ModifyRejectedMessage *written) {
+/* what was read of Modify Rejected is what was written, byte for byte */
+static void equal_modify_rejected(const ModifyRejected *read, const ModifyRejected *written) {
   for (size_t i = 0; i < 8; i++) { assert(read->transaction_time[i] == written->transaction_time[i]); }
   for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id[i] == written->cl_ord_id[i]); }
   for (size_t i = 0; i < 20; i++) { assert(read->orig_cl_ord_id[i] == written->orig_cl_ord_id[i]); }
@@ -680,25 +680,25 @@ static void equal_modify_rejected_message(const ModifyRejectedMessage *read, con
   for (size_t i = 0; i < 60; i++) { assert(read->text[i] == written->text[i]); }
 }
 
-/* Modify Rejected Message: written and read back, then read and written back */
-static void check_modify_rejected_message(void) {
-  ModifyRejectedMessage sent;
-  ModifyRejectedMessage got;
+/* Modify Rejected: written and read back, then read and written back */
+static void check_modify_rejected(void) {
+  ModifyRejected sent;
+  ModifyRejected got;
   uint8_t wire[113];
   uint8_t again[113];
 
-  any_modify_rejected_message(&sent);
-  assert(encode_modify_rejected_message(&sent, wire, 0) == 113);
-  assert(decode_modify_rejected_message(&got, wire, 0) == 113);
-  equal_modify_rejected_message(&got, &sent);
+  any_modify_rejected(&sent);
+  assert(encode_modify_rejected(&sent, wire, 0) == 113);
+  assert(decode_modify_rejected(&got, wire, 0) == 113);
+  equal_modify_rejected(&got, &sent);
 
   for (size_t i = 0; i < 113; i++) { wire[i] = arbitrary(); }
-  assert(decode_modify_rejected_message(&got, wire, 0) == 113);
-  assert(encode_modify_rejected_message(&got, again, 0) == 113);
+  assert(decode_modify_rejected(&got, wire, 0) == 113);
+  assert(encode_modify_rejected(&got, again, 0) == 113);
   for (size_t i = 0; i < 113; i++) { assert(again[i] == wire[i]); }
 }
 
-/* ---- Order Execution Message: 91 bytes --------------------------------------- */
+/* ---- Order Execution: 91 bytes ----------------------------------------------- */
 
 /* An Order Execution is sent for each fill on an order */
 typedef struct {
@@ -720,10 +720,10 @@ typedef struct {
   uint8_t pending_status;            /* byte 81 */
   uint8_t multileg_reporting_type;   /* byte 82 */
   uint8_t secondary_exec_id[8];      /* bytes 83 to 90 */
-} OrderExecutionMessage;
+} OrderExecution;
 
-/* any Order Execution Message at all: every byte one the checker chooses */
-static void any_order_execution_message(OrderExecutionMessage *record) {
+/* any Order Execution at all: every byte one the checker chooses */
+static void any_order_execution(OrderExecution *record) {
   for (size_t i = 0; i < 8; i++) { record->transaction_time[i] = arbitrary(); }
   for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->exec_id[i] = arbitrary(); }
@@ -744,8 +744,8 @@ static void any_order_execution_message(OrderExecutionMessage *record) {
   for (size_t i = 0; i < 8; i++) { record->secondary_exec_id[i] = arbitrary(); }
 }
 
-/* Order Execution Message to the wire: 91 bytes from at, returning where the next byte goes */
-static size_t encode_order_execution_message(const OrderExecutionMessage *record, uint8_t *wire, size_t at) {
+/* Order Execution to the wire: 91 bytes from at, returning where the next byte goes */
+static size_t encode_order_execution(const OrderExecution *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->transaction_time[i]; }
   for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->exec_id[i]; }
@@ -768,8 +768,8 @@ static size_t encode_order_execution_message(const OrderExecutionMessage *record
   return at;
 }
 
-/* Order Execution Message off the wire: 91 bytes from at, returning where the next byte lies */
-static size_t decode_order_execution_message(OrderExecutionMessage *record, const uint8_t *wire, size_t at) {
+/* Order Execution off the wire: 91 bytes from at, returning where the next byte lies */
+static size_t decode_order_execution(OrderExecution *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 8; i++) { record->transaction_time[i] = wire[at++]; }
   for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->exec_id[i] = wire[at++]; }
@@ -792,8 +792,8 @@ static size_t decode_order_execution_message(OrderExecutionMessage *record, cons
   return at;
 }
 
-/* what was read of Order Execution Message is what was written, byte for byte */
-static void equal_order_execution_message(const OrderExecutionMessage *read, const OrderExecutionMessage *written) {
+/* what was read of Order Execution is what was written, byte for byte */
+static void equal_order_execution(const OrderExecution *read, const OrderExecution *written) {
   for (size_t i = 0; i < 8; i++) { assert(read->transaction_time[i] == written->transaction_time[i]); }
   for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id[i] == written->cl_ord_id[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->exec_id[i] == written->exec_id[i]); }
@@ -814,25 +814,25 @@ static void equal_order_execution_message(const OrderExecutionMessage *read, con
   for (size_t i = 0; i < 8; i++) { assert(read->secondary_exec_id[i] == written->secondary_exec_id[i]); }
 }
 
-/* Order Execution Message: written and read back, then read and written back */
-static void check_order_execution_message(void) {
-  OrderExecutionMessage sent;
-  OrderExecutionMessage got;
+/* Order Execution: written and read back, then read and written back */
+static void check_order_execution(void) {
+  OrderExecution sent;
+  OrderExecution got;
   uint8_t wire[91];
   uint8_t again[91];
 
-  any_order_execution_message(&sent);
-  assert(encode_order_execution_message(&sent, wire, 0) == 91);
-  assert(decode_order_execution_message(&got, wire, 0) == 91);
-  equal_order_execution_message(&got, &sent);
+  any_order_execution(&sent);
+  assert(encode_order_execution(&sent, wire, 0) == 91);
+  assert(decode_order_execution(&got, wire, 0) == 91);
+  equal_order_execution(&got, &sent);
 
   for (size_t i = 0; i < 91; i++) { wire[i] = arbitrary(); }
-  assert(decode_order_execution_message(&got, wire, 0) == 91);
-  assert(encode_order_execution_message(&got, again, 0) == 91);
+  assert(decode_order_execution(&got, wire, 0) == 91);
+  assert(encode_order_execution(&got, again, 0) == 91);
   for (size_t i = 0; i < 91; i++) { assert(again[i] == wire[i]); }
 }
 
-/* ---- Order Cancelled Message: 41 bytes --------------------------------------- */
+/* ---- Order Cancelled: 41 bytes ----------------------------------------------- */
 
 /* Order Cancelled message */
 typedef struct {
@@ -841,10 +841,10 @@ typedef struct {
   uint8_t clearing_firm[4];          /* bytes 28 to 31 */
   uint8_t cancel_reason;             /* byte 32 */
   uint8_t request_received_time[8];  /* bytes 33 to 40 */
-} OrderCancelledMessage;
+} OrderCancelled;
 
-/* any Order Cancelled Message at all: every byte one the checker chooses */
-static void any_order_cancelled_message(OrderCancelledMessage *record) {
+/* any Order Cancelled at all: every byte one the checker chooses */
+static void any_order_cancelled(OrderCancelled *record) {
   for (size_t i = 0; i < 8; i++) { record->transaction_time[i] = arbitrary(); }
   for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->clearing_firm[i] = arbitrary(); }
@@ -852,8 +852,8 @@ static void any_order_cancelled_message(OrderCancelledMessage *record) {
   for (size_t i = 0; i < 8; i++) { record->request_received_time[i] = arbitrary(); }
 }
 
-/* Order Cancelled Message to the wire: 41 bytes from at, returning where the next byte goes */
-static size_t encode_order_cancelled_message(const OrderCancelledMessage *record, uint8_t *wire, size_t at) {
+/* Order Cancelled to the wire: 41 bytes from at, returning where the next byte goes */
+static size_t encode_order_cancelled(const OrderCancelled *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->transaction_time[i]; }
   for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->clearing_firm[i]; }
@@ -863,8 +863,8 @@ static size_t encode_order_cancelled_message(const OrderCancelledMessage *record
   return at;
 }
 
-/* Order Cancelled Message off the wire: 41 bytes from at, returning where the next byte lies */
-static size_t decode_order_cancelled_message(OrderCancelledMessage *record, const uint8_t *wire, size_t at) {
+/* Order Cancelled off the wire: 41 bytes from at, returning where the next byte lies */
+static size_t decode_order_cancelled(OrderCancelled *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 8; i++) { record->transaction_time[i] = wire[at++]; }
   for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->clearing_firm[i] = wire[at++]; }
@@ -874,8 +874,8 @@ static size_t decode_order_cancelled_message(OrderCancelledMessage *record, cons
   return at;
 }
 
-/* what was read of Order Cancelled Message is what was written, byte for byte */
-static void equal_order_cancelled_message(const OrderCancelledMessage *read, const OrderCancelledMessage *written) {
+/* what was read of Order Cancelled is what was written, byte for byte */
+static void equal_order_cancelled(const OrderCancelled *read, const OrderCancelled *written) {
   for (size_t i = 0; i < 8; i++) { assert(read->transaction_time[i] == written->transaction_time[i]); }
   for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id[i] == written->cl_ord_id[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->clearing_firm[i] == written->clearing_firm[i]); }
@@ -883,25 +883,25 @@ static void equal_order_cancelled_message(const OrderCancelledMessage *read, con
   for (size_t i = 0; i < 8; i++) { assert(read->request_received_time[i] == written->request_received_time[i]); }
 }
 
-/* Order Cancelled Message: written and read back, then read and written back */
-static void check_order_cancelled_message(void) {
-  OrderCancelledMessage sent;
-  OrderCancelledMessage got;
+/* Order Cancelled: written and read back, then read and written back */
+static void check_order_cancelled(void) {
+  OrderCancelled sent;
+  OrderCancelled got;
   uint8_t wire[41];
   uint8_t again[41];
 
-  any_order_cancelled_message(&sent);
-  assert(encode_order_cancelled_message(&sent, wire, 0) == 41);
-  assert(decode_order_cancelled_message(&got, wire, 0) == 41);
-  equal_order_cancelled_message(&got, &sent);
+  any_order_cancelled(&sent);
+  assert(encode_order_cancelled(&sent, wire, 0) == 41);
+  assert(decode_order_cancelled(&got, wire, 0) == 41);
+  equal_order_cancelled(&got, &sent);
 
   for (size_t i = 0; i < 41; i++) { wire[i] = arbitrary(); }
-  assert(decode_order_cancelled_message(&got, wire, 0) == 41);
-  assert(encode_order_cancelled_message(&got, again, 0) == 41);
+  assert(decode_order_cancelled(&got, wire, 0) == 41);
+  assert(encode_order_cancelled(&got, again, 0) == 41);
   for (size_t i = 0; i < 41; i++) { assert(again[i] == wire[i]); }
 }
 
-/* ---- Cancel Rejected Message: 93 bytes --------------------------------------- */
+/* ---- Cancel Rejected: 93 bytes ----------------------------------------------- */
 
 /* A Cancel Rejected message is sent in response to a Cancel Order message to indicate that the cancellation cannot occur */
 typedef struct {
@@ -910,10 +910,10 @@ typedef struct {
   uint8_t clearing_firm[4];      /* bytes 28 to 31 */
   uint8_t cancel_reject_reason;  /* byte 32 */
   uint8_t text[60];              /* bytes 33 to 92 */
-} CancelRejectedMessage;
+} CancelRejected;
 
-/* any Cancel Rejected Message at all: every byte one the checker chooses */
-static void any_cancel_rejected_message(CancelRejectedMessage *record) {
+/* any Cancel Rejected at all: every byte one the checker chooses */
+static void any_cancel_rejected(CancelRejected *record) {
   for (size_t i = 0; i < 8; i++) { record->transaction_time[i] = arbitrary(); }
   for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->clearing_firm[i] = arbitrary(); }
@@ -921,8 +921,8 @@ static void any_cancel_rejected_message(CancelRejectedMessage *record) {
   for (size_t i = 0; i < 60; i++) { record->text[i] = arbitrary(); }
 }
 
-/* Cancel Rejected Message to the wire: 93 bytes from at, returning where the next byte goes */
-static size_t encode_cancel_rejected_message(const CancelRejectedMessage *record, uint8_t *wire, size_t at) {
+/* Cancel Rejected to the wire: 93 bytes from at, returning where the next byte goes */
+static size_t encode_cancel_rejected(const CancelRejected *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->transaction_time[i]; }
   for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->clearing_firm[i]; }
@@ -932,8 +932,8 @@ static size_t encode_cancel_rejected_message(const CancelRejectedMessage *record
   return at;
 }
 
-/* Cancel Rejected Message off the wire: 93 bytes from at, returning where the next byte lies */
-static size_t decode_cancel_rejected_message(CancelRejectedMessage *record, const uint8_t *wire, size_t at) {
+/* Cancel Rejected off the wire: 93 bytes from at, returning where the next byte lies */
+static size_t decode_cancel_rejected(CancelRejected *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 8; i++) { record->transaction_time[i] = wire[at++]; }
   for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->clearing_firm[i] = wire[at++]; }
@@ -943,8 +943,8 @@ static size_t decode_cancel_rejected_message(CancelRejectedMessage *record, cons
   return at;
 }
 
-/* what was read of Cancel Rejected Message is what was written, byte for byte */
-static void equal_cancel_rejected_message(const CancelRejectedMessage *read, const CancelRejectedMessage *written) {
+/* what was read of Cancel Rejected is what was written, byte for byte */
+static void equal_cancel_rejected(const CancelRejected *read, const CancelRejected *written) {
   for (size_t i = 0; i < 8; i++) { assert(read->transaction_time[i] == written->transaction_time[i]); }
   for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id[i] == written->cl_ord_id[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->clearing_firm[i] == written->clearing_firm[i]); }
@@ -952,25 +952,25 @@ static void equal_cancel_rejected_message(const CancelRejectedMessage *read, con
   for (size_t i = 0; i < 60; i++) { assert(read->text[i] == written->text[i]); }
 }
 
-/* Cancel Rejected Message: written and read back, then read and written back */
-static void check_cancel_rejected_message(void) {
-  CancelRejectedMessage sent;
-  CancelRejectedMessage got;
+/* Cancel Rejected: written and read back, then read and written back */
+static void check_cancel_rejected(void) {
+  CancelRejected sent;
+  CancelRejected got;
   uint8_t wire[93];
   uint8_t again[93];
 
-  any_cancel_rejected_message(&sent);
-  assert(encode_cancel_rejected_message(&sent, wire, 0) == 93);
-  assert(decode_cancel_rejected_message(&got, wire, 0) == 93);
-  equal_cancel_rejected_message(&got, &sent);
+  any_cancel_rejected(&sent);
+  assert(encode_cancel_rejected(&sent, wire, 0) == 93);
+  assert(decode_cancel_rejected(&got, wire, 0) == 93);
+  equal_cancel_rejected(&got, &sent);
 
   for (size_t i = 0; i < 93; i++) { wire[i] = arbitrary(); }
-  assert(decode_cancel_rejected_message(&got, wire, 0) == 93);
-  assert(encode_cancel_rejected_message(&got, again, 0) == 93);
+  assert(decode_cancel_rejected(&got, wire, 0) == 93);
+  assert(encode_cancel_rejected(&got, again, 0) == 93);
   for (size_t i = 0; i < 93; i++) { assert(again[i] == wire[i]); }
 }
 
-/* ---- Mass Cancel Acknowledgement Message: 40 bytes --------------------------- */
+/* ---- Mass Cancel Acknowledgement: 40 bytes ----------------------------------- */
 
 /* A Mass Cancel Acknowledgment is an unsequenced message sent when a Cancel Order or Purge Orders message requesting a mass cancellation has completed cancelling all individual orders */
 typedef struct {
@@ -978,18 +978,18 @@ typedef struct {
   uint8_t mass_cancel_id[20];        /* bytes 8 to 27 */
   uint8_t cancelled_order_count[4];  /* bytes 28 to 31 */
   uint8_t request_received_time[8];  /* bytes 32 to 39 */
-} MassCancelAcknowledgementMessage;
+} MassCancelAcknowledgement;
 
-/* any Mass Cancel Acknowledgement Message at all: every byte one the checker chooses */
-static void any_mass_cancel_acknowledgement_message(MassCancelAcknowledgementMessage *record) {
+/* any Mass Cancel Acknowledgement at all: every byte one the checker chooses */
+static void any_mass_cancel_acknowledgement(MassCancelAcknowledgement *record) {
   for (size_t i = 0; i < 8; i++) { record->transaction_time[i] = arbitrary(); }
   for (size_t i = 0; i < 20; i++) { record->mass_cancel_id[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->cancelled_order_count[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->request_received_time[i] = arbitrary(); }
 }
 
-/* Mass Cancel Acknowledgement Message to the wire: 40 bytes from at, returning where the next byte goes */
-static size_t encode_mass_cancel_acknowledgement_message(const MassCancelAcknowledgementMessage *record, uint8_t *wire, size_t at) {
+/* Mass Cancel Acknowledgement to the wire: 40 bytes from at, returning where the next byte goes */
+static size_t encode_mass_cancel_acknowledgement(const MassCancelAcknowledgement *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->transaction_time[i]; }
   for (size_t i = 0; i < 20; i++) { wire[at++] = record->mass_cancel_id[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->cancelled_order_count[i]; }
@@ -998,8 +998,8 @@ static size_t encode_mass_cancel_acknowledgement_message(const MassCancelAcknowl
   return at;
 }
 
-/* Mass Cancel Acknowledgement Message off the wire: 40 bytes from at, returning where the next byte lies */
-static size_t decode_mass_cancel_acknowledgement_message(MassCancelAcknowledgementMessage *record, const uint8_t *wire, size_t at) {
+/* Mass Cancel Acknowledgement off the wire: 40 bytes from at, returning where the next byte lies */
+static size_t decode_mass_cancel_acknowledgement(MassCancelAcknowledgement *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 8; i++) { record->transaction_time[i] = wire[at++]; }
   for (size_t i = 0; i < 20; i++) { record->mass_cancel_id[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->cancelled_order_count[i] = wire[at++]; }
@@ -1008,33 +1008,33 @@ static size_t decode_mass_cancel_acknowledgement_message(MassCancelAcknowledgeme
   return at;
 }
 
-/* what was read of Mass Cancel Acknowledgement Message is what was written, byte for byte */
-static void equal_mass_cancel_acknowledgement_message(const MassCancelAcknowledgementMessage *read, const MassCancelAcknowledgementMessage *written) {
+/* what was read of Mass Cancel Acknowledgement is what was written, byte for byte */
+static void equal_mass_cancel_acknowledgement(const MassCancelAcknowledgement *read, const MassCancelAcknowledgement *written) {
   for (size_t i = 0; i < 8; i++) { assert(read->transaction_time[i] == written->transaction_time[i]); }
   for (size_t i = 0; i < 20; i++) { assert(read->mass_cancel_id[i] == written->mass_cancel_id[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->cancelled_order_count[i] == written->cancelled_order_count[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->request_received_time[i] == written->request_received_time[i]); }
 }
 
-/* Mass Cancel Acknowledgement Message: written and read back, then read and written back */
-static void check_mass_cancel_acknowledgement_message(void) {
-  MassCancelAcknowledgementMessage sent;
-  MassCancelAcknowledgementMessage got;
+/* Mass Cancel Acknowledgement: written and read back, then read and written back */
+static void check_mass_cancel_acknowledgement(void) {
+  MassCancelAcknowledgement sent;
+  MassCancelAcknowledgement got;
   uint8_t wire[40];
   uint8_t again[40];
 
-  any_mass_cancel_acknowledgement_message(&sent);
-  assert(encode_mass_cancel_acknowledgement_message(&sent, wire, 0) == 40);
-  assert(decode_mass_cancel_acknowledgement_message(&got, wire, 0) == 40);
-  equal_mass_cancel_acknowledgement_message(&got, &sent);
+  any_mass_cancel_acknowledgement(&sent);
+  assert(encode_mass_cancel_acknowledgement(&sent, wire, 0) == 40);
+  assert(decode_mass_cancel_acknowledgement(&got, wire, 0) == 40);
+  equal_mass_cancel_acknowledgement(&got, &sent);
 
   for (size_t i = 0; i < 40; i++) { wire[i] = arbitrary(); }
-  assert(decode_mass_cancel_acknowledgement_message(&got, wire, 0) == 40);
-  assert(encode_mass_cancel_acknowledgement_message(&got, again, 0) == 40);
+  assert(decode_mass_cancel_acknowledgement(&got, wire, 0) == 40);
+  assert(encode_mass_cancel_acknowledgement(&got, again, 0) == 40);
   for (size_t i = 0; i < 40; i++) { assert(again[i] == wire[i]); }
 }
 
-/* ---- Mass Cancel Rejected Message: 89 bytes ---------------------------------- */
+/* ---- Mass Cancel Rejected: 89 bytes ------------------------------------------ */
 
 /* A Mass Cancel Rejected message is sent in response to a Mass Cancel Order message to indicate that the mass cancellation cannot occur */
 typedef struct {
@@ -1042,18 +1042,18 @@ typedef struct {
   uint8_t mass_cancel_id[20];         /* bytes 8 to 27 */
   uint8_t mass_cancel_reject_reason;  /* byte 28 */
   uint8_t text[60];                   /* bytes 29 to 88 */
-} MassCancelRejectedMessage;
+} MassCancelRejected;
 
-/* any Mass Cancel Rejected Message at all: every byte one the checker chooses */
-static void any_mass_cancel_rejected_message(MassCancelRejectedMessage *record) {
+/* any Mass Cancel Rejected at all: every byte one the checker chooses */
+static void any_mass_cancel_rejected(MassCancelRejected *record) {
   for (size_t i = 0; i < 8; i++) { record->transaction_time[i] = arbitrary(); }
   for (size_t i = 0; i < 20; i++) { record->mass_cancel_id[i] = arbitrary(); }
   record->mass_cancel_reject_reason = arbitrary();
   for (size_t i = 0; i < 60; i++) { record->text[i] = arbitrary(); }
 }
 
-/* Mass Cancel Rejected Message to the wire: 89 bytes from at, returning where the next byte goes */
-static size_t encode_mass_cancel_rejected_message(const MassCancelRejectedMessage *record, uint8_t *wire, size_t at) {
+/* Mass Cancel Rejected to the wire: 89 bytes from at, returning where the next byte goes */
+static size_t encode_mass_cancel_rejected(const MassCancelRejected *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->transaction_time[i]; }
   for (size_t i = 0; i < 20; i++) { wire[at++] = record->mass_cancel_id[i]; }
   wire[at++] = record->mass_cancel_reject_reason;
@@ -1062,8 +1062,8 @@ static size_t encode_mass_cancel_rejected_message(const MassCancelRejectedMessag
   return at;
 }
 
-/* Mass Cancel Rejected Message off the wire: 89 bytes from at, returning where the next byte lies */
-static size_t decode_mass_cancel_rejected_message(MassCancelRejectedMessage *record, const uint8_t *wire, size_t at) {
+/* Mass Cancel Rejected off the wire: 89 bytes from at, returning where the next byte lies */
+static size_t decode_mass_cancel_rejected(MassCancelRejected *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 8; i++) { record->transaction_time[i] = wire[at++]; }
   for (size_t i = 0; i < 20; i++) { record->mass_cancel_id[i] = wire[at++]; }
   record->mass_cancel_reject_reason = wire[at++];
@@ -1072,33 +1072,33 @@ static size_t decode_mass_cancel_rejected_message(MassCancelRejectedMessage *rec
   return at;
 }
 
-/* what was read of Mass Cancel Rejected Message is what was written, byte for byte */
-static void equal_mass_cancel_rejected_message(const MassCancelRejectedMessage *read, const MassCancelRejectedMessage *written) {
+/* what was read of Mass Cancel Rejected is what was written, byte for byte */
+static void equal_mass_cancel_rejected(const MassCancelRejected *read, const MassCancelRejected *written) {
   for (size_t i = 0; i < 8; i++) { assert(read->transaction_time[i] == written->transaction_time[i]); }
   for (size_t i = 0; i < 20; i++) { assert(read->mass_cancel_id[i] == written->mass_cancel_id[i]); }
   assert(read->mass_cancel_reject_reason == written->mass_cancel_reject_reason);
   for (size_t i = 0; i < 60; i++) { assert(read->text[i] == written->text[i]); }
 }
 
-/* Mass Cancel Rejected Message: written and read back, then read and written back */
-static void check_mass_cancel_rejected_message(void) {
-  MassCancelRejectedMessage sent;
-  MassCancelRejectedMessage got;
+/* Mass Cancel Rejected: written and read back, then read and written back */
+static void check_mass_cancel_rejected(void) {
+  MassCancelRejected sent;
+  MassCancelRejected got;
   uint8_t wire[89];
   uint8_t again[89];
 
-  any_mass_cancel_rejected_message(&sent);
-  assert(encode_mass_cancel_rejected_message(&sent, wire, 0) == 89);
-  assert(decode_mass_cancel_rejected_message(&got, wire, 0) == 89);
-  equal_mass_cancel_rejected_message(&got, &sent);
+  any_mass_cancel_rejected(&sent);
+  assert(encode_mass_cancel_rejected(&sent, wire, 0) == 89);
+  assert(decode_mass_cancel_rejected(&got, wire, 0) == 89);
+  equal_mass_cancel_rejected(&got, &sent);
 
   for (size_t i = 0; i < 89; i++) { wire[i] = arbitrary(); }
-  assert(decode_mass_cancel_rejected_message(&got, wire, 0) == 89);
-  assert(encode_mass_cancel_rejected_message(&got, again, 0) == 89);
+  assert(decode_mass_cancel_rejected(&got, wire, 0) == 89);
+  assert(encode_mass_cancel_rejected(&got, again, 0) == 89);
   for (size_t i = 0; i < 89; i++) { assert(again[i] == wire[i]); }
 }
 
-/* ---- Purge Acknowledgement Message: 40 bytes --------------------------------- */
+/* ---- Purge Acknowledgement: 40 bytes ----------------------------------------- */
 
 /* A Purge Acknowledgment is an unsequenced message sent when a Purge Orders message requesting an order purge has completed cancelling all individual orders */
 typedef struct {
@@ -1106,18 +1106,18 @@ typedef struct {
   uint8_t mass_cancel_id[20];        /* bytes 8 to 27 */
   uint8_t cancelled_order_count[4];  /* bytes 28 to 31 */
   uint8_t request_received_time[8];  /* bytes 32 to 39 */
-} PurgeAcknowledgementMessage;
+} PurgeAcknowledgement;
 
-/* any Purge Acknowledgement Message at all: every byte one the checker chooses */
-static void any_purge_acknowledgement_message(PurgeAcknowledgementMessage *record) {
+/* any Purge Acknowledgement at all: every byte one the checker chooses */
+static void any_purge_acknowledgement(PurgeAcknowledgement *record) {
   for (size_t i = 0; i < 8; i++) { record->transaction_time[i] = arbitrary(); }
   for (size_t i = 0; i < 20; i++) { record->mass_cancel_id[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->cancelled_order_count[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->request_received_time[i] = arbitrary(); }
 }
 
-/* Purge Acknowledgement Message to the wire: 40 bytes from at, returning where the next byte goes */
-static size_t encode_purge_acknowledgement_message(const PurgeAcknowledgementMessage *record, uint8_t *wire, size_t at) {
+/* Purge Acknowledgement to the wire: 40 bytes from at, returning where the next byte goes */
+static size_t encode_purge_acknowledgement(const PurgeAcknowledgement *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->transaction_time[i]; }
   for (size_t i = 0; i < 20; i++) { wire[at++] = record->mass_cancel_id[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->cancelled_order_count[i]; }
@@ -1126,8 +1126,8 @@ static size_t encode_purge_acknowledgement_message(const PurgeAcknowledgementMes
   return at;
 }
 
-/* Purge Acknowledgement Message off the wire: 40 bytes from at, returning where the next byte lies */
-static size_t decode_purge_acknowledgement_message(PurgeAcknowledgementMessage *record, const uint8_t *wire, size_t at) {
+/* Purge Acknowledgement off the wire: 40 bytes from at, returning where the next byte lies */
+static size_t decode_purge_acknowledgement(PurgeAcknowledgement *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 8; i++) { record->transaction_time[i] = wire[at++]; }
   for (size_t i = 0; i < 20; i++) { record->mass_cancel_id[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->cancelled_order_count[i] = wire[at++]; }
@@ -1136,33 +1136,33 @@ static size_t decode_purge_acknowledgement_message(PurgeAcknowledgementMessage *
   return at;
 }
 
-/* what was read of Purge Acknowledgement Message is what was written, byte for byte */
-static void equal_purge_acknowledgement_message(const PurgeAcknowledgementMessage *read, const PurgeAcknowledgementMessage *written) {
+/* what was read of Purge Acknowledgement is what was written, byte for byte */
+static void equal_purge_acknowledgement(const PurgeAcknowledgement *read, const PurgeAcknowledgement *written) {
   for (size_t i = 0; i < 8; i++) { assert(read->transaction_time[i] == written->transaction_time[i]); }
   for (size_t i = 0; i < 20; i++) { assert(read->mass_cancel_id[i] == written->mass_cancel_id[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->cancelled_order_count[i] == written->cancelled_order_count[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->request_received_time[i] == written->request_received_time[i]); }
 }
 
-/* Purge Acknowledgement Message: written and read back, then read and written back */
-static void check_purge_acknowledgement_message(void) {
-  PurgeAcknowledgementMessage sent;
-  PurgeAcknowledgementMessage got;
+/* Purge Acknowledgement: written and read back, then read and written back */
+static void check_purge_acknowledgement(void) {
+  PurgeAcknowledgement sent;
+  PurgeAcknowledgement got;
   uint8_t wire[40];
   uint8_t again[40];
 
-  any_purge_acknowledgement_message(&sent);
-  assert(encode_purge_acknowledgement_message(&sent, wire, 0) == 40);
-  assert(decode_purge_acknowledgement_message(&got, wire, 0) == 40);
-  equal_purge_acknowledgement_message(&got, &sent);
+  any_purge_acknowledgement(&sent);
+  assert(encode_purge_acknowledgement(&sent, wire, 0) == 40);
+  assert(decode_purge_acknowledgement(&got, wire, 0) == 40);
+  equal_purge_acknowledgement(&got, &sent);
 
   for (size_t i = 0; i < 40; i++) { wire[i] = arbitrary(); }
-  assert(decode_purge_acknowledgement_message(&got, wire, 0) == 40);
-  assert(encode_purge_acknowledgement_message(&got, again, 0) == 40);
+  assert(decode_purge_acknowledgement(&got, wire, 0) == 40);
+  assert(encode_purge_acknowledgement(&got, again, 0) == 40);
   for (size_t i = 0; i < 40; i++) { assert(again[i] == wire[i]); }
 }
 
-/* ---- Purge Rejected Message: 89 bytes ---------------------------------------- */
+/* ---- Purge Rejected: 89 bytes ------------------------------------------------ */
 
 /* A Purge Rejected message is sent in response to a Purge Orders message to indicate that the mass cancellation cannot occur */
 typedef struct {
@@ -1170,18 +1170,18 @@ typedef struct {
   uint8_t mass_cancel_id[20];   /* bytes 8 to 27 */
   uint8_t purge_reject_reason;  /* byte 28 */
   uint8_t text[60];             /* bytes 29 to 88 */
-} PurgeRejectedMessage;
+} PurgeRejected;
 
-/* any Purge Rejected Message at all: every byte one the checker chooses */
-static void any_purge_rejected_message(PurgeRejectedMessage *record) {
+/* any Purge Rejected at all: every byte one the checker chooses */
+static void any_purge_rejected(PurgeRejected *record) {
   for (size_t i = 0; i < 8; i++) { record->transaction_time[i] = arbitrary(); }
   for (size_t i = 0; i < 20; i++) { record->mass_cancel_id[i] = arbitrary(); }
   record->purge_reject_reason = arbitrary();
   for (size_t i = 0; i < 60; i++) { record->text[i] = arbitrary(); }
 }
 
-/* Purge Rejected Message to the wire: 89 bytes from at, returning where the next byte goes */
-static size_t encode_purge_rejected_message(const PurgeRejectedMessage *record, uint8_t *wire, size_t at) {
+/* Purge Rejected to the wire: 89 bytes from at, returning where the next byte goes */
+static size_t encode_purge_rejected(const PurgeRejected *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->transaction_time[i]; }
   for (size_t i = 0; i < 20; i++) { wire[at++] = record->mass_cancel_id[i]; }
   wire[at++] = record->purge_reject_reason;
@@ -1190,8 +1190,8 @@ static size_t encode_purge_rejected_message(const PurgeRejectedMessage *record, 
   return at;
 }
 
-/* Purge Rejected Message off the wire: 89 bytes from at, returning where the next byte lies */
-static size_t decode_purge_rejected_message(PurgeRejectedMessage *record, const uint8_t *wire, size_t at) {
+/* Purge Rejected off the wire: 89 bytes from at, returning where the next byte lies */
+static size_t decode_purge_rejected(PurgeRejected *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 8; i++) { record->transaction_time[i] = wire[at++]; }
   for (size_t i = 0; i < 20; i++) { record->mass_cancel_id[i] = wire[at++]; }
   record->purge_reject_reason = wire[at++];
@@ -1200,33 +1200,33 @@ static size_t decode_purge_rejected_message(PurgeRejectedMessage *record, const 
   return at;
 }
 
-/* what was read of Purge Rejected Message is what was written, byte for byte */
-static void equal_purge_rejected_message(const PurgeRejectedMessage *read, const PurgeRejectedMessage *written) {
+/* what was read of Purge Rejected is what was written, byte for byte */
+static void equal_purge_rejected(const PurgeRejected *read, const PurgeRejected *written) {
   for (size_t i = 0; i < 8; i++) { assert(read->transaction_time[i] == written->transaction_time[i]); }
   for (size_t i = 0; i < 20; i++) { assert(read->mass_cancel_id[i] == written->mass_cancel_id[i]); }
   assert(read->purge_reject_reason == written->purge_reject_reason);
   for (size_t i = 0; i < 60; i++) { assert(read->text[i] == written->text[i]); }
 }
 
-/* Purge Rejected Message: written and read back, then read and written back */
-static void check_purge_rejected_message(void) {
-  PurgeRejectedMessage sent;
-  PurgeRejectedMessage got;
+/* Purge Rejected: written and read back, then read and written back */
+static void check_purge_rejected(void) {
+  PurgeRejected sent;
+  PurgeRejected got;
   uint8_t wire[89];
   uint8_t again[89];
 
-  any_purge_rejected_message(&sent);
-  assert(encode_purge_rejected_message(&sent, wire, 0) == 89);
-  assert(decode_purge_rejected_message(&got, wire, 0) == 89);
-  equal_purge_rejected_message(&got, &sent);
+  any_purge_rejected(&sent);
+  assert(encode_purge_rejected(&sent, wire, 0) == 89);
+  assert(decode_purge_rejected(&got, wire, 0) == 89);
+  equal_purge_rejected(&got, &sent);
 
   for (size_t i = 0; i < 89; i++) { wire[i] = arbitrary(); }
-  assert(decode_purge_rejected_message(&got, wire, 0) == 89);
-  assert(encode_purge_rejected_message(&got, again, 0) == 89);
+  assert(decode_purge_rejected(&got, wire, 0) == 89);
+  assert(encode_purge_rejected(&got, again, 0) == 89);
   for (size_t i = 0; i < 89; i++) { assert(again[i] == wire[i]); }
 }
 
-/* ---- Trade Cancel Or Correct Message: 92 bytes ------------------------------- */
+/* ---- Trade Cancel Or Correct: 92 bytes --------------------------------------- */
 
 /* Used to provide notification that a trade has been cancelled or corrected */
 typedef struct {
@@ -1246,10 +1246,10 @@ typedef struct {
   uint8_t maturity_date[4];          /* bytes 83 to 86 */
   uint8_t open_close;                /* byte 87 */
   uint8_t cmta_number[4];            /* bytes 88 to 91 */
-} TradeCancelOrCorrectMessage;
+} TradeCancelOrCorrect;
 
-/* any Trade Cancel Or Correct Message at all: every byte one the checker chooses */
-static void any_trade_cancel_or_correct_message(TradeCancelOrCorrectMessage *record) {
+/* any Trade Cancel Or Correct at all: every byte one the checker chooses */
+static void any_trade_cancel_or_correct(TradeCancelOrCorrect *record) {
   for (size_t i = 0; i < 8; i++) { record->transaction_time[i] = arbitrary(); }
   for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->exec_ref_id[i] = arbitrary(); }
@@ -1268,8 +1268,8 @@ static void any_trade_cancel_or_correct_message(TradeCancelOrCorrectMessage *rec
   for (size_t i = 0; i < 4; i++) { record->cmta_number[i] = arbitrary(); }
 }
 
-/* Trade Cancel Or Correct Message to the wire: 92 bytes from at, returning where the next byte goes */
-static size_t encode_trade_cancel_or_correct_message(const TradeCancelOrCorrectMessage *record, uint8_t *wire, size_t at) {
+/* Trade Cancel Or Correct to the wire: 92 bytes from at, returning where the next byte goes */
+static size_t encode_trade_cancel_or_correct(const TradeCancelOrCorrect *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->transaction_time[i]; }
   for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->exec_ref_id[i]; }
@@ -1290,8 +1290,8 @@ static size_t encode_trade_cancel_or_correct_message(const TradeCancelOrCorrectM
   return at;
 }
 
-/* Trade Cancel Or Correct Message off the wire: 92 bytes from at, returning where the next byte lies */
-static size_t decode_trade_cancel_or_correct_message(TradeCancelOrCorrectMessage *record, const uint8_t *wire, size_t at) {
+/* Trade Cancel Or Correct off the wire: 92 bytes from at, returning where the next byte lies */
+static size_t decode_trade_cancel_or_correct(TradeCancelOrCorrect *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 8; i++) { record->transaction_time[i] = wire[at++]; }
   for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->exec_ref_id[i] = wire[at++]; }
@@ -1312,8 +1312,8 @@ static size_t decode_trade_cancel_or_correct_message(TradeCancelOrCorrectMessage
   return at;
 }
 
-/* what was read of Trade Cancel Or Correct Message is what was written, byte for byte */
-static void equal_trade_cancel_or_correct_message(const TradeCancelOrCorrectMessage *read, const TradeCancelOrCorrectMessage *written) {
+/* what was read of Trade Cancel Or Correct is what was written, byte for byte */
+static void equal_trade_cancel_or_correct(const TradeCancelOrCorrect *read, const TradeCancelOrCorrect *written) {
   for (size_t i = 0; i < 8; i++) { assert(read->transaction_time[i] == written->transaction_time[i]); }
   for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id[i] == written->cl_ord_id[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->exec_ref_id[i] == written->exec_ref_id[i]); }
@@ -1332,25 +1332,25 @@ static void equal_trade_cancel_or_correct_message(const TradeCancelOrCorrectMess
   for (size_t i = 0; i < 4; i++) { assert(read->cmta_number[i] == written->cmta_number[i]); }
 }
 
-/* Trade Cancel Or Correct Message: written and read back, then read and written back */
-static void check_trade_cancel_or_correct_message(void) {
-  TradeCancelOrCorrectMessage sent;
-  TradeCancelOrCorrectMessage got;
+/* Trade Cancel Or Correct: written and read back, then read and written back */
+static void check_trade_cancel_or_correct(void) {
+  TradeCancelOrCorrect sent;
+  TradeCancelOrCorrect got;
   uint8_t wire[92];
   uint8_t again[92];
 
-  any_trade_cancel_or_correct_message(&sent);
-  assert(encode_trade_cancel_or_correct_message(&sent, wire, 0) == 92);
-  assert(decode_trade_cancel_or_correct_message(&got, wire, 0) == 92);
-  equal_trade_cancel_or_correct_message(&got, &sent);
+  any_trade_cancel_or_correct(&sent);
+  assert(encode_trade_cancel_or_correct(&sent, wire, 0) == 92);
+  assert(decode_trade_cancel_or_correct(&got, wire, 0) == 92);
+  equal_trade_cancel_or_correct(&got, &sent);
 
   for (size_t i = 0; i < 92; i++) { wire[i] = arbitrary(); }
-  assert(decode_trade_cancel_or_correct_message(&got, wire, 0) == 92);
-  assert(encode_trade_cancel_or_correct_message(&got, again, 0) == 92);
+  assert(decode_trade_cancel_or_correct(&got, wire, 0) == 92);
+  assert(encode_trade_cancel_or_correct(&got, again, 0) == 92);
   for (size_t i = 0; i < 92; i++) { assert(again[i] == wire[i]); }
 }
 
-/* ---- Tas Restatement Message: 104 bytes -------------------------------------- */
+/* ---- Tas Restatement: 104 bytes ---------------------------------------------- */
 
 /* A Tas Restatement is sent post-settlement time for each TAS execution during the associated business day to communicate the updated Price and Symbol associated with the cleared execution */
 typedef struct {
@@ -1370,10 +1370,10 @@ typedef struct {
   uint8_t clearing_symbol[8];       /* bytes 87 to 94 */
   uint8_t multileg_reporting_type;  /* byte 95 */
   uint8_t secondary_exec_id[8];     /* bytes 96 to 103 */
-} TasRestatementMessage;
+} TasRestatement;
 
-/* any Tas Restatement Message at all: every byte one the checker chooses */
-static void any_tas_restatement_message(TasRestatementMessage *record) {
+/* any Tas Restatement at all: every byte one the checker chooses */
+static void any_tas_restatement(TasRestatement *record) {
   for (size_t i = 0; i < 8; i++) { record->transaction_time[i] = arbitrary(); }
   for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->clearing_firm[i] = arbitrary(); }
@@ -1392,8 +1392,8 @@ static void any_tas_restatement_message(TasRestatementMessage *record) {
   for (size_t i = 0; i < 8; i++) { record->secondary_exec_id[i] = arbitrary(); }
 }
 
-/* Tas Restatement Message to the wire: 104 bytes from at, returning where the next byte goes */
-static size_t encode_tas_restatement_message(const TasRestatementMessage *record, uint8_t *wire, size_t at) {
+/* Tas Restatement to the wire: 104 bytes from at, returning where the next byte goes */
+static size_t encode_tas_restatement(const TasRestatement *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->transaction_time[i]; }
   for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->clearing_firm[i]; }
@@ -1414,8 +1414,8 @@ static size_t encode_tas_restatement_message(const TasRestatementMessage *record
   return at;
 }
 
-/* Tas Restatement Message off the wire: 104 bytes from at, returning where the next byte lies */
-static size_t decode_tas_restatement_message(TasRestatementMessage *record, const uint8_t *wire, size_t at) {
+/* Tas Restatement off the wire: 104 bytes from at, returning where the next byte lies */
+static size_t decode_tas_restatement(TasRestatement *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 8; i++) { record->transaction_time[i] = wire[at++]; }
   for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->clearing_firm[i] = wire[at++]; }
@@ -1436,8 +1436,8 @@ static size_t decode_tas_restatement_message(TasRestatementMessage *record, cons
   return at;
 }
 
-/* what was read of Tas Restatement Message is what was written, byte for byte */
-static void equal_tas_restatement_message(const TasRestatementMessage *read, const TasRestatementMessage *written) {
+/* what was read of Tas Restatement is what was written, byte for byte */
+static void equal_tas_restatement(const TasRestatement *read, const TasRestatement *written) {
   for (size_t i = 0; i < 8; i++) { assert(read->transaction_time[i] == written->transaction_time[i]); }
   for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id[i] == written->cl_ord_id[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->clearing_firm[i] == written->clearing_firm[i]); }
@@ -1456,25 +1456,25 @@ static void equal_tas_restatement_message(const TasRestatementMessage *read, con
   for (size_t i = 0; i < 8; i++) { assert(read->secondary_exec_id[i] == written->secondary_exec_id[i]); }
 }
 
-/* Tas Restatement Message: written and read back, then read and written back */
-static void check_tas_restatement_message(void) {
-  TasRestatementMessage sent;
-  TasRestatementMessage got;
+/* Tas Restatement: written and read back, then read and written back */
+static void check_tas_restatement(void) {
+  TasRestatement sent;
+  TasRestatement got;
   uint8_t wire[104];
   uint8_t again[104];
 
-  any_tas_restatement_message(&sent);
-  assert(encode_tas_restatement_message(&sent, wire, 0) == 104);
-  assert(decode_tas_restatement_message(&got, wire, 0) == 104);
-  equal_tas_restatement_message(&got, &sent);
+  any_tas_restatement(&sent);
+  assert(encode_tas_restatement(&sent, wire, 0) == 104);
+  assert(decode_tas_restatement(&got, wire, 0) == 104);
+  equal_tas_restatement(&got, &sent);
 
   for (size_t i = 0; i < 104; i++) { wire[i] = arbitrary(); }
-  assert(decode_tas_restatement_message(&got, wire, 0) == 104);
-  assert(encode_tas_restatement_message(&got, again, 0) == 104);
+  assert(decode_tas_restatement(&got, wire, 0) == 104);
+  assert(encode_tas_restatement(&got, again, 0) == 104);
   for (size_t i = 0; i < 104; i++) { assert(again[i] == wire[i]); }
 }
 
-/* ---- Variance Restatement Message: 108 bytes --------------------------------- */
+/* ---- Variance Restatement: 108 bytes ----------------------------------------- */
 
 /* A Variance Restatement is sent post-settlement time for each VA and VAO execution during the associated business day to communicate updated Price, Size and Symbol associated with the cleared execution */
 typedef struct {
@@ -1495,10 +1495,10 @@ typedef struct {
   uint8_t clearing_symbol[8];       /* bytes 91 to 98 */
   uint8_t multileg_reporting_type;  /* byte 99 */
   uint8_t secondary_exec_id[8];     /* bytes 100 to 107 */
-} VarianceRestatementMessage;
+} VarianceRestatement;
 
-/* any Variance Restatement Message at all: every byte one the checker chooses */
-static void any_variance_restatement_message(VarianceRestatementMessage *record) {
+/* any Variance Restatement at all: every byte one the checker chooses */
+static void any_variance_restatement(VarianceRestatement *record) {
   for (size_t i = 0; i < 8; i++) { record->transaction_time[i] = arbitrary(); }
   for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->clearing_firm[i] = arbitrary(); }
@@ -1518,8 +1518,8 @@ static void any_variance_restatement_message(VarianceRestatementMessage *record)
   for (size_t i = 0; i < 8; i++) { record->secondary_exec_id[i] = arbitrary(); }
 }
 
-/* Variance Restatement Message to the wire: 108 bytes from at, returning where the next byte goes */
-static size_t encode_variance_restatement_message(const VarianceRestatementMessage *record, uint8_t *wire, size_t at) {
+/* Variance Restatement to the wire: 108 bytes from at, returning where the next byte goes */
+static size_t encode_variance_restatement(const VarianceRestatement *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->transaction_time[i]; }
   for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->clearing_firm[i]; }
@@ -1541,8 +1541,8 @@ static size_t encode_variance_restatement_message(const VarianceRestatementMessa
   return at;
 }
 
-/* Variance Restatement Message off the wire: 108 bytes from at, returning where the next byte lies */
-static size_t decode_variance_restatement_message(VarianceRestatementMessage *record, const uint8_t *wire, size_t at) {
+/* Variance Restatement off the wire: 108 bytes from at, returning where the next byte lies */
+static size_t decode_variance_restatement(VarianceRestatement *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 8; i++) { record->transaction_time[i] = wire[at++]; }
   for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->clearing_firm[i] = wire[at++]; }
@@ -1564,8 +1564,8 @@ static size_t decode_variance_restatement_message(VarianceRestatementMessage *re
   return at;
 }
 
-/* what was read of Variance Restatement Message is what was written, byte for byte */
-static void equal_variance_restatement_message(const VarianceRestatementMessage *read, const VarianceRestatementMessage *written) {
+/* what was read of Variance Restatement is what was written, byte for byte */
+static void equal_variance_restatement(const VarianceRestatement *read, const VarianceRestatement *written) {
   for (size_t i = 0; i < 8; i++) { assert(read->transaction_time[i] == written->transaction_time[i]); }
   for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id[i] == written->cl_ord_id[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->clearing_firm[i] == written->clearing_firm[i]); }
@@ -1585,42 +1585,42 @@ static void equal_variance_restatement_message(const VarianceRestatementMessage 
   for (size_t i = 0; i < 8; i++) { assert(read->secondary_exec_id[i] == written->secondary_exec_id[i]); }
 }
 
-/* Variance Restatement Message: written and read back, then read and written back */
-static void check_variance_restatement_message(void) {
-  VarianceRestatementMessage sent;
-  VarianceRestatementMessage got;
+/* Variance Restatement: written and read back, then read and written back */
+static void check_variance_restatement(void) {
+  VarianceRestatement sent;
+  VarianceRestatement got;
   uint8_t wire[108];
   uint8_t again[108];
 
-  any_variance_restatement_message(&sent);
-  assert(encode_variance_restatement_message(&sent, wire, 0) == 108);
-  assert(decode_variance_restatement_message(&got, wire, 0) == 108);
-  equal_variance_restatement_message(&got, &sent);
+  any_variance_restatement(&sent);
+  assert(encode_variance_restatement(&sent, wire, 0) == 108);
+  assert(decode_variance_restatement(&got, wire, 0) == 108);
+  equal_variance_restatement(&got, &sent);
 
   for (size_t i = 0; i < 108; i++) { wire[i] = arbitrary(); }
-  assert(decode_variance_restatement_message(&got, wire, 0) == 108);
-  assert(encode_variance_restatement_message(&got, again, 0) == 108);
+  assert(decode_variance_restatement(&got, wire, 0) == 108);
+  assert(encode_variance_restatement(&got, again, 0) == 108);
   for (size_t i = 0; i < 108; i++) { assert(again[i] == wire[i]); }
 }
 
-/* ---- Quote Update Rejected Message: 25 bytes --------------------------------- */
+/* ---- Quote Update Rejected: 25 bytes ----------------------------------------- */
 
 /* Quote Update Rejected messages are sent in response to a Quote Update or Quote Update Option message when the entire quote block is rejected by the order handler */
 typedef struct {
   uint8_t transaction_time[8];  /* bytes 0 to 7 */
   uint8_t quote_update_id[16];  /* bytes 8 to 23 */
   uint8_t quote_reject_reason;  /* byte 24 */
-} QuoteUpdateRejectedMessage;
+} QuoteUpdateRejected;
 
-/* any Quote Update Rejected Message at all: every byte one the checker chooses */
-static void any_quote_update_rejected_message(QuoteUpdateRejectedMessage *record) {
+/* any Quote Update Rejected at all: every byte one the checker chooses */
+static void any_quote_update_rejected(QuoteUpdateRejected *record) {
   for (size_t i = 0; i < 8; i++) { record->transaction_time[i] = arbitrary(); }
   for (size_t i = 0; i < 16; i++) { record->quote_update_id[i] = arbitrary(); }
   record->quote_reject_reason = arbitrary();
 }
 
-/* Quote Update Rejected Message to the wire: 25 bytes from at, returning where the next byte goes */
-static size_t encode_quote_update_rejected_message(const QuoteUpdateRejectedMessage *record, uint8_t *wire, size_t at) {
+/* Quote Update Rejected to the wire: 25 bytes from at, returning where the next byte goes */
+static size_t encode_quote_update_rejected(const QuoteUpdateRejected *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->transaction_time[i]; }
   for (size_t i = 0; i < 16; i++) { wire[at++] = record->quote_update_id[i]; }
   wire[at++] = record->quote_reject_reason;
@@ -1628,8 +1628,8 @@ static size_t encode_quote_update_rejected_message(const QuoteUpdateRejectedMess
   return at;
 }
 
-/* Quote Update Rejected Message off the wire: 25 bytes from at, returning where the next byte lies */
-static size_t decode_quote_update_rejected_message(QuoteUpdateRejectedMessage *record, const uint8_t *wire, size_t at) {
+/* Quote Update Rejected off the wire: 25 bytes from at, returning where the next byte lies */
+static size_t decode_quote_update_rejected(QuoteUpdateRejected *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 8; i++) { record->transaction_time[i] = wire[at++]; }
   for (size_t i = 0; i < 16; i++) { record->quote_update_id[i] = wire[at++]; }
   record->quote_reject_reason = wire[at++];
@@ -1637,32 +1637,32 @@ static size_t decode_quote_update_rejected_message(QuoteUpdateRejectedMessage *r
   return at;
 }
 
-/* what was read of Quote Update Rejected Message is what was written, byte for byte */
-static void equal_quote_update_rejected_message(const QuoteUpdateRejectedMessage *read, const QuoteUpdateRejectedMessage *written) {
+/* what was read of Quote Update Rejected is what was written, byte for byte */
+static void equal_quote_update_rejected(const QuoteUpdateRejected *read, const QuoteUpdateRejected *written) {
   for (size_t i = 0; i < 8; i++) { assert(read->transaction_time[i] == written->transaction_time[i]); }
   for (size_t i = 0; i < 16; i++) { assert(read->quote_update_id[i] == written->quote_update_id[i]); }
   assert(read->quote_reject_reason == written->quote_reject_reason);
 }
 
-/* Quote Update Rejected Message: written and read back, then read and written back */
-static void check_quote_update_rejected_message(void) {
-  QuoteUpdateRejectedMessage sent;
-  QuoteUpdateRejectedMessage got;
+/* Quote Update Rejected: written and read back, then read and written back */
+static void check_quote_update_rejected(void) {
+  QuoteUpdateRejected sent;
+  QuoteUpdateRejected got;
   uint8_t wire[25];
   uint8_t again[25];
 
-  any_quote_update_rejected_message(&sent);
-  assert(encode_quote_update_rejected_message(&sent, wire, 0) == 25);
-  assert(decode_quote_update_rejected_message(&got, wire, 0) == 25);
-  equal_quote_update_rejected_message(&got, &sent);
+  any_quote_update_rejected(&sent);
+  assert(encode_quote_update_rejected(&sent, wire, 0) == 25);
+  assert(decode_quote_update_rejected(&got, wire, 0) == 25);
+  equal_quote_update_rejected(&got, &sent);
 
   for (size_t i = 0; i < 25; i++) { wire[i] = arbitrary(); }
-  assert(decode_quote_update_rejected_message(&got, wire, 0) == 25);
-  assert(encode_quote_update_rejected_message(&got, again, 0) == 25);
+  assert(decode_quote_update_rejected(&got, wire, 0) == 25);
+  assert(encode_quote_update_rejected(&got, again, 0) == 25);
   for (size_t i = 0; i < 25; i++) { assert(again[i] == wire[i]); }
 }
 
-/* ---- Quote Restated Message: 52 bytes ---------------------------------------- */
+/* ---- Quote Restated: 52 bytes ------------------------------------------------ */
 
 /* Quote Restated messages are sent to inform the TPH that an order has been asynchronously modified for some reason by CFE */
 typedef struct {
@@ -1674,10 +1674,10 @@ typedef struct {
   uint8_t quote_symbol[6];      /* bytes 44 to 49 */
   uint8_t side;                 /* byte 50 */
   uint8_t restatement_reason;   /* byte 51 */
-} QuoteRestatedMessage;
+} QuoteRestated;
 
-/* any Quote Restated Message at all: every byte one the checker chooses */
-static void any_quote_restated_message(QuoteRestatedMessage *record) {
+/* any Quote Restated at all: every byte one the checker chooses */
+static void any_quote_restated(QuoteRestated *record) {
   for (size_t i = 0; i < 8; i++) { record->transaction_time[i] = arbitrary(); }
   for (size_t i = 0; i < 16; i++) { record->quote_update_id[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->order_id[i] = arbitrary(); }
@@ -1688,8 +1688,8 @@ static void any_quote_restated_message(QuoteRestatedMessage *record) {
   record->restatement_reason = arbitrary();
 }
 
-/* Quote Restated Message to the wire: 52 bytes from at, returning where the next byte goes */
-static size_t encode_quote_restated_message(const QuoteRestatedMessage *record, uint8_t *wire, size_t at) {
+/* Quote Restated to the wire: 52 bytes from at, returning where the next byte goes */
+static size_t encode_quote_restated(const QuoteRestated *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->transaction_time[i]; }
   for (size_t i = 0; i < 16; i++) { wire[at++] = record->quote_update_id[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->order_id[i]; }
@@ -1702,8 +1702,8 @@ static size_t encode_quote_restated_message(const QuoteRestatedMessage *record, 
   return at;
 }
 
-/* Quote Restated Message off the wire: 52 bytes from at, returning where the next byte lies */
-static size_t decode_quote_restated_message(QuoteRestatedMessage *record, const uint8_t *wire, size_t at) {
+/* Quote Restated off the wire: 52 bytes from at, returning where the next byte lies */
+static size_t decode_quote_restated(QuoteRestated *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 8; i++) { record->transaction_time[i] = wire[at++]; }
   for (size_t i = 0; i < 16; i++) { record->quote_update_id[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->order_id[i] = wire[at++]; }
@@ -1716,8 +1716,8 @@ static size_t decode_quote_restated_message(QuoteRestatedMessage *record, const 
   return at;
 }
 
-/* what was read of Quote Restated Message is what was written, byte for byte */
-static void equal_quote_restated_message(const QuoteRestatedMessage *read, const QuoteRestatedMessage *written) {
+/* what was read of Quote Restated is what was written, byte for byte */
+static void equal_quote_restated(const QuoteRestated *read, const QuoteRestated *written) {
   for (size_t i = 0; i < 8; i++) { assert(read->transaction_time[i] == written->transaction_time[i]); }
   for (size_t i = 0; i < 16; i++) { assert(read->quote_update_id[i] == written->quote_update_id[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->order_id[i] == written->order_id[i]); }
@@ -1728,25 +1728,25 @@ static void equal_quote_restated_message(const QuoteRestatedMessage *read, const
   assert(read->restatement_reason == written->restatement_reason);
 }
 
-/* Quote Restated Message: written and read back, then read and written back */
-static void check_quote_restated_message(void) {
-  QuoteRestatedMessage sent;
-  QuoteRestatedMessage got;
+/* Quote Restated: written and read back, then read and written back */
+static void check_quote_restated(void) {
+  QuoteRestated sent;
+  QuoteRestated got;
   uint8_t wire[52];
   uint8_t again[52];
 
-  any_quote_restated_message(&sent);
-  assert(encode_quote_restated_message(&sent, wire, 0) == 52);
-  assert(decode_quote_restated_message(&got, wire, 0) == 52);
-  equal_quote_restated_message(&got, &sent);
+  any_quote_restated(&sent);
+  assert(encode_quote_restated(&sent, wire, 0) == 52);
+  assert(decode_quote_restated(&got, wire, 0) == 52);
+  equal_quote_restated(&got, &sent);
 
   for (size_t i = 0; i < 52; i++) { wire[i] = arbitrary(); }
-  assert(decode_quote_restated_message(&got, wire, 0) == 52);
-  assert(encode_quote_restated_message(&got, again, 0) == 52);
+  assert(decode_quote_restated(&got, wire, 0) == 52);
+  assert(encode_quote_restated(&got, again, 0) == 52);
   for (size_t i = 0; i < 52; i++) { assert(again[i] == wire[i]); }
 }
 
-/* ---- Quote Execution Message: 71 bytes --------------------------------------- */
+/* ---- Quote Execution: 71 bytes ----------------------------------------------- */
 
 /* A Quote Execution message is used to indicate an execution has occurred on a resting quote */
 typedef struct {
@@ -1763,10 +1763,10 @@ typedef struct {
   uint8_t base_liquidity_indicator;  /* byte 67 */
   uint8_t sub_liquidity_indicator;   /* byte 68 */
   uint8_t fee_code[2];               /* bytes 69 to 70 */
-} QuoteExecutionMessage;
+} QuoteExecution;
 
-/* any Quote Execution Message at all: every byte one the checker chooses */
-static void any_quote_execution_message(QuoteExecutionMessage *record) {
+/* any Quote Execution at all: every byte one the checker chooses */
+static void any_quote_execution(QuoteExecution *record) {
   for (size_t i = 0; i < 8; i++) { record->transaction_time[i] = arbitrary(); }
   for (size_t i = 0; i < 16; i++) { record->quote_update_id[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->order_id[i] = arbitrary(); }
@@ -1782,8 +1782,8 @@ static void any_quote_execution_message(QuoteExecutionMessage *record) {
   for (size_t i = 0; i < 2; i++) { record->fee_code[i] = arbitrary(); }
 }
 
-/* Quote Execution Message to the wire: 71 bytes from at, returning where the next byte goes */
-static size_t encode_quote_execution_message(const QuoteExecutionMessage *record, uint8_t *wire, size_t at) {
+/* Quote Execution to the wire: 71 bytes from at, returning where the next byte goes */
+static size_t encode_quote_execution(const QuoteExecution *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->transaction_time[i]; }
   for (size_t i = 0; i < 16; i++) { wire[at++] = record->quote_update_id[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->order_id[i]; }
@@ -1801,8 +1801,8 @@ static size_t encode_quote_execution_message(const QuoteExecutionMessage *record
   return at;
 }
 
-/* Quote Execution Message off the wire: 71 bytes from at, returning where the next byte lies */
-static size_t decode_quote_execution_message(QuoteExecutionMessage *record, const uint8_t *wire, size_t at) {
+/* Quote Execution off the wire: 71 bytes from at, returning where the next byte lies */
+static size_t decode_quote_execution(QuoteExecution *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 8; i++) { record->transaction_time[i] = wire[at++]; }
   for (size_t i = 0; i < 16; i++) { record->quote_update_id[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->order_id[i] = wire[at++]; }
@@ -1820,8 +1820,8 @@ static size_t decode_quote_execution_message(QuoteExecutionMessage *record, cons
   return at;
 }
 
-/* what was read of Quote Execution Message is what was written, byte for byte */
-static void equal_quote_execution_message(const QuoteExecutionMessage *read, const QuoteExecutionMessage *written) {
+/* what was read of Quote Execution is what was written, byte for byte */
+static void equal_quote_execution(const QuoteExecution *read, const QuoteExecution *written) {
   for (size_t i = 0; i < 8; i++) { assert(read->transaction_time[i] == written->transaction_time[i]); }
   for (size_t i = 0; i < 16; i++) { assert(read->quote_update_id[i] == written->quote_update_id[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->order_id[i] == written->order_id[i]); }
@@ -1837,25 +1837,25 @@ static void equal_quote_execution_message(const QuoteExecutionMessage *read, con
   for (size_t i = 0; i < 2; i++) { assert(read->fee_code[i] == written->fee_code[i]); }
 }
 
-/* Quote Execution Message: written and read back, then read and written back */
-static void check_quote_execution_message(void) {
-  QuoteExecutionMessage sent;
-  QuoteExecutionMessage got;
+/* Quote Execution: written and read back, then read and written back */
+static void check_quote_execution(void) {
+  QuoteExecution sent;
+  QuoteExecution got;
   uint8_t wire[71];
   uint8_t again[71];
 
-  any_quote_execution_message(&sent);
-  assert(encode_quote_execution_message(&sent, wire, 0) == 71);
-  assert(decode_quote_execution_message(&got, wire, 0) == 71);
-  equal_quote_execution_message(&got, &sent);
+  any_quote_execution(&sent);
+  assert(encode_quote_execution(&sent, wire, 0) == 71);
+  assert(decode_quote_execution(&got, wire, 0) == 71);
+  equal_quote_execution(&got, &sent);
 
   for (size_t i = 0; i < 71; i++) { wire[i] = arbitrary(); }
-  assert(decode_quote_execution_message(&got, wire, 0) == 71);
-  assert(encode_quote_execution_message(&got, again, 0) == 71);
+  assert(decode_quote_execution(&got, wire, 0) == 71);
+  assert(encode_quote_execution(&got, again, 0) == 71);
   for (size_t i = 0; i < 71; i++) { assert(again[i] == wire[i]); }
 }
 
-/* ---- Quote Cancelled Message: 40 bytes --------------------------------------- */
+/* ---- Quote Cancelled: 40 bytes ----------------------------------------------- */
 
 /* A Quote Cancelled message will be sent to indicate an unsolicited cancellation of a quote entered with a Quote Update message */
 typedef struct {
@@ -1865,10 +1865,10 @@ typedef struct {
   uint8_t quote_symbol[6];      /* bytes 32 to 37 */
   uint8_t side;                 /* byte 38 */
   uint8_t cancel_reason;        /* byte 39 */
-} QuoteCancelledMessage;
+} QuoteCancelled;
 
-/* any Quote Cancelled Message at all: every byte one the checker chooses */
-static void any_quote_cancelled_message(QuoteCancelledMessage *record) {
+/* any Quote Cancelled at all: every byte one the checker chooses */
+static void any_quote_cancelled(QuoteCancelled *record) {
   for (size_t i = 0; i < 8; i++) { record->transaction_time[i] = arbitrary(); }
   for (size_t i = 0; i < 16; i++) { record->quote_update_id[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->order_id[i] = arbitrary(); }
@@ -1877,8 +1877,8 @@ static void any_quote_cancelled_message(QuoteCancelledMessage *record) {
   record->cancel_reason = arbitrary();
 }
 
-/* Quote Cancelled Message to the wire: 40 bytes from at, returning where the next byte goes */
-static size_t encode_quote_cancelled_message(const QuoteCancelledMessage *record, uint8_t *wire, size_t at) {
+/* Quote Cancelled to the wire: 40 bytes from at, returning where the next byte goes */
+static size_t encode_quote_cancelled(const QuoteCancelled *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->transaction_time[i]; }
   for (size_t i = 0; i < 16; i++) { wire[at++] = record->quote_update_id[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->order_id[i]; }
@@ -1889,8 +1889,8 @@ static size_t encode_quote_cancelled_message(const QuoteCancelledMessage *record
   return at;
 }
 
-/* Quote Cancelled Message off the wire: 40 bytes from at, returning where the next byte lies */
-static size_t decode_quote_cancelled_message(QuoteCancelledMessage *record, const uint8_t *wire, size_t at) {
+/* Quote Cancelled off the wire: 40 bytes from at, returning where the next byte lies */
+static size_t decode_quote_cancelled(QuoteCancelled *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 8; i++) { record->transaction_time[i] = wire[at++]; }
   for (size_t i = 0; i < 16; i++) { record->quote_update_id[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->order_id[i] = wire[at++]; }
@@ -1901,8 +1901,8 @@ static size_t decode_quote_cancelled_message(QuoteCancelledMessage *record, cons
   return at;
 }
 
-/* what was read of Quote Cancelled Message is what was written, byte for byte */
-static void equal_quote_cancelled_message(const QuoteCancelledMessage *read, const QuoteCancelledMessage *written) {
+/* what was read of Quote Cancelled is what was written, byte for byte */
+static void equal_quote_cancelled(const QuoteCancelled *read, const QuoteCancelled *written) {
   for (size_t i = 0; i < 8; i++) { assert(read->transaction_time[i] == written->transaction_time[i]); }
   for (size_t i = 0; i < 16; i++) { assert(read->quote_update_id[i] == written->quote_update_id[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->order_id[i] == written->order_id[i]); }
@@ -1911,25 +1911,25 @@ static void equal_quote_cancelled_message(const QuoteCancelledMessage *read, con
   assert(read->cancel_reason == written->cancel_reason);
 }
 
-/* Quote Cancelled Message: written and read back, then read and written back */
-static void check_quote_cancelled_message(void) {
-  QuoteCancelledMessage sent;
-  QuoteCancelledMessage got;
+/* Quote Cancelled: written and read back, then read and written back */
+static void check_quote_cancelled(void) {
+  QuoteCancelled sent;
+  QuoteCancelled got;
   uint8_t wire[40];
   uint8_t again[40];
 
-  any_quote_cancelled_message(&sent);
-  assert(encode_quote_cancelled_message(&sent, wire, 0) == 40);
-  assert(decode_quote_cancelled_message(&got, wire, 0) == 40);
-  equal_quote_cancelled_message(&got, &sent);
+  any_quote_cancelled(&sent);
+  assert(encode_quote_cancelled(&sent, wire, 0) == 40);
+  assert(decode_quote_cancelled(&got, wire, 0) == 40);
+  equal_quote_cancelled(&got, &sent);
 
   for (size_t i = 0; i < 40; i++) { wire[i] = arbitrary(); }
-  assert(decode_quote_cancelled_message(&got, wire, 0) == 40);
-  assert(encode_quote_cancelled_message(&got, again, 0) == 40);
+  assert(decode_quote_cancelled(&got, wire, 0) == 40);
+  assert(encode_quote_cancelled(&got, again, 0) == 40);
   for (size_t i = 0; i < 40; i++) { assert(again[i] == wire[i]); }
 }
 
-/* ---- Tas Quote Restatement Message: 54 bytes --------------------------------- */
+/* ---- Tas Quote Restatement: 54 bytes ----------------------------------------- */
 
 /* A TAS Quote Restatement is sent post-settlement time for each TAS quote execution during the associated business day to communicate the updated Price and Symbol associated with the cleared execution */
 typedef struct {
@@ -1939,10 +1939,10 @@ typedef struct {
   uint8_t quote_symbol[6];      /* bytes 32 to 37 */
   uint8_t clearing_symbol[8];   /* bytes 38 to 45 */
   uint8_t clearing_price[8];    /* bytes 46 to 53 */
-} TasQuoteRestatementMessage;
+} TasQuoteRestatement;
 
-/* any Tas Quote Restatement Message at all: every byte one the checker chooses */
-static void any_tas_quote_restatement_message(TasQuoteRestatementMessage *record) {
+/* any Tas Quote Restatement at all: every byte one the checker chooses */
+static void any_tas_quote_restatement(TasQuoteRestatement *record) {
   for (size_t i = 0; i < 8; i++) { record->transaction_time[i] = arbitrary(); }
   for (size_t i = 0; i < 16; i++) { record->quote_update_id[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->exec_id[i] = arbitrary(); }
@@ -1951,8 +1951,8 @@ static void any_tas_quote_restatement_message(TasQuoteRestatementMessage *record
   for (size_t i = 0; i < 8; i++) { record->clearing_price[i] = arbitrary(); }
 }
 
-/* Tas Quote Restatement Message to the wire: 54 bytes from at, returning where the next byte goes */
-static size_t encode_tas_quote_restatement_message(const TasQuoteRestatementMessage *record, uint8_t *wire, size_t at) {
+/* Tas Quote Restatement to the wire: 54 bytes from at, returning where the next byte goes */
+static size_t encode_tas_quote_restatement(const TasQuoteRestatement *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->transaction_time[i]; }
   for (size_t i = 0; i < 16; i++) { wire[at++] = record->quote_update_id[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->exec_id[i]; }
@@ -1963,8 +1963,8 @@ static size_t encode_tas_quote_restatement_message(const TasQuoteRestatementMess
   return at;
 }
 
-/* Tas Quote Restatement Message off the wire: 54 bytes from at, returning where the next byte lies */
-static size_t decode_tas_quote_restatement_message(TasQuoteRestatementMessage *record, const uint8_t *wire, size_t at) {
+/* Tas Quote Restatement off the wire: 54 bytes from at, returning where the next byte lies */
+static size_t decode_tas_quote_restatement(TasQuoteRestatement *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 8; i++) { record->transaction_time[i] = wire[at++]; }
   for (size_t i = 0; i < 16; i++) { record->quote_update_id[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->exec_id[i] = wire[at++]; }
@@ -1975,8 +1975,8 @@ static size_t decode_tas_quote_restatement_message(TasQuoteRestatementMessage *r
   return at;
 }
 
-/* what was read of Tas Quote Restatement Message is what was written, byte for byte */
-static void equal_tas_quote_restatement_message(const TasQuoteRestatementMessage *read, const TasQuoteRestatementMessage *written) {
+/* what was read of Tas Quote Restatement is what was written, byte for byte */
+static void equal_tas_quote_restatement(const TasQuoteRestatement *read, const TasQuoteRestatement *written) {
   for (size_t i = 0; i < 8; i++) { assert(read->transaction_time[i] == written->transaction_time[i]); }
   for (size_t i = 0; i < 16; i++) { assert(read->quote_update_id[i] == written->quote_update_id[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->exec_id[i] == written->exec_id[i]); }
@@ -1985,25 +1985,25 @@ static void equal_tas_quote_restatement_message(const TasQuoteRestatementMessage
   for (size_t i = 0; i < 8; i++) { assert(read->clearing_price[i] == written->clearing_price[i]); }
 }
 
-/* Tas Quote Restatement Message: written and read back, then read and written back */
-static void check_tas_quote_restatement_message(void) {
-  TasQuoteRestatementMessage sent;
-  TasQuoteRestatementMessage got;
+/* Tas Quote Restatement: written and read back, then read and written back */
+static void check_tas_quote_restatement(void) {
+  TasQuoteRestatement sent;
+  TasQuoteRestatement got;
   uint8_t wire[54];
   uint8_t again[54];
 
-  any_tas_quote_restatement_message(&sent);
-  assert(encode_tas_quote_restatement_message(&sent, wire, 0) == 54);
-  assert(decode_tas_quote_restatement_message(&got, wire, 0) == 54);
-  equal_tas_quote_restatement_message(&got, &sent);
+  any_tas_quote_restatement(&sent);
+  assert(encode_tas_quote_restatement(&sent, wire, 0) == 54);
+  assert(decode_tas_quote_restatement(&got, wire, 0) == 54);
+  equal_tas_quote_restatement(&got, &sent);
 
   for (size_t i = 0; i < 54; i++) { wire[i] = arbitrary(); }
-  assert(decode_tas_quote_restatement_message(&got, wire, 0) == 54);
-  assert(encode_tas_quote_restatement_message(&got, again, 0) == 54);
+  assert(decode_tas_quote_restatement(&got, wire, 0) == 54);
+  assert(encode_tas_quote_restatement(&got, again, 0) == 54);
   for (size_t i = 0; i < 54; i++) { assert(again[i] == wire[i]); }
 }
 
-/* ---- Variance Quote Restatement Message: 58 bytes ---------------------------- */
+/* ---- Variance Quote Restatement: 58 bytes ------------------------------------ */
 
 /* A Variance Quote Restatement is sent post-settlement time for each VA and VAO execution during the associated business day to communicate updated Price, Size, and Symbol values associated with the cleared execution */
 typedef struct {
@@ -2014,10 +2014,10 @@ typedef struct {
   uint8_t clearing_symbol[8];   /* bytes 38 to 45 */
   uint8_t clearing_price[8];    /* bytes 46 to 53 */
   uint8_t clearing_size[4];     /* bytes 54 to 57 */
-} VarianceQuoteRestatementMessage;
+} VarianceQuoteRestatement;
 
-/* any Variance Quote Restatement Message at all: every byte one the checker chooses */
-static void any_variance_quote_restatement_message(VarianceQuoteRestatementMessage *record) {
+/* any Variance Quote Restatement at all: every byte one the checker chooses */
+static void any_variance_quote_restatement(VarianceQuoteRestatement *record) {
   for (size_t i = 0; i < 8; i++) { record->transaction_time[i] = arbitrary(); }
   for (size_t i = 0; i < 16; i++) { record->quote_update_id[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->exec_id[i] = arbitrary(); }
@@ -2027,8 +2027,8 @@ static void any_variance_quote_restatement_message(VarianceQuoteRestatementMessa
   for (size_t i = 0; i < 4; i++) { record->clearing_size[i] = arbitrary(); }
 }
 
-/* Variance Quote Restatement Message to the wire: 58 bytes from at, returning where the next byte goes */
-static size_t encode_variance_quote_restatement_message(const VarianceQuoteRestatementMessage *record, uint8_t *wire, size_t at) {
+/* Variance Quote Restatement to the wire: 58 bytes from at, returning where the next byte goes */
+static size_t encode_variance_quote_restatement(const VarianceQuoteRestatement *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->transaction_time[i]; }
   for (size_t i = 0; i < 16; i++) { wire[at++] = record->quote_update_id[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->exec_id[i]; }
@@ -2040,8 +2040,8 @@ static size_t encode_variance_quote_restatement_message(const VarianceQuoteResta
   return at;
 }
 
-/* Variance Quote Restatement Message off the wire: 58 bytes from at, returning where the next byte lies */
-static size_t decode_variance_quote_restatement_message(VarianceQuoteRestatementMessage *record, const uint8_t *wire, size_t at) {
+/* Variance Quote Restatement off the wire: 58 bytes from at, returning where the next byte lies */
+static size_t decode_variance_quote_restatement(VarianceQuoteRestatement *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 8; i++) { record->transaction_time[i] = wire[at++]; }
   for (size_t i = 0; i < 16; i++) { record->quote_update_id[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->exec_id[i] = wire[at++]; }
@@ -2053,8 +2053,8 @@ static size_t decode_variance_quote_restatement_message(VarianceQuoteRestatement
   return at;
 }
 
-/* what was read of Variance Quote Restatement Message is what was written, byte for byte */
-static void equal_variance_quote_restatement_message(const VarianceQuoteRestatementMessage *read, const VarianceQuoteRestatementMessage *written) {
+/* what was read of Variance Quote Restatement is what was written, byte for byte */
+static void equal_variance_quote_restatement(const VarianceQuoteRestatement *read, const VarianceQuoteRestatement *written) {
   for (size_t i = 0; i < 8; i++) { assert(read->transaction_time[i] == written->transaction_time[i]); }
   for (size_t i = 0; i < 16; i++) { assert(read->quote_update_id[i] == written->quote_update_id[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->exec_id[i] == written->exec_id[i]); }
@@ -2064,42 +2064,42 @@ static void equal_variance_quote_restatement_message(const VarianceQuoteRestatem
   for (size_t i = 0; i < 4; i++) { assert(read->clearing_size[i] == written->clearing_size[i]); }
 }
 
-/* Variance Quote Restatement Message: written and read back, then read and written back */
-static void check_variance_quote_restatement_message(void) {
-  VarianceQuoteRestatementMessage sent;
-  VarianceQuoteRestatementMessage got;
+/* Variance Quote Restatement: written and read back, then read and written back */
+static void check_variance_quote_restatement(void) {
+  VarianceQuoteRestatement sent;
+  VarianceQuoteRestatement got;
   uint8_t wire[58];
   uint8_t again[58];
 
-  any_variance_quote_restatement_message(&sent);
-  assert(encode_variance_quote_restatement_message(&sent, wire, 0) == 58);
-  assert(decode_variance_quote_restatement_message(&got, wire, 0) == 58);
-  equal_variance_quote_restatement_message(&got, &sent);
+  any_variance_quote_restatement(&sent);
+  assert(encode_variance_quote_restatement(&sent, wire, 0) == 58);
+  assert(decode_variance_quote_restatement(&got, wire, 0) == 58);
+  equal_variance_quote_restatement(&got, &sent);
 
   for (size_t i = 0; i < 58; i++) { wire[i] = arbitrary(); }
-  assert(decode_variance_quote_restatement_message(&got, wire, 0) == 58);
-  assert(encode_variance_quote_restatement_message(&got, again, 0) == 58);
+  assert(decode_variance_quote_restatement(&got, wire, 0) == 58);
+  assert(encode_variance_quote_restatement(&got, again, 0) == 58);
   for (size_t i = 0; i < 58; i++) { assert(again[i] == wire[i]); }
 }
 
-/* ---- Reset Risk Acknowledgement Message: 25 bytes ---------------------------- */
+/* ---- Reset Risk Acknowledgement: 25 bytes ------------------------------------ */
 
 /* Response to a Reset Risk request */
 typedef struct {
   uint8_t risk_status_id[16];        /* bytes 0 to 15 */
   uint8_t risk_reset_result;         /* byte 16 */
   uint8_t request_received_time[8];  /* bytes 17 to 24 */
-} ResetRiskAcknowledgementMessage;
+} ResetRiskAcknowledgement;
 
-/* any Reset Risk Acknowledgement Message at all: every byte one the checker chooses */
-static void any_reset_risk_acknowledgement_message(ResetRiskAcknowledgementMessage *record) {
+/* any Reset Risk Acknowledgement at all: every byte one the checker chooses */
+static void any_reset_risk_acknowledgement(ResetRiskAcknowledgement *record) {
   for (size_t i = 0; i < 16; i++) { record->risk_status_id[i] = arbitrary(); }
   record->risk_reset_result = arbitrary();
   for (size_t i = 0; i < 8; i++) { record->request_received_time[i] = arbitrary(); }
 }
 
-/* Reset Risk Acknowledgement Message to the wire: 25 bytes from at, returning where the next byte goes */
-static size_t encode_reset_risk_acknowledgement_message(const ResetRiskAcknowledgementMessage *record, uint8_t *wire, size_t at) {
+/* Reset Risk Acknowledgement to the wire: 25 bytes from at, returning where the next byte goes */
+static size_t encode_reset_risk_acknowledgement(const ResetRiskAcknowledgement *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 16; i++) { wire[at++] = record->risk_status_id[i]; }
   wire[at++] = record->risk_reset_result;
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->request_received_time[i]; }
@@ -2107,8 +2107,8 @@ static size_t encode_reset_risk_acknowledgement_message(const ResetRiskAcknowled
   return at;
 }
 
-/* Reset Risk Acknowledgement Message off the wire: 25 bytes from at, returning where the next byte lies */
-static size_t decode_reset_risk_acknowledgement_message(ResetRiskAcknowledgementMessage *record, const uint8_t *wire, size_t at) {
+/* Reset Risk Acknowledgement off the wire: 25 bytes from at, returning where the next byte lies */
+static size_t decode_reset_risk_acknowledgement(ResetRiskAcknowledgement *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 16; i++) { record->risk_status_id[i] = wire[at++]; }
   record->risk_reset_result = wire[at++];
   for (size_t i = 0; i < 8; i++) { record->request_received_time[i] = wire[at++]; }
@@ -2116,28 +2116,28 @@ static size_t decode_reset_risk_acknowledgement_message(ResetRiskAcknowledgement
   return at;
 }
 
-/* what was read of Reset Risk Acknowledgement Message is what was written, byte for byte */
-static void equal_reset_risk_acknowledgement_message(const ResetRiskAcknowledgementMessage *read, const ResetRiskAcknowledgementMessage *written) {
+/* what was read of Reset Risk Acknowledgement is what was written, byte for byte */
+static void equal_reset_risk_acknowledgement(const ResetRiskAcknowledgement *read, const ResetRiskAcknowledgement *written) {
   for (size_t i = 0; i < 16; i++) { assert(read->risk_status_id[i] == written->risk_status_id[i]); }
   assert(read->risk_reset_result == written->risk_reset_result);
   for (size_t i = 0; i < 8; i++) { assert(read->request_received_time[i] == written->request_received_time[i]); }
 }
 
-/* Reset Risk Acknowledgement Message: written and read back, then read and written back */
-static void check_reset_risk_acknowledgement_message(void) {
-  ResetRiskAcknowledgementMessage sent;
-  ResetRiskAcknowledgementMessage got;
+/* Reset Risk Acknowledgement: written and read back, then read and written back */
+static void check_reset_risk_acknowledgement(void) {
+  ResetRiskAcknowledgement sent;
+  ResetRiskAcknowledgement got;
   uint8_t wire[25];
   uint8_t again[25];
 
-  any_reset_risk_acknowledgement_message(&sent);
-  assert(encode_reset_risk_acknowledgement_message(&sent, wire, 0) == 25);
-  assert(decode_reset_risk_acknowledgement_message(&got, wire, 0) == 25);
-  equal_reset_risk_acknowledgement_message(&got, &sent);
+  any_reset_risk_acknowledgement(&sent);
+  assert(encode_reset_risk_acknowledgement(&sent, wire, 0) == 25);
+  assert(decode_reset_risk_acknowledgement(&got, wire, 0) == 25);
+  equal_reset_risk_acknowledgement(&got, &sent);
 
   for (size_t i = 0; i < 25; i++) { wire[i] = arbitrary(); }
-  assert(decode_reset_risk_acknowledgement_message(&got, wire, 0) == 25);
-  assert(encode_reset_risk_acknowledgement_message(&got, again, 0) == 25);
+  assert(decode_reset_risk_acknowledgement(&got, wire, 0) == 25);
+  assert(encode_reset_risk_acknowledgement(&got, again, 0) == 25);
   for (size_t i = 0; i < 25; i++) { assert(again[i] == wire[i]); }
 }
 
@@ -2148,27 +2148,27 @@ static void checks(void) {
   check_exchange_message_header();
   check_logout_response_message();
   check_prevent_match();
-  check_order_acknowledgement_message();
-  check_order_rejected_message();
-  check_order_modified_message();
-  check_modify_rejected_message();
-  check_order_execution_message();
-  check_order_cancelled_message();
-  check_cancel_rejected_message();
-  check_mass_cancel_acknowledgement_message();
-  check_mass_cancel_rejected_message();
-  check_purge_acknowledgement_message();
-  check_purge_rejected_message();
-  check_trade_cancel_or_correct_message();
-  check_tas_restatement_message();
-  check_variance_restatement_message();
-  check_quote_update_rejected_message();
-  check_quote_restated_message();
-  check_quote_execution_message();
-  check_quote_cancelled_message();
-  check_tas_quote_restatement_message();
-  check_variance_quote_restatement_message();
-  check_reset_risk_acknowledgement_message();
+  check_order_acknowledgement();
+  check_order_rejected();
+  check_order_modified();
+  check_modify_rejected();
+  check_order_execution();
+  check_order_cancelled();
+  check_cancel_rejected();
+  check_mass_cancel_acknowledgement();
+  check_mass_cancel_rejected();
+  check_purge_acknowledgement();
+  check_purge_rejected();
+  check_trade_cancel_or_correct();
+  check_tas_restatement();
+  check_variance_restatement();
+  check_quote_update_rejected();
+  check_quote_restated();
+  check_quote_execution();
+  check_quote_cancelled();
+  check_tas_quote_restatement();
+  check_variance_quote_restatement();
+  check_reset_risk_acknowledgement();
 }
 
 int main(void) {

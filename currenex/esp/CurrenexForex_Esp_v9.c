@@ -537,24 +537,24 @@ static void check_subscription_reply(void) {
   for (size_t i = 0; i < 57; i++) { assert(again[i] == wire[i]); }
 }
 
-/* ---- Price Message: 29 bytes ------------------------------------------------- */
+/* ---- Price Message: 32 bytes ------------------------------------------------- */
 
 /* Price Message */
 typedef struct {
   uint8_t instrument_index[2];  /* bytes 0 to 1 */
-  uint8_t price_id;             /* byte 2 */
-  uint8_t side;                 /* byte 3 */
-  uint8_t max_amount[8];        /* bytes 4 to 11 */
-  uint8_t min_amount[8];        /* bytes 12 to 19 */
-  uint8_t price[4];             /* bytes 20 to 23 */
-  uint8_t attributed;           /* byte 24 */
-  uint8_t price_provider[4];    /* bytes 25 to 28 */
+  uint8_t price_id[4];          /* bytes 2 to 5 */
+  uint8_t side;                 /* byte 6 */
+  uint8_t max_amount[8];        /* bytes 7 to 14 */
+  uint8_t min_amount[8];        /* bytes 15 to 22 */
+  uint8_t price[4];             /* bytes 23 to 26 */
+  uint8_t attributed;           /* byte 27 */
+  uint8_t price_provider[4];    /* bytes 28 to 31 */
 } PriceMessage;
 
 /* any Price Message at all: every byte one the checker chooses */
 static void any_price_message(PriceMessage *record) {
   for (size_t i = 0; i < 2; i++) { record->instrument_index[i] = arbitrary(); }
-  record->price_id = arbitrary();
+  for (size_t i = 0; i < 4; i++) { record->price_id[i] = arbitrary(); }
   record->side = arbitrary();
   for (size_t i = 0; i < 8; i++) { record->max_amount[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->min_amount[i] = arbitrary(); }
@@ -563,10 +563,10 @@ static void any_price_message(PriceMessage *record) {
   for (size_t i = 0; i < 4; i++) { record->price_provider[i] = arbitrary(); }
 }
 
-/* Price Message to the wire: 29 bytes from at, returning where the next byte goes */
+/* Price Message to the wire: 32 bytes from at, returning where the next byte goes */
 static size_t encode_price_message(const PriceMessage *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 2; i++) { wire[at++] = record->instrument_index[i]; }
-  wire[at++] = record->price_id;
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->price_id[i]; }
   wire[at++] = record->side;
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->max_amount[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->min_amount[i]; }
@@ -577,10 +577,10 @@ static size_t encode_price_message(const PriceMessage *record, uint8_t *wire, si
   return at;
 }
 
-/* Price Message off the wire: 29 bytes from at, returning where the next byte lies */
+/* Price Message off the wire: 32 bytes from at, returning where the next byte lies */
 static size_t decode_price_message(PriceMessage *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 2; i++) { record->instrument_index[i] = wire[at++]; }
-  record->price_id = wire[at++];
+  for (size_t i = 0; i < 4; i++) { record->price_id[i] = wire[at++]; }
   record->side = wire[at++];
   for (size_t i = 0; i < 8; i++) { record->max_amount[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->min_amount[i] = wire[at++]; }
@@ -594,7 +594,7 @@ static size_t decode_price_message(PriceMessage *record, const uint8_t *wire, si
 /* what was read of Price Message is what was written, byte for byte */
 static void equal_price_message(const PriceMessage *read, const PriceMessage *written) {
   for (size_t i = 0; i < 2; i++) { assert(read->instrument_index[i] == written->instrument_index[i]); }
-  assert(read->price_id == written->price_id);
+  for (size_t i = 0; i < 4; i++) { assert(read->price_id[i] == written->price_id[i]); }
   assert(read->side == written->side);
   for (size_t i = 0; i < 8; i++) { assert(read->max_amount[i] == written->max_amount[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->min_amount[i] == written->min_amount[i]); }
@@ -607,46 +607,46 @@ static void equal_price_message(const PriceMessage *read, const PriceMessage *wr
 static void check_price_message(void) {
   PriceMessage sent;
   PriceMessage got;
-  uint8_t wire[29];
-  uint8_t again[29];
+  uint8_t wire[32];
+  uint8_t again[32];
 
   any_price_message(&sent);
-  assert(encode_price_message(&sent, wire, 0) == 29);
-  assert(decode_price_message(&got, wire, 0) == 29);
+  assert(encode_price_message(&sent, wire, 0) == 32);
+  assert(decode_price_message(&got, wire, 0) == 32);
   equal_price_message(&got, &sent);
 
-  for (size_t i = 0; i < 29; i++) { wire[i] = arbitrary(); }
-  assert(decode_price_message(&got, wire, 0) == 29);
-  assert(encode_price_message(&got, again, 0) == 29);
-  for (size_t i = 0; i < 29; i++) { assert(again[i] == wire[i]); }
+  for (size_t i = 0; i < 32; i++) { wire[i] = arbitrary(); }
+  assert(decode_price_message(&got, wire, 0) == 32);
+  assert(encode_price_message(&got, again, 0) == 32);
+  for (size_t i = 0; i < 32; i++) { assert(again[i] == wire[i]); }
 }
 
-/* ---- Price Cancel Message: 3 bytes ------------------------------------------- */
+/* ---- Price Cancel Message: 6 bytes ------------------------------------------- */
 
 /* Price Cancel */
 typedef struct {
   uint8_t instrument_index[2];  /* bytes 0 to 1 */
-  uint8_t price_id;             /* byte 2 */
+  uint8_t price_id[4];          /* bytes 2 to 5 */
 } PriceCancelMessage;
 
 /* any Price Cancel Message at all: every byte one the checker chooses */
 static void any_price_cancel_message(PriceCancelMessage *record) {
   for (size_t i = 0; i < 2; i++) { record->instrument_index[i] = arbitrary(); }
-  record->price_id = arbitrary();
+  for (size_t i = 0; i < 4; i++) { record->price_id[i] = arbitrary(); }
 }
 
-/* Price Cancel Message to the wire: 3 bytes from at, returning where the next byte goes */
+/* Price Cancel Message to the wire: 6 bytes from at, returning where the next byte goes */
 static size_t encode_price_cancel_message(const PriceCancelMessage *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 2; i++) { wire[at++] = record->instrument_index[i]; }
-  wire[at++] = record->price_id;
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->price_id[i]; }
 
   return at;
 }
 
-/* Price Cancel Message off the wire: 3 bytes from at, returning where the next byte lies */
+/* Price Cancel Message off the wire: 6 bytes from at, returning where the next byte lies */
 static size_t decode_price_cancel_message(PriceCancelMessage *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 2; i++) { record->instrument_index[i] = wire[at++]; }
-  record->price_id = wire[at++];
+  for (size_t i = 0; i < 4; i++) { record->price_id[i] = wire[at++]; }
 
   return at;
 }
@@ -654,25 +654,25 @@ static size_t decode_price_cancel_message(PriceCancelMessage *record, const uint
 /* what was read of Price Cancel Message is what was written, byte for byte */
 static void equal_price_cancel_message(const PriceCancelMessage *read, const PriceCancelMessage *written) {
   for (size_t i = 0; i < 2; i++) { assert(read->instrument_index[i] == written->instrument_index[i]); }
-  assert(read->price_id == written->price_id);
+  for (size_t i = 0; i < 4; i++) { assert(read->price_id[i] == written->price_id[i]); }
 }
 
 /* Price Cancel Message: written and read back, then read and written back */
 static void check_price_cancel_message(void) {
   PriceCancelMessage sent;
   PriceCancelMessage got;
-  uint8_t wire[3];
-  uint8_t again[3];
+  uint8_t wire[6];
+  uint8_t again[6];
 
   any_price_cancel_message(&sent);
-  assert(encode_price_cancel_message(&sent, wire, 0) == 3);
-  assert(decode_price_cancel_message(&got, wire, 0) == 3);
+  assert(encode_price_cancel_message(&sent, wire, 0) == 6);
+  assert(decode_price_cancel_message(&got, wire, 0) == 6);
   equal_price_cancel_message(&got, &sent);
 
-  for (size_t i = 0; i < 3; i++) { wire[i] = arbitrary(); }
-  assert(decode_price_cancel_message(&got, wire, 0) == 3);
-  assert(encode_price_cancel_message(&got, again, 0) == 3);
-  for (size_t i = 0; i < 3; i++) { assert(again[i] == wire[i]); }
+  for (size_t i = 0; i < 6; i++) { wire[i] = arbitrary(); }
+  assert(decode_price_cancel_message(&got, wire, 0) == 6);
+  assert(encode_price_cancel_message(&got, again, 0) == 6);
+  for (size_t i = 0; i < 6; i++) { assert(again[i] == wire[i]); }
 }
 
 /* ---- Trade Ticker Message: 15 bytes ------------------------------------------ */

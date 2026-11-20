@@ -21,6 +21,7 @@
  * What this definition does not state, and the model does:
  *   - a run filling what frames it
  *   - the dispatch that chooses a message by its type
+ *   - a Composite rule
  *   - a run counted by a field
  *
  * License: MIT No Attribution
@@ -1977,144 +1978,6 @@ static void check_future_product(void) {
   assert(decode_future_product(&got, wire, 0) == 11);
   assert(encode_future_product(&got, again, 0) == 11);
   for (size_t i = 0; i < 11; i++) { assert(again[i] == wire[i]); }
-}
-
-/* ---- Futures Request For Quote Rfq Message: 33 bytes ------------------------- */
-
-/* Futures Request for Quote (RFQ) message */
-typedef struct {
-  LongMessageHeader long_message_header;  /* bytes 0 to 11 */
-  uint8_t exchange_id;                    /* byte 12 */
-  FutureProduct future_product;           /* bytes 13 to 23 */
-  uint8_t requested_size[8];              /* bytes 24 to 31 */
-  uint8_t requested_market_side;          /* byte 32 */
-} FuturesRequestForQuoteRfqMessage;
-
-/* any Futures Request For Quote Rfq Message at all: every byte one the checker chooses */
-static void any_futures_request_for_quote_rfq_message(FuturesRequestForQuoteRfqMessage *record) {
-  any_long_message_header(&record->long_message_header);
-  record->exchange_id = arbitrary();
-  any_future_product(&record->future_product);
-  for (size_t i = 0; i < 8; i++) { record->requested_size[i] = arbitrary(); }
-  record->requested_market_side = arbitrary();
-}
-
-/* Futures Request For Quote Rfq Message to the wire: 33 bytes from at, returning where the next byte goes */
-static size_t encode_futures_request_for_quote_rfq_message(const FuturesRequestForQuoteRfqMessage *record, uint8_t *wire, size_t at) {
-  at = encode_long_message_header(&record->long_message_header, wire, at);
-  wire[at++] = record->exchange_id;
-  at = encode_future_product(&record->future_product, wire, at);
-  for (size_t i = 0; i < 8; i++) { wire[at++] = record->requested_size[i]; }
-  wire[at++] = record->requested_market_side;
-
-  return at;
-}
-
-/* Futures Request For Quote Rfq Message off the wire: 33 bytes from at, returning where the next byte lies */
-static size_t decode_futures_request_for_quote_rfq_message(FuturesRequestForQuoteRfqMessage *record, const uint8_t *wire, size_t at) {
-  at = decode_long_message_header(&record->long_message_header, wire, at);
-  record->exchange_id = wire[at++];
-  at = decode_future_product(&record->future_product, wire, at);
-  for (size_t i = 0; i < 8; i++) { record->requested_size[i] = wire[at++]; }
-  record->requested_market_side = wire[at++];
-
-  return at;
-}
-
-/* what was read of Futures Request For Quote Rfq Message is what was written, byte for byte */
-static void equal_futures_request_for_quote_rfq_message(const FuturesRequestForQuoteRfqMessage *read, const FuturesRequestForQuoteRfqMessage *written) {
-  equal_long_message_header(&read->long_message_header, &written->long_message_header);
-  assert(read->exchange_id == written->exchange_id);
-  equal_future_product(&read->future_product, &written->future_product);
-  for (size_t i = 0; i < 8; i++) { assert(read->requested_size[i] == written->requested_size[i]); }
-  assert(read->requested_market_side == written->requested_market_side);
-}
-
-/* Futures Request For Quote Rfq Message: written and read back, then read and written back */
-static void check_futures_request_for_quote_rfq_message(void) {
-  FuturesRequestForQuoteRfqMessage sent;
-  FuturesRequestForQuoteRfqMessage got;
-  uint8_t wire[33];
-  uint8_t again[33];
-
-  any_futures_request_for_quote_rfq_message(&sent);
-  assert(encode_futures_request_for_quote_rfq_message(&sent, wire, 0) == 33);
-  assert(decode_futures_request_for_quote_rfq_message(&got, wire, 0) == 33);
-  equal_futures_request_for_quote_rfq_message(&got, &sent);
-
-  for (size_t i = 0; i < 33; i++) { wire[i] = arbitrary(); }
-  assert(decode_futures_request_for_quote_rfq_message(&got, wire, 0) == 33);
-  assert(encode_futures_request_for_quote_rfq_message(&got, again, 0) == 33);
-  for (size_t i = 0; i < 33; i++) { assert(again[i] == wire[i]); }
-}
-
-/* ---- Strategy Request For Quote Rfq Message: 52 bytes ------------------------ */
-
-/* Strategy Request for Quote (RFQ) message */
-typedef struct {
-  LongMessageHeader long_message_header;  /* bytes 0 to 11 */
-  uint8_t exchange_id;                    /* byte 12 */
-  uint8_t symbol[30];                     /* bytes 13 to 42 */
-  uint8_t requested_size[8];              /* bytes 43 to 50 */
-  uint8_t requested_market_side;          /* byte 51 */
-} StrategyRequestForQuoteRfqMessage;
-
-/* any Strategy Request For Quote Rfq Message at all: every byte one the checker chooses */
-static void any_strategy_request_for_quote_rfq_message(StrategyRequestForQuoteRfqMessage *record) {
-  any_long_message_header(&record->long_message_header);
-  record->exchange_id = arbitrary();
-  for (size_t i = 0; i < 30; i++) { record->symbol[i] = arbitrary(); }
-  for (size_t i = 0; i < 8; i++) { record->requested_size[i] = arbitrary(); }
-  record->requested_market_side = arbitrary();
-}
-
-/* Strategy Request For Quote Rfq Message to the wire: 52 bytes from at, returning where the next byte goes */
-static size_t encode_strategy_request_for_quote_rfq_message(const StrategyRequestForQuoteRfqMessage *record, uint8_t *wire, size_t at) {
-  at = encode_long_message_header(&record->long_message_header, wire, at);
-  wire[at++] = record->exchange_id;
-  for (size_t i = 0; i < 30; i++) { wire[at++] = record->symbol[i]; }
-  for (size_t i = 0; i < 8; i++) { wire[at++] = record->requested_size[i]; }
-  wire[at++] = record->requested_market_side;
-
-  return at;
-}
-
-/* Strategy Request For Quote Rfq Message off the wire: 52 bytes from at, returning where the next byte lies */
-static size_t decode_strategy_request_for_quote_rfq_message(StrategyRequestForQuoteRfqMessage *record, const uint8_t *wire, size_t at) {
-  at = decode_long_message_header(&record->long_message_header, wire, at);
-  record->exchange_id = wire[at++];
-  for (size_t i = 0; i < 30; i++) { record->symbol[i] = wire[at++]; }
-  for (size_t i = 0; i < 8; i++) { record->requested_size[i] = wire[at++]; }
-  record->requested_market_side = wire[at++];
-
-  return at;
-}
-
-/* what was read of Strategy Request For Quote Rfq Message is what was written, byte for byte */
-static void equal_strategy_request_for_quote_rfq_message(const StrategyRequestForQuoteRfqMessage *read, const StrategyRequestForQuoteRfqMessage *written) {
-  equal_long_message_header(&read->long_message_header, &written->long_message_header);
-  assert(read->exchange_id == written->exchange_id);
-  for (size_t i = 0; i < 30; i++) { assert(read->symbol[i] == written->symbol[i]); }
-  for (size_t i = 0; i < 8; i++) { assert(read->requested_size[i] == written->requested_size[i]); }
-  assert(read->requested_market_side == written->requested_market_side);
-}
-
-/* Strategy Request For Quote Rfq Message: written and read back, then read and written back */
-static void check_strategy_request_for_quote_rfq_message(void) {
-  StrategyRequestForQuoteRfqMessage sent;
-  StrategyRequestForQuoteRfqMessage got;
-  uint8_t wire[52];
-  uint8_t again[52];
-
-  any_strategy_request_for_quote_rfq_message(&sent);
-  assert(encode_strategy_request_for_quote_rfq_message(&sent, wire, 0) == 52);
-  assert(decode_strategy_request_for_quote_rfq_message(&got, wire, 0) == 52);
-  equal_strategy_request_for_quote_rfq_message(&got, &sent);
-
-  for (size_t i = 0; i < 52; i++) { wire[i] = arbitrary(); }
-  assert(decode_strategy_request_for_quote_rfq_message(&got, wire, 0) == 52);
-  assert(encode_strategy_request_for_quote_rfq_message(&got, again, 0) == 52);
-  for (size_t i = 0; i < 52; i++) { assert(again[i] == wire[i]); }
 }
 
 /* ---- Strike Price Schedule Notice Negative Whole Pair: 8 bytes --------------- */
@@ -13869,8 +13732,6 @@ static void checks(void) {
   check_net_change_future_options_trade_message_negative_million_pair();
   check_net_change_future_options_trade_message_numeric_pair();
   check_future_product();
-  check_futures_request_for_quote_rfq_message();
-  check_strategy_request_for_quote_rfq_message();
   check_strike_price_schedule_notice_negative_whole_pair();
   check_strike_price_schedule_notice_negative_ten_pair();
   check_strike_price_schedule_notice_negative_hundred_pair();

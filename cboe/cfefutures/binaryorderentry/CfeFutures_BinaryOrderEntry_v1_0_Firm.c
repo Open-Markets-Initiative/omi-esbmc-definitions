@@ -193,7 +193,7 @@ static void check_prevent_match(void) {
   for (size_t i = 0; i < 3; i++) { assert(again[i] == wire[i]); }
 }
 
-/* ---- New Order Message: 129 bytes -------------------------------------------- */
+/* ---- New Order: 129 bytes ---------------------------------------------------- */
 
 /* New order futures message */
 typedef struct {
@@ -221,10 +221,10 @@ typedef struct {
   uint8_t oeo_id[18];                /* bytes 104 to 121 */
   uint8_t frequent_trader_id[6];     /* bytes 122 to 127 */
   uint8_t cust_order_handling_inst;  /* byte 128 */
-} NewOrderMessage;
+} NewOrder;
 
-/* any New Order Message at all: every byte one the checker chooses */
-static void any_new_order_message(NewOrderMessage *record) {
+/* any New Order at all: every byte one the checker chooses */
+static void any_new_order(NewOrder *record) {
   for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = arbitrary(); }
   record->side = arbitrary();
   for (size_t i = 0; i < 4; i++) { record->order_qty[i] = arbitrary(); }
@@ -251,8 +251,8 @@ static void any_new_order_message(NewOrderMessage *record) {
   record->cust_order_handling_inst = arbitrary();
 }
 
-/* New Order Message to the wire: 129 bytes from at, returning where the next byte goes */
-static size_t encode_new_order_message(const NewOrderMessage *record, uint8_t *wire, size_t at) {
+/* New Order to the wire: 129 bytes from at, returning where the next byte goes */
+static size_t encode_new_order(const NewOrder *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id[i]; }
   wire[at++] = record->side;
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->order_qty[i]; }
@@ -281,8 +281,8 @@ static size_t encode_new_order_message(const NewOrderMessage *record, uint8_t *w
   return at;
 }
 
-/* New Order Message off the wire: 129 bytes from at, returning where the next byte lies */
-static size_t decode_new_order_message(NewOrderMessage *record, const uint8_t *wire, size_t at) {
+/* New Order off the wire: 129 bytes from at, returning where the next byte lies */
+static size_t decode_new_order(NewOrder *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = wire[at++]; }
   record->side = wire[at++];
   for (size_t i = 0; i < 4; i++) { record->order_qty[i] = wire[at++]; }
@@ -311,8 +311,8 @@ static size_t decode_new_order_message(NewOrderMessage *record, const uint8_t *w
   return at;
 }
 
-/* what was read of New Order Message is what was written, byte for byte */
-static void equal_new_order_message(const NewOrderMessage *read, const NewOrderMessage *written) {
+/* what was read of New Order is what was written, byte for byte */
+static void equal_new_order(const NewOrder *read, const NewOrder *written) {
   for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id[i] == written->cl_ord_id[i]); }
   assert(read->side == written->side);
   for (size_t i = 0; i < 4; i++) { assert(read->order_qty[i] == written->order_qty[i]); }
@@ -339,25 +339,25 @@ static void equal_new_order_message(const NewOrderMessage *read, const NewOrderM
   assert(read->cust_order_handling_inst == written->cust_order_handling_inst);
 }
 
-/* New Order Message: written and read back, then read and written back */
-static void check_new_order_message(void) {
-  NewOrderMessage sent;
-  NewOrderMessage got;
+/* New Order: written and read back, then read and written back */
+static void check_new_order(void) {
+  NewOrder sent;
+  NewOrder got;
   uint8_t wire[129];
   uint8_t again[129];
 
-  any_new_order_message(&sent);
-  assert(encode_new_order_message(&sent, wire, 0) == 129);
-  assert(decode_new_order_message(&got, wire, 0) == 129);
-  equal_new_order_message(&got, &sent);
+  any_new_order(&sent);
+  assert(encode_new_order(&sent, wire, 0) == 129);
+  assert(decode_new_order(&got, wire, 0) == 129);
+  equal_new_order(&got, &sent);
 
   for (size_t i = 0; i < 129; i++) { wire[i] = arbitrary(); }
-  assert(decode_new_order_message(&got, wire, 0) == 129);
-  assert(encode_new_order_message(&got, again, 0) == 129);
+  assert(decode_new_order(&got, wire, 0) == 129);
+  assert(encode_new_order(&got, again, 0) == 129);
   for (size_t i = 0; i < 129; i++) { assert(again[i] == wire[i]); }
 }
 
-/* ---- Modify Order Message: 92 bytes ------------------------------------------ */
+/* ---- Modify Order: 92 bytes -------------------------------------------------- */
 
 /* Request to modify an order */
 typedef struct {
@@ -373,10 +373,10 @@ typedef struct {
   uint8_t oeo_id[18];                /* bytes 67 to 84 */
   uint8_t frequent_trader_id[6];     /* bytes 85 to 90 */
   uint8_t cust_order_handling_inst;  /* byte 91 */
-} ModifyOrderMessage;
+} ModifyOrder;
 
-/* any Modify Order Message at all: every byte one the checker chooses */
-static void any_modify_order_message(ModifyOrderMessage *record) {
+/* any Modify Order at all: every byte one the checker chooses */
+static void any_modify_order(ModifyOrder *record) {
   for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = arbitrary(); }
   for (size_t i = 0; i < 20; i++) { record->orig_cl_ord_id[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->clearing_firm[i] = arbitrary(); }
@@ -391,8 +391,8 @@ static void any_modify_order_message(ModifyOrderMessage *record) {
   record->cust_order_handling_inst = arbitrary();
 }
 
-/* Modify Order Message to the wire: 92 bytes from at, returning where the next byte goes */
-static size_t encode_modify_order_message(const ModifyOrderMessage *record, uint8_t *wire, size_t at) {
+/* Modify Order to the wire: 92 bytes from at, returning where the next byte goes */
+static size_t encode_modify_order(const ModifyOrder *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 20; i++) { wire[at++] = record->cl_ord_id[i]; }
   for (size_t i = 0; i < 20; i++) { wire[at++] = record->orig_cl_ord_id[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->clearing_firm[i]; }
@@ -409,8 +409,8 @@ static size_t encode_modify_order_message(const ModifyOrderMessage *record, uint
   return at;
 }
 
-/* Modify Order Message off the wire: 92 bytes from at, returning where the next byte lies */
-static size_t decode_modify_order_message(ModifyOrderMessage *record, const uint8_t *wire, size_t at) {
+/* Modify Order off the wire: 92 bytes from at, returning where the next byte lies */
+static size_t decode_modify_order(ModifyOrder *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 20; i++) { record->cl_ord_id[i] = wire[at++]; }
   for (size_t i = 0; i < 20; i++) { record->orig_cl_ord_id[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->clearing_firm[i] = wire[at++]; }
@@ -427,8 +427,8 @@ static size_t decode_modify_order_message(ModifyOrderMessage *record, const uint
   return at;
 }
 
-/* what was read of Modify Order Message is what was written, byte for byte */
-static void equal_modify_order_message(const ModifyOrderMessage *read, const ModifyOrderMessage *written) {
+/* what was read of Modify Order is what was written, byte for byte */
+static void equal_modify_order(const ModifyOrder *read, const ModifyOrder *written) {
   for (size_t i = 0; i < 20; i++) { assert(read->cl_ord_id[i] == written->cl_ord_id[i]); }
   for (size_t i = 0; i < 20; i++) { assert(read->orig_cl_ord_id[i] == written->orig_cl_ord_id[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->clearing_firm[i] == written->clearing_firm[i]); }
@@ -443,25 +443,25 @@ static void equal_modify_order_message(const ModifyOrderMessage *read, const Mod
   assert(read->cust_order_handling_inst == written->cust_order_handling_inst);
 }
 
-/* Modify Order Message: written and read back, then read and written back */
-static void check_modify_order_message(void) {
-  ModifyOrderMessage sent;
-  ModifyOrderMessage got;
+/* Modify Order: written and read back, then read and written back */
+static void check_modify_order(void) {
+  ModifyOrder sent;
+  ModifyOrder got;
   uint8_t wire[92];
   uint8_t again[92];
 
-  any_modify_order_message(&sent);
-  assert(encode_modify_order_message(&sent, wire, 0) == 92);
-  assert(decode_modify_order_message(&got, wire, 0) == 92);
-  equal_modify_order_message(&got, &sent);
+  any_modify_order(&sent);
+  assert(encode_modify_order(&sent, wire, 0) == 92);
+  assert(decode_modify_order(&got, wire, 0) == 92);
+  equal_modify_order(&got, &sent);
 
   for (size_t i = 0; i < 92; i++) { wire[i] = arbitrary(); }
-  assert(decode_modify_order_message(&got, wire, 0) == 92);
-  assert(encode_modify_order_message(&got, again, 0) == 92);
+  assert(decode_modify_order(&got, wire, 0) == 92);
+  assert(encode_modify_order(&got, again, 0) == 92);
   for (size_t i = 0; i < 92; i++) { assert(again[i] == wire[i]); }
 }
 
-/* ---- Cancel Order Message: 43 bytes ------------------------------------------ */
+/* ---- Cancel Order: 43 bytes -------------------------------------------------- */
 
 /* Request to cancel a single order or quote */
 typedef struct {
@@ -469,18 +469,18 @@ typedef struct {
   uint8_t clearing_firm[4];        /* bytes 20 to 23 */
   uint8_t manual_order_indicator;  /* byte 24 */
   uint8_t oeo_id[18];              /* bytes 25 to 42 */
-} CancelOrderMessage;
+} CancelOrder;
 
-/* any Cancel Order Message at all: every byte one the checker chooses */
-static void any_cancel_order_message(CancelOrderMessage *record) {
+/* any Cancel Order at all: every byte one the checker chooses */
+static void any_cancel_order(CancelOrder *record) {
   for (size_t i = 0; i < 20; i++) { record->orig_cl_ord_id[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->clearing_firm[i] = arbitrary(); }
   record->manual_order_indicator = arbitrary();
   for (size_t i = 0; i < 18; i++) { record->oeo_id[i] = arbitrary(); }
 }
 
-/* Cancel Order Message to the wire: 43 bytes from at, returning where the next byte goes */
-static size_t encode_cancel_order_message(const CancelOrderMessage *record, uint8_t *wire, size_t at) {
+/* Cancel Order to the wire: 43 bytes from at, returning where the next byte goes */
+static size_t encode_cancel_order(const CancelOrder *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 20; i++) { wire[at++] = record->orig_cl_ord_id[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->clearing_firm[i]; }
   wire[at++] = record->manual_order_indicator;
@@ -489,8 +489,8 @@ static size_t encode_cancel_order_message(const CancelOrderMessage *record, uint
   return at;
 }
 
-/* Cancel Order Message off the wire: 43 bytes from at, returning where the next byte lies */
-static size_t decode_cancel_order_message(CancelOrderMessage *record, const uint8_t *wire, size_t at) {
+/* Cancel Order off the wire: 43 bytes from at, returning where the next byte lies */
+static size_t decode_cancel_order(CancelOrder *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 20; i++) { record->orig_cl_ord_id[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->clearing_firm[i] = wire[at++]; }
   record->manual_order_indicator = wire[at++];
@@ -499,29 +499,29 @@ static size_t decode_cancel_order_message(CancelOrderMessage *record, const uint
   return at;
 }
 
-/* what was read of Cancel Order Message is what was written, byte for byte */
-static void equal_cancel_order_message(const CancelOrderMessage *read, const CancelOrderMessage *written) {
+/* what was read of Cancel Order is what was written, byte for byte */
+static void equal_cancel_order(const CancelOrder *read, const CancelOrder *written) {
   for (size_t i = 0; i < 20; i++) { assert(read->orig_cl_ord_id[i] == written->orig_cl_ord_id[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->clearing_firm[i] == written->clearing_firm[i]); }
   assert(read->manual_order_indicator == written->manual_order_indicator);
   for (size_t i = 0; i < 18; i++) { assert(read->oeo_id[i] == written->oeo_id[i]); }
 }
 
-/* Cancel Order Message: written and read back, then read and written back */
-static void check_cancel_order_message(void) {
-  CancelOrderMessage sent;
-  CancelOrderMessage got;
+/* Cancel Order: written and read back, then read and written back */
+static void check_cancel_order(void) {
+  CancelOrder sent;
+  CancelOrder got;
   uint8_t wire[43];
   uint8_t again[43];
 
-  any_cancel_order_message(&sent);
-  assert(encode_cancel_order_message(&sent, wire, 0) == 43);
-  assert(decode_cancel_order_message(&got, wire, 0) == 43);
-  equal_cancel_order_message(&got, &sent);
+  any_cancel_order(&sent);
+  assert(encode_cancel_order(&sent, wire, 0) == 43);
+  assert(decode_cancel_order(&got, wire, 0) == 43);
+  equal_cancel_order(&got, &sent);
 
   for (size_t i = 0; i < 43; i++) { wire[i] = arbitrary(); }
-  assert(decode_cancel_order_message(&got, wire, 0) == 43);
-  assert(encode_cancel_order_message(&got, again, 0) == 43);
+  assert(decode_cancel_order(&got, wire, 0) == 43);
+  assert(encode_cancel_order(&got, again, 0) == 43);
   for (size_t i = 0; i < 43; i++) { assert(again[i] == wire[i]); }
 }
 
@@ -598,7 +598,7 @@ static void check_mass_cancel_inst(void) {
   for (size_t i = 0; i < 16; i++) { assert(again[i] == wire[i]); }
 }
 
-/* ---- Mass Cancel Order Message: 65 bytes ------------------------------------- */
+/* ---- Mass Cancel Order: 65 bytes --------------------------------------------- */
 
 /* A Mass Cancel Order message is a request to cancel a group of orders or quotes */
 typedef struct {
@@ -608,10 +608,10 @@ typedef struct {
   MassCancelInst mass_cancel_inst;  /* bytes 30 to 45 */
   uint8_t manual_order_indicator;   /* byte 46 */
   uint8_t oeo_id[18];               /* bytes 47 to 64 */
-} MassCancelOrderMessage;
+} MassCancelOrder;
 
-/* any Mass Cancel Order Message at all: every byte one the checker chooses */
-static void any_mass_cancel_order_message(MassCancelOrderMessage *record) {
+/* any Mass Cancel Order at all: every byte one the checker chooses */
+static void any_mass_cancel_order(MassCancelOrder *record) {
   for (size_t i = 0; i < 20; i++) { record->mass_cancel_id[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->clearing_firm[i] = arbitrary(); }
   for (size_t i = 0; i < 6; i++) { record->product_name[i] = arbitrary(); }
@@ -620,8 +620,8 @@ static void any_mass_cancel_order_message(MassCancelOrderMessage *record) {
   for (size_t i = 0; i < 18; i++) { record->oeo_id[i] = arbitrary(); }
 }
 
-/* Mass Cancel Order Message to the wire: 65 bytes from at, returning where the next byte goes */
-static size_t encode_mass_cancel_order_message(const MassCancelOrderMessage *record, uint8_t *wire, size_t at) {
+/* Mass Cancel Order to the wire: 65 bytes from at, returning where the next byte goes */
+static size_t encode_mass_cancel_order(const MassCancelOrder *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 20; i++) { wire[at++] = record->mass_cancel_id[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->clearing_firm[i]; }
   for (size_t i = 0; i < 6; i++) { wire[at++] = record->product_name[i]; }
@@ -632,8 +632,8 @@ static size_t encode_mass_cancel_order_message(const MassCancelOrderMessage *rec
   return at;
 }
 
-/* Mass Cancel Order Message off the wire: 65 bytes from at, returning where the next byte lies */
-static size_t decode_mass_cancel_order_message(MassCancelOrderMessage *record, const uint8_t *wire, size_t at) {
+/* Mass Cancel Order off the wire: 65 bytes from at, returning where the next byte lies */
+static size_t decode_mass_cancel_order(MassCancelOrder *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 20; i++) { record->mass_cancel_id[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->clearing_firm[i] = wire[at++]; }
   for (size_t i = 0; i < 6; i++) { record->product_name[i] = wire[at++]; }
@@ -644,8 +644,8 @@ static size_t decode_mass_cancel_order_message(MassCancelOrderMessage *record, c
   return at;
 }
 
-/* what was read of Mass Cancel Order Message is what was written, byte for byte */
-static void equal_mass_cancel_order_message(const MassCancelOrderMessage *read, const MassCancelOrderMessage *written) {
+/* what was read of Mass Cancel Order is what was written, byte for byte */
+static void equal_mass_cancel_order(const MassCancelOrder *read, const MassCancelOrder *written) {
   for (size_t i = 0; i < 20; i++) { assert(read->mass_cancel_id[i] == written->mass_cancel_id[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->clearing_firm[i] == written->clearing_firm[i]); }
   for (size_t i = 0; i < 6; i++) { assert(read->product_name[i] == written->product_name[i]); }
@@ -654,25 +654,109 @@ static void equal_mass_cancel_order_message(const MassCancelOrderMessage *read, 
   for (size_t i = 0; i < 18; i++) { assert(read->oeo_id[i] == written->oeo_id[i]); }
 }
 
-/* Mass Cancel Order Message: written and read back, then read and written back */
-static void check_mass_cancel_order_message(void) {
-  MassCancelOrderMessage sent;
-  MassCancelOrderMessage got;
+/* Mass Cancel Order: written and read back, then read and written back */
+static void check_mass_cancel_order(void) {
+  MassCancelOrder sent;
+  MassCancelOrder got;
   uint8_t wire[65];
   uint8_t again[65];
 
-  any_mass_cancel_order_message(&sent);
-  assert(encode_mass_cancel_order_message(&sent, wire, 0) == 65);
-  assert(decode_mass_cancel_order_message(&got, wire, 0) == 65);
-  equal_mass_cancel_order_message(&got, &sent);
+  any_mass_cancel_order(&sent);
+  assert(encode_mass_cancel_order(&sent, wire, 0) == 65);
+  assert(decode_mass_cancel_order(&got, wire, 0) == 65);
+  equal_mass_cancel_order(&got, &sent);
 
   for (size_t i = 0; i < 65; i++) { wire[i] = arbitrary(); }
-  assert(decode_mass_cancel_order_message(&got, wire, 0) == 65);
-  assert(encode_mass_cancel_order_message(&got, again, 0) == 65);
+  assert(decode_mass_cancel_order(&got, wire, 0) == 65);
+  assert(encode_mass_cancel_order(&got, again, 0) == 65);
   for (size_t i = 0; i < 65; i++) { assert(again[i] == wire[i]); }
 }
 
-/* ---- Reset Risk Message: 36 bytes -------------------------------------------- */
+/* ---- Purge Orders: 68 bytes -------------------------------------------------- */
+
+/* Request to cancel a group of orders or quotes across all the TPH's sessions for that port’s matching unit */
+typedef struct {
+  uint8_t mass_cancel_id[20];       /* bytes 0 to 19 */
+  uint8_t clearing_firm[4];         /* bytes 20 to 23 */
+  uint8_t product_name[6];          /* bytes 24 to 29 */
+  MassCancelInst mass_cancel_inst;  /* bytes 30 to 45 */
+  uint8_t manual_order_indicator;   /* byte 46 */
+  uint8_t oeo_id[18];               /* bytes 47 to 64 */
+  uint8_t custom_group_id_cnt;      /* byte 65 */
+  uint8_t custom_group_id[2];       /* bytes 66 to 67 */
+} PurgeOrders;
+
+/* any Purge Orders at all: every byte one the checker chooses */
+static void any_purge_orders(PurgeOrders *record) {
+  for (size_t i = 0; i < 20; i++) { record->mass_cancel_id[i] = arbitrary(); }
+  for (size_t i = 0; i < 4; i++) { record->clearing_firm[i] = arbitrary(); }
+  for (size_t i = 0; i < 6; i++) { record->product_name[i] = arbitrary(); }
+  any_mass_cancel_inst(&record->mass_cancel_inst);
+  record->manual_order_indicator = arbitrary();
+  for (size_t i = 0; i < 18; i++) { record->oeo_id[i] = arbitrary(); }
+  record->custom_group_id_cnt = arbitrary();
+  for (size_t i = 0; i < 2; i++) { record->custom_group_id[i] = arbitrary(); }
+}
+
+/* Purge Orders to the wire: 68 bytes from at, returning where the next byte goes */
+static size_t encode_purge_orders(const PurgeOrders *record, uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 20; i++) { wire[at++] = record->mass_cancel_id[i]; }
+  for (size_t i = 0; i < 4; i++) { wire[at++] = record->clearing_firm[i]; }
+  for (size_t i = 0; i < 6; i++) { wire[at++] = record->product_name[i]; }
+  at = encode_mass_cancel_inst(&record->mass_cancel_inst, wire, at);
+  wire[at++] = record->manual_order_indicator;
+  for (size_t i = 0; i < 18; i++) { wire[at++] = record->oeo_id[i]; }
+  wire[at++] = record->custom_group_id_cnt;
+  for (size_t i = 0; i < 2; i++) { wire[at++] = record->custom_group_id[i]; }
+
+  return at;
+}
+
+/* Purge Orders off the wire: 68 bytes from at, returning where the next byte lies */
+static size_t decode_purge_orders(PurgeOrders *record, const uint8_t *wire, size_t at) {
+  for (size_t i = 0; i < 20; i++) { record->mass_cancel_id[i] = wire[at++]; }
+  for (size_t i = 0; i < 4; i++) { record->clearing_firm[i] = wire[at++]; }
+  for (size_t i = 0; i < 6; i++) { record->product_name[i] = wire[at++]; }
+  at = decode_mass_cancel_inst(&record->mass_cancel_inst, wire, at);
+  record->manual_order_indicator = wire[at++];
+  for (size_t i = 0; i < 18; i++) { record->oeo_id[i] = wire[at++]; }
+  record->custom_group_id_cnt = wire[at++];
+  for (size_t i = 0; i < 2; i++) { record->custom_group_id[i] = wire[at++]; }
+
+  return at;
+}
+
+/* what was read of Purge Orders is what was written, byte for byte */
+static void equal_purge_orders(const PurgeOrders *read, const PurgeOrders *written) {
+  for (size_t i = 0; i < 20; i++) { assert(read->mass_cancel_id[i] == written->mass_cancel_id[i]); }
+  for (size_t i = 0; i < 4; i++) { assert(read->clearing_firm[i] == written->clearing_firm[i]); }
+  for (size_t i = 0; i < 6; i++) { assert(read->product_name[i] == written->product_name[i]); }
+  equal_mass_cancel_inst(&read->mass_cancel_inst, &written->mass_cancel_inst);
+  assert(read->manual_order_indicator == written->manual_order_indicator);
+  for (size_t i = 0; i < 18; i++) { assert(read->oeo_id[i] == written->oeo_id[i]); }
+  assert(read->custom_group_id_cnt == written->custom_group_id_cnt);
+  for (size_t i = 0; i < 2; i++) { assert(read->custom_group_id[i] == written->custom_group_id[i]); }
+}
+
+/* Purge Orders: written and read back, then read and written back */
+static void check_purge_orders(void) {
+  PurgeOrders sent;
+  PurgeOrders got;
+  uint8_t wire[68];
+  uint8_t again[68];
+
+  any_purge_orders(&sent);
+  assert(encode_purge_orders(&sent, wire, 0) == 68);
+  assert(decode_purge_orders(&got, wire, 0) == 68);
+  equal_purge_orders(&got, &sent);
+
+  for (size_t i = 0; i < 68; i++) { wire[i] = arbitrary(); }
+  assert(decode_purge_orders(&got, wire, 0) == 68);
+  assert(encode_purge_orders(&got, again, 0) == 68);
+  for (size_t i = 0; i < 68; i++) { assert(again[i] == wire[i]); }
+}
+
+/* ---- Reset Risk: 36 bytes ---------------------------------------------------- */
 
 /* Reset or release Firm/EFID, Product, or Custom Group Id level lockout conditions resulting from risk profile trips or self-imposed lockouts issued viaMass Cancel Order or Purge Orders messages */
 typedef struct {
@@ -681,10 +765,10 @@ typedef struct {
   uint8_t clearing_firm[4];    /* bytes 24 to 27 */
   uint8_t product_name[6];     /* bytes 28 to 33 */
   uint8_t custom_group_id[2];  /* bytes 34 to 35 */
-} ResetRiskMessage;
+} ResetRisk;
 
-/* any Reset Risk Message at all: every byte one the checker chooses */
-static void any_reset_risk_message(ResetRiskMessage *record) {
+/* any Reset Risk at all: every byte one the checker chooses */
+static void any_reset_risk(ResetRisk *record) {
   for (size_t i = 0; i < 16; i++) { record->risk_status_id[i] = arbitrary(); }
   for (size_t i = 0; i < 8; i++) { record->risk_reset[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->clearing_firm[i] = arbitrary(); }
@@ -692,8 +776,8 @@ static void any_reset_risk_message(ResetRiskMessage *record) {
   for (size_t i = 0; i < 2; i++) { record->custom_group_id[i] = arbitrary(); }
 }
 
-/* Reset Risk Message to the wire: 36 bytes from at, returning where the next byte goes */
-static size_t encode_reset_risk_message(const ResetRiskMessage *record, uint8_t *wire, size_t at) {
+/* Reset Risk to the wire: 36 bytes from at, returning where the next byte goes */
+static size_t encode_reset_risk(const ResetRisk *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 16; i++) { wire[at++] = record->risk_status_id[i]; }
   for (size_t i = 0; i < 8; i++) { wire[at++] = record->risk_reset[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->clearing_firm[i]; }
@@ -703,8 +787,8 @@ static size_t encode_reset_risk_message(const ResetRiskMessage *record, uint8_t 
   return at;
 }
 
-/* Reset Risk Message off the wire: 36 bytes from at, returning where the next byte lies */
-static size_t decode_reset_risk_message(ResetRiskMessage *record, const uint8_t *wire, size_t at) {
+/* Reset Risk off the wire: 36 bytes from at, returning where the next byte lies */
+static size_t decode_reset_risk(ResetRisk *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 16; i++) { record->risk_status_id[i] = wire[at++]; }
   for (size_t i = 0; i < 8; i++) { record->risk_reset[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->clearing_firm[i] = wire[at++]; }
@@ -714,8 +798,8 @@ static size_t decode_reset_risk_message(ResetRiskMessage *record, const uint8_t 
   return at;
 }
 
-/* what was read of Reset Risk Message is what was written, byte for byte */
-static void equal_reset_risk_message(const ResetRiskMessage *read, const ResetRiskMessage *written) {
+/* what was read of Reset Risk is what was written, byte for byte */
+static void equal_reset_risk(const ResetRisk *read, const ResetRisk *written) {
   for (size_t i = 0; i < 16; i++) { assert(read->risk_status_id[i] == written->risk_status_id[i]); }
   for (size_t i = 0; i < 8; i++) { assert(read->risk_reset[i] == written->risk_reset[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->clearing_firm[i] == written->clearing_firm[i]); }
@@ -723,21 +807,21 @@ static void equal_reset_risk_message(const ResetRiskMessage *read, const ResetRi
   for (size_t i = 0; i < 2; i++) { assert(read->custom_group_id[i] == written->custom_group_id[i]); }
 }
 
-/* Reset Risk Message: written and read back, then read and written back */
-static void check_reset_risk_message(void) {
-  ResetRiskMessage sent;
-  ResetRiskMessage got;
+/* Reset Risk: written and read back, then read and written back */
+static void check_reset_risk(void) {
+  ResetRisk sent;
+  ResetRisk got;
   uint8_t wire[36];
   uint8_t again[36];
 
-  any_reset_risk_message(&sent);
-  assert(encode_reset_risk_message(&sent, wire, 0) == 36);
-  assert(decode_reset_risk_message(&got, wire, 0) == 36);
-  equal_reset_risk_message(&got, &sent);
+  any_reset_risk(&sent);
+  assert(encode_reset_risk(&sent, wire, 0) == 36);
+  assert(decode_reset_risk(&got, wire, 0) == 36);
+  equal_reset_risk(&got, &sent);
 
   for (size_t i = 0; i < 36; i++) { wire[i] = arbitrary(); }
-  assert(decode_reset_risk_message(&got, wire, 0) == 36);
-  assert(encode_reset_risk_message(&got, again, 0) == 36);
+  assert(decode_reset_risk(&got, wire, 0) == 36);
+  assert(encode_reset_risk(&got, again, 0) == 36);
   for (size_t i = 0; i < 36; i++) { assert(again[i] == wire[i]); }
 }
 
@@ -747,12 +831,13 @@ static void check_reset_risk_message(void) {
 static void checks(void) {
   check_firm_message_header();
   check_prevent_match();
-  check_new_order_message();
-  check_modify_order_message();
-  check_cancel_order_message();
+  check_new_order();
+  check_modify_order();
+  check_cancel_order();
   check_mass_cancel_inst();
-  check_mass_cancel_order_message();
-  check_reset_risk_message();
+  check_mass_cancel_order();
+  check_purge_orders();
+  check_reset_risk();
 }
 
 int main(void) {
