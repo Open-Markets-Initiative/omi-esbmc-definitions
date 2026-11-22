@@ -1,4 +1,4 @@
-// cboe/c1options/complex/C1Options_Complex_v2_1_18.c
+// cboe/c1options/complex/C1Options_Complex_Pitch_v2_1_18.c
 /*
  * Chicago Board Options Exchange Complex
  *

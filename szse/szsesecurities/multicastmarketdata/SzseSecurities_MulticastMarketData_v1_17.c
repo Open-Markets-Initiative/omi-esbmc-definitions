@@ -24,6 +24,7 @@
  *   - a field present only on a condition
  *   - a run counted by a field
  *   - a length prefix framing what follows
+ *   - a Integrity rule
  *
  * License: MIT No Attribution
  */
@@ -1910,55 +1911,6 @@ static void check_transaction_tick_data_of_bid_quotation_message(void) {
   for (size_t i = 0; i < 95; i++) { assert(again[i] == wire[i]); }
 }
 
-/* ---- Packet Trailer: 4 bytes ------------------------------------------------- */
-
-/* Szse Mddp Packet Trailer, transmitted without encryption */
-typedef struct {
-  uint8_t checksum[4];  /* bytes 0 to 3 */
-} PacketTrailer;
-
-/* any Packet Trailer at all: every byte one the checker chooses */
-static void any_packet_trailer(PacketTrailer *record) {
-  for (size_t i = 0; i < 4; i++) { record->checksum[i] = arbitrary(); }
-}
-
-/* Packet Trailer to the wire: 4 bytes from at, returning where the next byte goes */
-static size_t encode_packet_trailer(const PacketTrailer *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->checksum[i]; }
-
-  return at;
-}
-
-/* Packet Trailer off the wire: 4 bytes from at, returning where the next byte lies */
-static size_t decode_packet_trailer(PacketTrailer *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 4; i++) { record->checksum[i] = wire[at++]; }
-
-  return at;
-}
-
-/* what was read of Packet Trailer is what was written, byte for byte */
-static void equal_packet_trailer(const PacketTrailer *read, const PacketTrailer *written) {
-  for (size_t i = 0; i < 4; i++) { assert(read->checksum[i] == written->checksum[i]); }
-}
-
-/* Packet Trailer: written and read back, then read and written back */
-static void check_packet_trailer(void) {
-  PacketTrailer sent;
-  PacketTrailer got;
-  uint8_t wire[4];
-  uint8_t again[4];
-
-  any_packet_trailer(&sent);
-  assert(encode_packet_trailer(&sent, wire, 0) == 4);
-  assert(decode_packet_trailer(&got, wire, 0) == 4);
-  equal_packet_trailer(&got, &sent);
-
-  for (size_t i = 0; i < 4; i++) { wire[i] = arbitrary(); }
-  assert(decode_packet_trailer(&got, wire, 0) == 4);
-  assert(encode_packet_trailer(&got, again, 0) == 4);
-  for (size_t i = 0; i < 4; i++) { assert(again[i] == wire[i]); }
-}
-
 /* ---- What esbmc checks ------------------------------------------------------- */
 
 /* every record of the protocol, each on its own buffers */
@@ -1982,7 +1934,6 @@ static void checks(void) {
   check_transaction_tick_data_of_bond_general_pledged_repo_message();
   check_transaction_tick_data_of_spot_bond_trading_quotation_message();
   check_transaction_tick_data_of_bid_quotation_message();
-  check_packet_trailer();
 }
 
 int main(void) {

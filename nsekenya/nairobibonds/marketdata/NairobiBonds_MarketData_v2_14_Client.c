@@ -1,6 +1,6 @@
-// nairobi/nairobiderivatives/marketdata/NairobiDerivatives_MarketData_v2_14_Client.c
+// nsekenya/nairobibonds/marketdata/NairobiBonds_MarketData_v2_14_Client.c
 /*
- * Nairobi Securities Exchange Nairobi Derivatives Market Data
+ * Nairobi Securities Exchange Nairobi Bonds Market Data
  *
  * Generated from the binary model. Every record is a run of fields, and esbmc checks two
  * claims of each, for every value its bytes can take rather than for chosen ones: that any

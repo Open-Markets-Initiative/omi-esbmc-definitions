@@ -20,6 +20,7 @@
  *
  * What this definition does not state, and the model does:
  *   - a Reassemble rule
+ *   - a Integrity rule
  *   - a run counted by a field
  *   - a field present only on a condition
  *
@@ -61,75 +62,6 @@ static uint8_t arbitrary(void) {
 }
 
 #endif
-
-/* ---- Block Header: 10 bytes -------------------------------------------------- */
-
-/* Cta participant input block header */
-typedef struct {
-  uint8_t version;                   /* byte 0 */
-  uint8_t block_size[2];             /* bytes 1 to 2 */
-  uint8_t block_sequence_number[4];  /* bytes 3 to 6 */
-  uint8_t messages_in_block;         /* byte 7 */
-  uint8_t block_checksum[2];         /* bytes 8 to 9 */
-} BlockHeader;
-
-/* any Block Header at all: every byte one the checker chooses */
-static void any_block_header(BlockHeader *record) {
-  record->version = arbitrary();
-  for (size_t i = 0; i < 2; i++) { record->block_size[i] = arbitrary(); }
-  for (size_t i = 0; i < 4; i++) { record->block_sequence_number[i] = arbitrary(); }
-  record->messages_in_block = arbitrary();
-  for (size_t i = 0; i < 2; i++) { record->block_checksum[i] = arbitrary(); }
-}
-
-/* Block Header to the wire: 10 bytes from at, returning where the next byte goes */
-static size_t encode_block_header(const BlockHeader *record, uint8_t *wire, size_t at) {
-  wire[at++] = record->version;
-  for (size_t i = 0; i < 2; i++) { wire[at++] = record->block_size[i]; }
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->block_sequence_number[i]; }
-  wire[at++] = record->messages_in_block;
-  for (size_t i = 0; i < 2; i++) { wire[at++] = record->block_checksum[i]; }
-
-  return at;
-}
-
-/* Block Header off the wire: 10 bytes from at, returning where the next byte lies */
-static size_t decode_block_header(BlockHeader *record, const uint8_t *wire, size_t at) {
-  record->version = wire[at++];
-  for (size_t i = 0; i < 2; i++) { record->block_size[i] = wire[at++]; }
-  for (size_t i = 0; i < 4; i++) { record->block_sequence_number[i] = wire[at++]; }
-  record->messages_in_block = wire[at++];
-  for (size_t i = 0; i < 2; i++) { record->block_checksum[i] = wire[at++]; }
-
-  return at;
-}
-
-/* what was read of Block Header is what was written, byte for byte */
-static void equal_block_header(const BlockHeader *read, const BlockHeader *written) {
-  assert(read->version == written->version);
-  for (size_t i = 0; i < 2; i++) { assert(read->block_size[i] == written->block_size[i]); }
-  for (size_t i = 0; i < 4; i++) { assert(read->block_sequence_number[i] == written->block_sequence_number[i]); }
-  assert(read->messages_in_block == written->messages_in_block);
-  for (size_t i = 0; i < 2; i++) { assert(read->block_checksum[i] == written->block_checksum[i]); }
-}
-
-/* Block Header: written and read back, then read and written back */
-static void check_block_header(void) {
-  BlockHeader sent;
-  BlockHeader got;
-  uint8_t wire[10];
-  uint8_t again[10];
-
-  any_block_header(&sent);
-  assert(encode_block_header(&sent, wire, 0) == 10);
-  assert(decode_block_header(&got, wire, 0) == 10);
-  equal_block_header(&got, &sent);
-
-  for (size_t i = 0; i < 10; i++) { wire[i] = arbitrary(); }
-  assert(decode_block_header(&got, wire, 0) == 10);
-  assert(encode_block_header(&got, again, 0) == 10);
-  for (size_t i = 0; i < 10; i++) { assert(again[i] == wire[i]); }
-}
 
 /* ---- Timestamp 1: 8 bytes ---------------------------------------------------- */
 
@@ -1137,7 +1069,6 @@ static void check_trading_status_message(void) {
 
 /* every record of the protocol, each on its own buffers */
 static void checks(void) {
-  check_block_header();
   check_timestamp1();
   check_message_header();
   check_rejection_message();

@@ -19,6 +19,7 @@
  * tried without the checker. That run is a test, and the checker's is the claim.
  *
  * What this definition does not state, and the model does:
+ *   - a Integrity rule
  *   - a run counted by a field
  *   - the dispatch that chooses a message by its type
  *
@@ -113,95 +114,6 @@ static void check_sip_block_timestamp(void) {
   assert(decode_sip_block_timestamp(&got, wire, 0) == 8);
   assert(encode_sip_block_timestamp(&got, again, 0) == 8);
   for (size_t i = 0; i < 8; i++) { assert(again[i] == wire[i]); }
-}
-
-/* ---- Block Header: 24 bytes -------------------------------------------------- */
-
-/* Cqs Snapshot packet header */
-typedef struct {
-  uint8_t version;                        /* byte 0 */
-  uint8_t block_size[2];                  /* bytes 1 to 2 */
-  uint8_t block_sequence_number[4];       /* bytes 3 to 6 */
-  uint8_t messages_in_block;              /* byte 7 */
-  uint8_t deliveryflag;                   /* byte 8 */
-  uint8_t lastseqnum[4];                  /* bytes 9 to 12 */
-  uint8_t totpubseqrollover;              /* byte 13 */
-  SipBlockTimestamp sip_block_timestamp;  /* bytes 14 to 21 */
-  uint8_t block_checksum[2];              /* bytes 22 to 23 */
-} BlockHeader;
-
-/* any Block Header at all: every byte one the checker chooses */
-static void any_block_header(BlockHeader *record) {
-  record->version = arbitrary();
-  for (size_t i = 0; i < 2; i++) { record->block_size[i] = arbitrary(); }
-  for (size_t i = 0; i < 4; i++) { record->block_sequence_number[i] = arbitrary(); }
-  record->messages_in_block = arbitrary();
-  record->deliveryflag = arbitrary();
-  for (size_t i = 0; i < 4; i++) { record->lastseqnum[i] = arbitrary(); }
-  record->totpubseqrollover = arbitrary();
-  any_sip_block_timestamp(&record->sip_block_timestamp);
-  for (size_t i = 0; i < 2; i++) { record->block_checksum[i] = arbitrary(); }
-}
-
-/* Block Header to the wire: 24 bytes from at, returning where the next byte goes */
-static size_t encode_block_header(const BlockHeader *record, uint8_t *wire, size_t at) {
-  wire[at++] = record->version;
-  for (size_t i = 0; i < 2; i++) { wire[at++] = record->block_size[i]; }
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->block_sequence_number[i]; }
-  wire[at++] = record->messages_in_block;
-  wire[at++] = record->deliveryflag;
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->lastseqnum[i]; }
-  wire[at++] = record->totpubseqrollover;
-  at = encode_sip_block_timestamp(&record->sip_block_timestamp, wire, at);
-  for (size_t i = 0; i < 2; i++) { wire[at++] = record->block_checksum[i]; }
-
-  return at;
-}
-
-/* Block Header off the wire: 24 bytes from at, returning where the next byte lies */
-static size_t decode_block_header(BlockHeader *record, const uint8_t *wire, size_t at) {
-  record->version = wire[at++];
-  for (size_t i = 0; i < 2; i++) { record->block_size[i] = wire[at++]; }
-  for (size_t i = 0; i < 4; i++) { record->block_sequence_number[i] = wire[at++]; }
-  record->messages_in_block = wire[at++];
-  record->deliveryflag = wire[at++];
-  for (size_t i = 0; i < 4; i++) { record->lastseqnum[i] = wire[at++]; }
-  record->totpubseqrollover = wire[at++];
-  at = decode_sip_block_timestamp(&record->sip_block_timestamp, wire, at);
-  for (size_t i = 0; i < 2; i++) { record->block_checksum[i] = wire[at++]; }
-
-  return at;
-}
-
-/* what was read of Block Header is what was written, byte for byte */
-static void equal_block_header(const BlockHeader *read, const BlockHeader *written) {
-  assert(read->version == written->version);
-  for (size_t i = 0; i < 2; i++) { assert(read->block_size[i] == written->block_size[i]); }
-  for (size_t i = 0; i < 4; i++) { assert(read->block_sequence_number[i] == written->block_sequence_number[i]); }
-  assert(read->messages_in_block == written->messages_in_block);
-  assert(read->deliveryflag == written->deliveryflag);
-  for (size_t i = 0; i < 4; i++) { assert(read->lastseqnum[i] == written->lastseqnum[i]); }
-  assert(read->totpubseqrollover == written->totpubseqrollover);
-  equal_sip_block_timestamp(&read->sip_block_timestamp, &written->sip_block_timestamp);
-  for (size_t i = 0; i < 2; i++) { assert(read->block_checksum[i] == written->block_checksum[i]); }
-}
-
-/* Block Header: written and read back, then read and written back */
-static void check_block_header(void) {
-  BlockHeader sent;
-  BlockHeader got;
-  uint8_t wire[24];
-  uint8_t again[24];
-
-  any_block_header(&sent);
-  assert(encode_block_header(&sent, wire, 0) == 24);
-  assert(decode_block_header(&got, wire, 0) == 24);
-  equal_block_header(&got, &sent);
-
-  for (size_t i = 0; i < 24; i++) { wire[i] = arbitrary(); }
-  assert(decode_block_header(&got, wire, 0) == 24);
-  assert(encode_block_header(&got, again, 0) == 24);
-  for (size_t i = 0; i < 24; i++) { assert(again[i] == wire[i]); }
 }
 
 /* ---- Line Integrity Message: 1 byte ------------------------------------------ */
@@ -724,7 +636,6 @@ static void check_finra_snapshot_message(void) {
 /* every record of the protocol, each on its own buffers */
 static void checks(void) {
   check_sip_block_timestamp();
-  check_block_header();
   check_line_integrity_message();
   check_market_wide_circuit_breaker_decline_level_status_snapshot_message();
   check_consolidated_snapshot_message();

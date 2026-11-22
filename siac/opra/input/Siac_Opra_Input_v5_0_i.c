@@ -20,6 +20,7 @@
  *
  * What this definition does not state, and the model does:
  *   - a Reassemble rule
+ *   - a Integrity rule
  *   - a run counted by a field
  *   - the dispatch that chooses a message by its type
  *   - a length prefix framing what follows
@@ -115,95 +116,6 @@ static void check_block_timestamp(void) {
   assert(decode_block_timestamp(&got, wire, 0) == 8);
   assert(encode_block_timestamp(&got, again, 0) == 8);
   for (size_t i = 0; i < 8; i++) { assert(again[i] == wire[i]); }
-}
-
-/* ---- Block Header: 21 bytes -------------------------------------------------- */
-
-/* Opra Tcp block header */
-typedef struct {
-  uint8_t version;                   /* byte 0 */
-  uint8_t block_size[2];             /* bytes 1 to 2 */
-  uint8_t reserved;                  /* byte 3 */
-  uint8_t second_reserved;           /* byte 4 */
-  uint8_t third_reserved;            /* byte 5 */
-  uint8_t block_sequence_number[4];  /* bytes 6 to 9 */
-  uint8_t messages_in_block;         /* byte 10 */
-  BlockTimestamp block_timestamp;    /* bytes 11 to 18 */
-  uint8_t block_checksum[2];         /* bytes 19 to 20 */
-} BlockHeader;
-
-/* any Block Header at all: every byte one the checker chooses */
-static void any_block_header(BlockHeader *record) {
-  record->version = arbitrary();
-  for (size_t i = 0; i < 2; i++) { record->block_size[i] = arbitrary(); }
-  record->reserved = arbitrary();
-  record->second_reserved = arbitrary();
-  record->third_reserved = arbitrary();
-  for (size_t i = 0; i < 4; i++) { record->block_sequence_number[i] = arbitrary(); }
-  record->messages_in_block = arbitrary();
-  any_block_timestamp(&record->block_timestamp);
-  for (size_t i = 0; i < 2; i++) { record->block_checksum[i] = arbitrary(); }
-}
-
-/* Block Header to the wire: 21 bytes from at, returning where the next byte goes */
-static size_t encode_block_header(const BlockHeader *record, uint8_t *wire, size_t at) {
-  wire[at++] = record->version;
-  for (size_t i = 0; i < 2; i++) { wire[at++] = record->block_size[i]; }
-  wire[at++] = record->reserved;
-  wire[at++] = record->second_reserved;
-  wire[at++] = record->third_reserved;
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->block_sequence_number[i]; }
-  wire[at++] = record->messages_in_block;
-  at = encode_block_timestamp(&record->block_timestamp, wire, at);
-  for (size_t i = 0; i < 2; i++) { wire[at++] = record->block_checksum[i]; }
-
-  return at;
-}
-
-/* Block Header off the wire: 21 bytes from at, returning where the next byte lies */
-static size_t decode_block_header(BlockHeader *record, const uint8_t *wire, size_t at) {
-  record->version = wire[at++];
-  for (size_t i = 0; i < 2; i++) { record->block_size[i] = wire[at++]; }
-  record->reserved = wire[at++];
-  record->second_reserved = wire[at++];
-  record->third_reserved = wire[at++];
-  for (size_t i = 0; i < 4; i++) { record->block_sequence_number[i] = wire[at++]; }
-  record->messages_in_block = wire[at++];
-  at = decode_block_timestamp(&record->block_timestamp, wire, at);
-  for (size_t i = 0; i < 2; i++) { record->block_checksum[i] = wire[at++]; }
-
-  return at;
-}
-
-/* what was read of Block Header is what was written, byte for byte */
-static void equal_block_header(const BlockHeader *read, const BlockHeader *written) {
-  assert(read->version == written->version);
-  for (size_t i = 0; i < 2; i++) { assert(read->block_size[i] == written->block_size[i]); }
-  assert(read->reserved == written->reserved);
-  assert(read->second_reserved == written->second_reserved);
-  assert(read->third_reserved == written->third_reserved);
-  for (size_t i = 0; i < 4; i++) { assert(read->block_sequence_number[i] == written->block_sequence_number[i]); }
-  assert(read->messages_in_block == written->messages_in_block);
-  equal_block_timestamp(&read->block_timestamp, &written->block_timestamp);
-  for (size_t i = 0; i < 2; i++) { assert(read->block_checksum[i] == written->block_checksum[i]); }
-}
-
-/* Block Header: written and read back, then read and written back */
-static void check_block_header(void) {
-  BlockHeader sent;
-  BlockHeader got;
-  uint8_t wire[21];
-  uint8_t again[21];
-
-  any_block_header(&sent);
-  assert(encode_block_header(&sent, wire, 0) == 21);
-  assert(decode_block_header(&got, wire, 0) == 21);
-  equal_block_header(&got, &sent);
-
-  for (size_t i = 0; i < 21; i++) { wire[i] = arbitrary(); }
-  assert(decode_block_header(&got, wire, 0) == 21);
-  assert(encode_block_header(&got, again, 0) == 21);
-  for (size_t i = 0; i < 21; i++) { assert(again[i] == wire[i]); }
 }
 
 /* ---- Message Header: 2 bytes ------------------------------------------------- */
@@ -1218,7 +1130,6 @@ static void check_underlying_value_bid_and_offer_message(void) {
 /* every record of the protocol, each on its own buffers */
 static void checks(void) {
   check_block_timestamp();
-  check_block_header();
   check_message_header();
   check_expiration_block();
   check_equity_and_index_last_sale_message();

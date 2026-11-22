@@ -22,6 +22,7 @@
  *   - the dispatch that chooses a message by its type
  *   - a run counted by a field
  *   - a length prefix framing what follows
+ *   - a Integrity rule
  *
  * License: MIT No Attribution
  */
@@ -1080,55 +1081,6 @@ static void check_securities_lending_trade_tick_message(void) {
   for (size_t i = 0; i < 74; i++) { assert(again[i] == wire[i]); }
 }
 
-/* ---- Message Tail: 4 bytes --------------------------------------------------- */
-
-/* Bjse Bjqg Message Tail, defining the checksum of a message, transmitted without encryption */
-typedef struct {
-  uint8_t checksum[4];  /* bytes 0 to 3 */
-} MessageTail;
-
-/* any Message Tail at all: every byte one the checker chooses */
-static void any_message_tail(MessageTail *record) {
-  for (size_t i = 0; i < 4; i++) { record->checksum[i] = arbitrary(); }
-}
-
-/* Message Tail to the wire: 4 bytes from at, returning where the next byte goes */
-static size_t encode_message_tail(const MessageTail *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 4; i++) { wire[at++] = record->checksum[i]; }
-
-  return at;
-}
-
-/* Message Tail off the wire: 4 bytes from at, returning where the next byte lies */
-static size_t decode_message_tail(MessageTail *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 4; i++) { record->checksum[i] = wire[at++]; }
-
-  return at;
-}
-
-/* what was read of Message Tail is what was written, byte for byte */
-static void equal_message_tail(const MessageTail *read, const MessageTail *written) {
-  for (size_t i = 0; i < 4; i++) { assert(read->checksum[i] == written->checksum[i]); }
-}
-
-/* Message Tail: written and read back, then read and written back */
-static void check_message_tail(void) {
-  MessageTail sent;
-  MessageTail got;
-  uint8_t wire[4];
-  uint8_t again[4];
-
-  any_message_tail(&sent);
-  assert(encode_message_tail(&sent, wire, 0) == 4);
-  assert(decode_message_tail(&got, wire, 0) == 4);
-  equal_message_tail(&got, &sent);
-
-  for (size_t i = 0; i < 4; i++) { wire[i] = arbitrary(); }
-  assert(decode_message_tail(&got, wire, 0) == 4);
-  assert(encode_message_tail(&got, again, 0) == 4);
-  for (size_t i = 0; i < 4; i++) { assert(again[i] == wire[i]); }
-}
-
 /* ---- What esbmc checks ------------------------------------------------------- */
 
 /* every record of the protocol, each on its own buffers */
@@ -1145,7 +1097,6 @@ static void checks(void) {
   check_bond_spot_matching_large_trade_tick_message();
   check_bond_spot_negotiated_trade_tick_message();
   check_securities_lending_trade_tick_message();
-  check_message_tail();
 }
 
 int main(void) {

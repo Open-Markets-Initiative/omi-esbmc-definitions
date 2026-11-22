@@ -1,4 +1,4 @@
-// nairobi/nairobiequities/realtime/NairobiEquities_RealTime_v1_22.c
+// nsekenya/nairobiequities/realtime/NairobiEquities_RealTime_v1_22.c
 /*
  * Nairobi Securities Exchange Nairobi Equities Real Time
  *

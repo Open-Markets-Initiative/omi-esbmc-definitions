@@ -20,6 +20,7 @@
  *
  * What this definition does not state, and the model does:
  *   - a run filling what frames it
+ *   - a Integrity rule
  *   - a run of a stated number of entries
  *   - a Composite rule
  *   - the dispatch that chooses a message by its type
@@ -65,36 +66,32 @@ static uint8_t arbitrary(void) {
 
 #endif
 
-/* ---- Packet Header: 22 bytes ------------------------------------------------- */
+/* ---- Packet Header: 6 bytes -------------------------------------------------- */
 
-/* Direct interface twenty two byte packet header */
+/* Packet Length and Sequence number, the first six bytes of the direct interface's twenty two byte packet header; its last sixteen open each packet body branch */
 typedef struct {
   uint8_t packet_length[2];           /* bytes 0 to 1 */
   uint8_t packet_sequence_number[4];  /* bytes 2 to 5 */
-  uint8_t checksum[16];               /* bytes 6 to 21 */
 } PacketHeader;
 
 /* any Packet Header at all: every byte one the checker chooses */
 static void any_packet_header(PacketHeader *record) {
   for (size_t i = 0; i < 2; i++) { record->packet_length[i] = arbitrary(); }
   for (size_t i = 0; i < 4; i++) { record->packet_sequence_number[i] = arbitrary(); }
-  for (size_t i = 0; i < 16; i++) { record->checksum[i] = arbitrary(); }
 }
 
-/* Packet Header to the wire: 22 bytes from at, returning where the next byte goes */
+/* Packet Header to the wire: 6 bytes from at, returning where the next byte goes */
 static size_t encode_packet_header(const PacketHeader *record, uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 2; i++) { wire[at++] = record->packet_length[i]; }
   for (size_t i = 0; i < 4; i++) { wire[at++] = record->packet_sequence_number[i]; }
-  for (size_t i = 0; i < 16; i++) { wire[at++] = record->checksum[i]; }
 
   return at;
 }
 
-/* Packet Header off the wire: 22 bytes from at, returning where the next byte lies */
+/* Packet Header off the wire: 6 bytes from at, returning where the next byte lies */
 static size_t decode_packet_header(PacketHeader *record, const uint8_t *wire, size_t at) {
   for (size_t i = 0; i < 2; i++) { record->packet_length[i] = wire[at++]; }
   for (size_t i = 0; i < 4; i++) { record->packet_sequence_number[i] = wire[at++]; }
-  for (size_t i = 0; i < 16; i++) { record->checksum[i] = wire[at++]; }
 
   return at;
 }
@@ -103,25 +100,24 @@ static size_t decode_packet_header(PacketHeader *record, const uint8_t *wire, si
 static void equal_packet_header(const PacketHeader *read, const PacketHeader *written) {
   for (size_t i = 0; i < 2; i++) { assert(read->packet_length[i] == written->packet_length[i]); }
   for (size_t i = 0; i < 4; i++) { assert(read->packet_sequence_number[i] == written->packet_sequence_number[i]); }
-  for (size_t i = 0; i < 16; i++) { assert(read->checksum[i] == written->checksum[i]); }
 }
 
 /* Packet Header: written and read back, then read and written back */
 static void check_packet_header(void) {
   PacketHeader sent;
   PacketHeader got;
-  uint8_t wire[22];
-  uint8_t again[22];
+  uint8_t wire[6];
+  uint8_t again[6];
 
   any_packet_header(&sent);
-  assert(encode_packet_header(&sent, wire, 0) == 22);
-  assert(decode_packet_header(&got, wire, 0) == 22);
+  assert(encode_packet_header(&sent, wire, 0) == 6);
+  assert(decode_packet_header(&got, wire, 0) == 6);
   equal_packet_header(&got, &sent);
 
-  for (size_t i = 0; i < 22; i++) { wire[i] = arbitrary(); }
-  assert(decode_packet_header(&got, wire, 0) == 22);
-  assert(encode_packet_header(&got, again, 0) == 22);
-  for (size_t i = 0; i < 22; i++) { assert(again[i] == wire[i]); }
+  for (size_t i = 0; i < 6; i++) { wire[i] = arbitrary(); }
+  assert(decode_packet_header(&got, wire, 0) == 6);
+  assert(encode_packet_header(&got, again, 0) == 6);
+  for (size_t i = 0; i < 6; i++) { assert(again[i] == wire[i]); }
 }
 
 /* ---- Message Header: 40 bytes ------------------------------------------------ */

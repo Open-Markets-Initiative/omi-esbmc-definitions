@@ -1,4 +1,4 @@
-// nairobi/nairobiequities/snapshot/NairobiEquities_Snapshot_v1_22.c
+// nsekenya/nairobiequities/snapshot/NairobiEquities_Snapshot_v1_22.c
 /*
  * Nairobi Securities Exchange Nairobi Equities Snapshot
  *

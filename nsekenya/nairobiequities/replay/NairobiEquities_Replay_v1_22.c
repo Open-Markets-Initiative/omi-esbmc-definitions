@@ -1,4 +1,4 @@
-// nairobi/nairobiequities/replay/NairobiEquities_Replay_v1_22.c
+// nsekenya/nairobiequities/replay/NairobiEquities_Replay_v1_22.c
 /*
  * Nairobi Securities Exchange Nairobi Equities Replay
  *
