@@ -321,55 +321,6 @@ static void check_error_response_message(void) {
   for (size_t i = 0; i < 140; i++) { assert(again[i] == wire[i]); }
 }
 
-/* ---- Secure Box Registration Request Message: 2 bytes ------------------------ */
-
-/* Sent as SECURE_BOX_REGISTRATION_REQUE */
-typedef struct {
-  uint8_t box_id[2];  /* bytes 0 to 1 */
-} SecureBoxRegistrationRequestMessage;
-
-/* any Secure Box Registration Request Message at all: every byte one the checker chooses */
-static void any_secure_box_registration_request_message(SecureBoxRegistrationRequestMessage *record) {
-  for (size_t i = 0; i < 2; i++) { record->box_id[i] = arbitrary(); }
-}
-
-/* Secure Box Registration Request Message to the wire: 2 bytes from at, returning where the next byte goes */
-static size_t encode_secure_box_registration_request_message(const SecureBoxRegistrationRequestMessage *record, uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 2; i++) { wire[at++] = record->box_id[i]; }
-
-  return at;
-}
-
-/* Secure Box Registration Request Message off the wire: 2 bytes from at, returning where the next byte lies */
-static size_t decode_secure_box_registration_request_message(SecureBoxRegistrationRequestMessage *record, const uint8_t *wire, size_t at) {
-  for (size_t i = 0; i < 2; i++) { record->box_id[i] = wire[at++]; }
-
-  return at;
-}
-
-/* what was read of Secure Box Registration Request Message is what was written, byte for byte */
-static void equal_secure_box_registration_request_message(const SecureBoxRegistrationRequestMessage *read, const SecureBoxRegistrationRequestMessage *written) {
-  for (size_t i = 0; i < 2; i++) { assert(read->box_id[i] == written->box_id[i]); }
-}
-
-/* Secure Box Registration Request Message: written and read back, then read and written back */
-static void check_secure_box_registration_request_message(void) {
-  SecureBoxRegistrationRequestMessage sent;
-  SecureBoxRegistrationRequestMessage got;
-  uint8_t wire[2];
-  uint8_t again[2];
-
-  any_secure_box_registration_request_message(&sent);
-  assert(encode_secure_box_registration_request_message(&sent, wire, 0) == 2);
-  assert(decode_secure_box_registration_request_message(&got, wire, 0) == 2);
-  equal_secure_box_registration_request_message(&got, &sent);
-
-  for (size_t i = 0; i < 2; i++) { wire[i] = arbitrary(); }
-  assert(decode_secure_box_registration_request_message(&got, wire, 0) == 2);
-  assert(encode_secure_box_registration_request_message(&got, again, 0) == 2);
-  for (size_t i = 0; i < 2; i++) { assert(again[i] == wire[i]); }
-}
-
 /* ---- Box Sign On Response Message: 12 bytes ---------------------------------- */
 
 /* Sent as BOX_SIGN_ON_REQUEST_OUT */
@@ -1131,7 +1082,6 @@ static void checks(void) {
   check_cancel_on_logout_status_response_message();
   check_sec_info();
   check_error_response_message();
-  check_secure_box_registration_request_message();
   check_box_sign_on_response_message();
   check_existing_encryption_tail();
   check_new_encryption_tail();
